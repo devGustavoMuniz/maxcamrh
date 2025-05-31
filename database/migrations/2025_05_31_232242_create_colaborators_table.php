@@ -1,0 +1,59 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('colaborators', function (Blueprint $table) {
+          $table->uuid('id')->primary();
+          $table->foreignUuid('user_id')->unique()->constrained('users')->onDelete('cascade');
+
+          $table->string('photo_url')->nullable();
+          $table->string('curriculum_url')->nullable();
+          $table->date('date_of_birth')->nullable();
+          $table->string('gender')->nullable();
+          $table->boolean('is_special_needs_person')->default(false);
+          $table->string('marital_status')->nullable();
+          $table->string('scholarity')->nullable();
+          $table->string('father_name')->nullable();
+          $table->string('mother_name')->nullable();
+          $table->string('nationality')->nullable();
+
+          $table->string('personal_email')->nullable()->unique();
+          $table->string('business_email')->nullable()->unique();
+
+          $table->string('phone')->nullable();
+          $table->string('cellphone')->nullable();
+          $table->string('emergency_phone')->nullable();
+
+          $table->string('department')->nullable();
+          $table->string('position')->nullable();
+          $table->string('type_of_contract')->nullable();
+          $table->decimal('salary', 10, 2)->nullable();
+          $table->date('admission_date')->nullable();
+          $table->string('direct_superior_name')->nullable();
+          $table->string('hierarchical_degree')->nullable();
+
+          $table->text('observations')->nullable();
+          $table->date('contract_start_date')->nullable();
+          $table->date('contract_expiration')->nullable();
+
+          $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('colaborators');
+    }
+};
