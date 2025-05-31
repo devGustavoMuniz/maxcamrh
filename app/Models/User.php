@@ -7,7 +7,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use App\Enums\UserRole;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class User extends Authenticatable
 {
@@ -34,8 +34,18 @@ class User extends Authenticatable
     ];
   }
 
-  public function addresses(): HasMany
+  public function addresses(): HasOne
   {
-    return $this->hasMany(Address::class);
+    return $this->hasOne(Address::class);
+  }
+
+  public function franchise(): HasOne
+  {
+    return $this->hasOne(Franchise::class);
+  }
+
+  public function client(): HasOne
+  {
+    return $this->hasOne(Client::class);
   }
 }

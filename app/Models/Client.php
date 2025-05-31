@@ -1,0 +1,32 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
+class Client extends Model
+{
+  use HasUuids;
+
+  protected $fillable = [
+    'user_id',
+    'cnpj',
+    'test_number',
+    'contract_end_date',
+    'is_monthly_contract',
+    'phone',
+    'logo_url',
+  ];
+
+  protected $casts = [
+    'contract_end_date' => 'date',
+    'is_monthly_contract' => 'boolean',
+  ];
+
+  public function user(): BelongsTo
+  {
+    return $this->belongsTo(User::class);
+  }
+}

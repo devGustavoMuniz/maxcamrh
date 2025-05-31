@@ -11,16 +11,15 @@ return new class extends Migration
    */
   public function up(): void
   {
-    Schema::create('addresses', function (Blueprint $table) {
+    Schema::create('clients', function (Blueprint $table) {
       $table->uuid('id')->primary();
       $table->foreignUuid('user_id')->unique()->constrained('users')->onDelete('cascade');
-      $table->string('cep');
-      $table->string('street');
-      $table->string('number');
-      $table->string('complement')->nullable();
-      $table->string('neighborhood');
-      $table->string('state');
-      $table->string('city');
+      $table->string('cnpj')->unique();
+      $table->string('test_number');
+      $table->date('contract_end_date');
+      $table->boolean('is_monthly_contract')->default(false);
+      $table->string('phone');
+      $table->string('logo_url');
       $table->timestamps();
     });
   }
@@ -30,6 +29,6 @@ return new class extends Migration
    */
   public function down(): void
   {
-    Schema::dropIfExists('addresses');
+    Schema::dropIfExists('clients');
   }
 };
