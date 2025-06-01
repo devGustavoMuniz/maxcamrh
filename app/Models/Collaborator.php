@@ -7,14 +7,14 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class Colaborator extends Model
+class Collaborator extends Model
 {
   use HasFactory, HasUuids;
 
   protected $fillable = [
     'user_id',
     'photo_url',
-    'curriculum',
+    'curriculum_url',
     'date_of_birth',
     'gender',
     'is_special_needs_person',

@@ -49,8 +49,8 @@ class User extends Authenticatable
     return $this->hasOne(Client::class);
   }
 
-  public function colaborator(): HasOne
+  public function collaborator(): HasOne
   {
-    return $this->hasOne(Colaborator::class);
+    return $this->hasOne(Collaborator::class);
   }
 }
