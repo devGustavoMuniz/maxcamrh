@@ -1,40 +1,30 @@
 <script setup>
-import { defineProps } from 'vue';
-import { Button } from '@/components/ui/button';
-
-defineProps({
-  message: String,
-});
-
-const handleButtonClick = () => {
-  alert('Botão Shadcn Vue clicado com sucesso!');
-};
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import { Head } from '@inertiajs/vue3';
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-100 dark:bg-gray-900 py-8">
-    <div class="container mx-auto p-4 sm:p-6 lg:p-8">
-      <header class="mb-8 text-center">
-        <h1 class="text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white sm:text-5xl md:text-6xl">
-          Dashboard Interativo
-        </h1>
-      </header>
+    <Head title="Dashboard" />
 
-      <div class="max-w-2xl mx-auto p-6 bg-white dark:bg-gray-800 shadow-xl rounded-lg">
-        <p class="text-lg text-gray-700 dark:text-gray-300 mb-6">{{ message }}</p>
+    <AuthenticatedLayout>
+        <template #header>
+            <h2
+                class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200"
+            >
+                Dashboard
+            </h2>
+        </template>
 
-        <div class="flex justify-center">
-          <Button variant="default" size="lg" @click="handleButtonClick">
-            Clique em Mim (Shadcn Vue)
-          </Button>
+        <div class="py-12">
+            <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
+                <div
+                    class="overflow-hidden bg-white shadow-sm sm:rounded-lg dark:bg-gray-800"
+                >
+                    <div class="p-6 text-gray-900 dark:text-gray-100">
+                        You're logged in!
+                    </div>
+                </div>
+            </div>
         </div>
-
-        <div class="mt-8 text-center">
-          <p class="text-sm text-gray-500 dark:text-gray-400">
-            Este botão demonstra a integração do Shadcn Vue.
-          </p>
-        </div>
-      </div>
-    </div>
-  </div>
+    </AuthenticatedLayout>
 </template>
