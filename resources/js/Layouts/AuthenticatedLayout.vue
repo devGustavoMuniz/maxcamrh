@@ -17,7 +17,7 @@ const sidebarLinks = ref([
   { name: 'Administradores', href: route('admins.index'), /* icon: UserCogIcon, */ current: false }, // Ex: route('admins.index')
   { name: 'Franqueados', href: route('franchises.index'), /* icon: BriefcaseIcon, */ current: false }, // Ex: route('franchises.index')
   { name: 'Clientes', href: route('clients.index'), /* icon: UsersIcon, */ current: false },       // Ex: route('clients.index')
-  { name: 'Colaboradores', href: '#', /* icon: UserCheckIcon, */ current: false }, // Ex: route('colaborators.index')
+  { name: 'Colaboradores', href: route('collaborators.index'), /* icon: UserCheckIcon, */ current: false }, // Ex: route('colaborators.index')
 ]);
 
 </script>

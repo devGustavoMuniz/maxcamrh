@@ -38,6 +38,17 @@ class Collaborator extends Model
     'observations',
     'contract_start_date',
     'contract_expiration',
+    'cpf',
+    'rg',
+    'cnh',
+    'reservista',
+    'titulo_eleitor',
+    'zona_eleitoral',
+    'pis_ctps_numero',
+    'ctps_serie',
+    'banco',
+    'agencia',
+    'conta_corrente',
   ];
 
   protected $casts = [

@@ -45,6 +45,19 @@ return new class extends Migration
           $table->date('contract_start_date')->nullable();
           $table->date('contract_expiration')->nullable();
 
+          $table->string('cpf')->nullable()->unique();
+          $table->string('rg')->nullable();
+          $table->string('cnh')->nullable()->unique();
+          $table->string('reservista')->nullable();
+          $table->string('titulo_eleitor')->nullable();
+          $table->string('zona_eleitoral')->nullable();
+          $table->string('pis_ctps_numero')->nullable();
+          $table->string('ctps_serie')->nullable();
+
+          $table->string('banco')->nullable();
+          $table->string('agencia')->nullable();
+          $table->string('conta_corrente')->nullable();
+
           $table->timestamps();
         });
     }

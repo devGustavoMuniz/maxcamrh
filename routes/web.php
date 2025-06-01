@@ -7,6 +7,7 @@ use Inertia\Inertia;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\FranchiseController;
+use App\Http\Controllers\CollaboratorController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -29,6 +30,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('admins', AdminController::class);
     Route::resource('clients', ClientController::class);
     Route::resource('franchises', FranchiseController::class);
+    Route::resource('collaborators', CollaboratorController::class);
 });
 
 require __DIR__.'/auth.php';
