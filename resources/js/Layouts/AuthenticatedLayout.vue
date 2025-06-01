@@ -14,7 +14,7 @@ const showingNavigationDropdown = ref(false);
 
 const sidebarLinks = ref([
   { name: 'Dashboard', href: route('dashboard'), /* icon: HomeIcon, */ current: route().current('dashboard') },
-  { name: 'Administradores', href: '#', /* icon: UserCogIcon, */ current: false }, // Ex: route('admins.index')
+  { name: 'Administradores', href: route('admins.index'), /* icon: UserCogIcon, */ current: false }, // Ex: route('admins.index')
   { name: 'Franqueados', href: '#', /* icon: BriefcaseIcon, */ current: false }, // Ex: route('franchises.index')
   { name: 'Clientes', href: '#', /* icon: UsersIcon, */ current: false },       // Ex: route('clients.index')
   { name: 'Colaboradores', href: '#', /* icon: UserCheckIcon, */ current: false }, // Ex: route('colaborators.index')
