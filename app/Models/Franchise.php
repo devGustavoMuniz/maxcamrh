@@ -17,7 +17,7 @@ class Franchise extends Model
     'cnpj',
     'max_client',
     'contract_start_date',
-    'atuation_region',
+    'actuation_region',
     'document_url',
     'observations',
   ];
