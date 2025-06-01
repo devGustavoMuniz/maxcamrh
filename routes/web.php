@@ -5,6 +5,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\ClientController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -25,6 +26,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::resource('admins', AdminController::class);
+    Route::resource('clients', ClientController::class);
 });
 
 require __DIR__.'/auth.php';

@@ -1,0 +1,148 @@
+<script setup>
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import { Head, useForm, Link, usePage } from '@inertiajs/vue3';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
+import InputError from '@/Components/InputError.vue';
+import { ref } from 'vue';
+
+const props = defineProps({
+  client_data: Object,
+});
+
+const form = useForm({
+  _method: 'PUT',
+  name: props.client_data.user.name,
+  email: props.client_data.user.email,
+  password: '',
+  password_confirmation: '',
+  cnpj: props.client_data.cnpj,
+  test_number: props.client_data.test_number,
+  contract_end_date: props.client_data.contract_end_date_form,
+  is_monthly_contract: props.client_data.is_monthly_contract,
+  phone: props.client_data.phone,
+  logo_file: null,
+});
+
+const logoPreview = ref(props.client_data.logo_full_url); // Começa com o logo existente, se houver
+
+function handleLogoUpload(event) {
+  const file = event.target.files[0];
+  if (file) {
+    form.logo_file = file;
+    logoPreview.value = URL.createObjectURL(file);
+  }
+}
+
+const submit = () => {
+  form.post(route('clients.update', props.client_data.id), {
+    onSuccess: () => {
+      form.reset('password', 'password_confirmation');
+      if (!form.logo_file) {
+        logoPreview.value = usePage().props.client_data?.logo_full_url || props.client_data.logo_full_url;
+      }
+    },
+  });
+};
+</script>
+
+<template>
+  <Head :title="'Editar Cliente: ' + client_data.user.name" />
+  <AuthenticatedLayout>
+    <template #header>
+      <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
+        Editar Cliente: {{ client_data.user.name }} (CNPJ: {{ client_data.cnpj }})
+      </h2>
+    </template>
+
+    <div class="py-12">
+      <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
+        <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
+          <form @submit.prevent="submit" class="space-y-6">
+            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Dados do Usuário</h3>
+            <div>
+              <Label for="user_name">Nome do Usuário</Label>
+              <Input id="user_name" type="text" class="mt-1 block w-full" v-model="form.name" required autofocus />
+              <InputError class="mt-2" :message="form.errors.name" />
+            </div>
+            <div>
+              <Label for="user_email">Email do Usuário</Label>
+              <Input id="user_email" type="email" class="mt-1 block w-full" v-model="form.email" required />
+              <InputError class="mt-2" :message="form.errors.email" />
+            </div>
+            <div class="border-t dark:border-gray-700 pt-4">
+              <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">Alterar Senha (deixe em branco para não modificar)</p>
+              <div>
+                <Label for="user_password">Nova Senha</Label>
+                <Input id="user_password" type="password" class="mt-1 block w-full" v-model="form.password" />
+                <InputError class="mt-2" :message="form.errors.password" />
+              </div>
+              <div class="mt-4">
+                <Label for="user_password_confirmation">Confirmar Nova Senha</Label>
+                <Input id="user_password_confirmation" type="password" class="mt-1 block w-full" v-model="form.password_confirmation" />
+                <InputError class="mt-2" :message="form.errors.password_confirmation" />
+              </div>
+            </div>
+
+            <hr class="my-6 dark:border-gray-700">
+            <div>
+              <Label for="client_cnpj">CNPJ</Label>
+              <Input id="client_cnpj" type="text" class="mt-1 block w-full" v-model="form.cnpj" required />
+              <InputError class="mt-2" :message="form.errors.cnpj" />
+            </div>
+            <div>
+              <Label for="client_phone">Telefone</Label>
+              <Input id="client_phone" type="text" class="mt-1 block w-full" v-model="form.phone" />
+              <InputError class="mt-2" :message="form.errors.phone" />
+            </div>
+            <div>
+              <Label for="client_test_number">Número de Teste</Label>
+              <Input id="client_test_number" type="text" class="mt-1 block w-full" v-model="form.test_number" />
+              <InputError class="mt-2" :message="form.errors.test_number" />
+            </div>
+            <div>
+              <Label for="client_contract_end_date">Data Final do Contrato</Label>
+              <Input id="client_contract_end_date" type="date" class="mt-1 block w-full" v-model="form.contract_end_date" />
+              <InputError class="mt-2" :message="form.errors.contract_end_date" />
+            </div>
+            <div class="flex items-center space-x-2 mt-1">
+              <Checkbox id="client_is_monthly_contract" v-model:checked="form.is_monthly_contract" />
+              <Label for="client_is_monthly_contract" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                Contrato Mensal?
+              </Label>
+              <InputError class="mt-2" :message="form.errors.is_monthly_contract" />
+            </div>
+            <div>
+              <Label for="client_logo_file">Novo Logo da Empresa (deixe em branco para manter o atual)</Label>
+              <Input
+                id="client_logo_file"
+                type="file"
+                class="mt-1 block w-full file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                @input="handleLogoUpload"
+              />
+              <InputError class="mt-2" :message="form.errors.logo_file" />
+              <div v-if="logoPreview" class="mt-4">
+                <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Preview / Logo Atual:</p>
+                <img :src="logoPreview" alt="Logo Preview" class="h-24 w-auto rounded shadow" />
+              </div>
+              <div v-else-if="!form.logo_file && !props.client_data.logo_full_url" class="mt-2 text-sm text-gray-500">
+                Nenhum logo cadastrado.
+              </div>
+            </div>
+
+            <div class="flex items-center justify-end mt-6 pt-6 border-t dark:border-gray-700">
+              <Link :href="route('clients.index')" class="mr-4">
+                <Button variant="outline" type="button">Cancelar</Button>
+              </Link>
+              <Button type="submit" :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
+                Atualizar Cliente
+              </Button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </AuthenticatedLayout>
+</template>

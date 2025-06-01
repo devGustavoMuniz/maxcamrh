@@ -67,10 +67,6 @@ class AdminController extends Controller
      */
     public function show(User $admin): Response
     {
-      if ($admin->role !== UserRole::ADMIN->value) {
-        abort(404);
-      }
-
       return Inertia::render('Admins/Show', [
         'admin_user' => [
           'id' => $admin->id,
@@ -88,10 +84,6 @@ class AdminController extends Controller
      */
     public function edit(User $admin)
     {
-      if ($admin->role !== UserRole::ADMIN->value) {
-        abort(404);
-      }
-
       return Inertia::render('Admins/Edit', [
         'admin_user' => [
           'id' => $admin->id,
@@ -106,10 +98,6 @@ class AdminController extends Controller
      */
     public function update(Request $request, User $admin)
     {
-      if ($admin->role !== UserRole::ADMIN->value) {
-        abort(403);
-      }
-
       $request->validate([
         'name' => 'required|string|max:255',
         'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($admin->id)],
