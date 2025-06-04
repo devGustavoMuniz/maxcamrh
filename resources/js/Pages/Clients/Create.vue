@@ -1,24 +1,41 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, useForm, Link } from '@inertiajs/vue3';
+import { Head, useForm, Link, usePage } from '@inertiajs/vue3'; // Adicionado usePage
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
+// import { Combobox } from '@/components/ui/combobox'; // Mantenha se for usar para listas longas
 import InputError from '@/Components/InputError.vue';
-import { ref } from 'vue';
+import { ref, computed } from 'vue'; // Adicionado computed
+
+const props = defineProps({
+  franchises: Array, // Recebe a lista de franqueados (apenas para admin)
+});
+
+const page = usePage(); // Para acessar props globais como auth.user
+
+// Propriedade computada para pegar o papel do usuário de forma mais limpa
+const userRole = computed(() => page.props.auth.user?.role);
 
 const form = useForm({
+  // Dados do Usuário (para o Cliente)
   name: '',
   email: '',
   password: '',
   password_confirmation: '',
+
+  // Dados da Empresa Cliente
   cnpj: '',
   test_number: '',
   contract_end_date: '',
   is_monthly_contract: false,
   phone: '',
   logo_file: null,
+
+  // Chave estrangeira para o Franqueado (se admin estiver criando)
+  franchise_id: null, // Adicionado e inicializado como null
 });
 
 const logoPreview = ref(null);
@@ -26,8 +43,8 @@ const logoPreview = ref(null);
 function handleLogoUpload(event) {
   const file = event.target.files[0];
   if (file) {
-    form.logo_file = file; // Atribui o objeto File ao form
-    logoPreview.value = URL.createObjectURL(file); // Gera URL para preview
+    form.logo_file = file;
+    logoPreview.value = URL.createObjectURL(file);
   } else {
     form.logo_file = null;
     logoPreview.value = null;
@@ -38,7 +55,7 @@ const submit = () => {
   form.post(route('clients.store'), {
     onFinish: () => form.reset('password', 'password_confirmation'),
     onSuccess: () => {
-      form.reset();
+      form.reset(); // Reseta todo o formulário, incluindo franchise_id e outros campos
       logoPreview.value = null;
     },
   });
@@ -58,6 +75,21 @@ const submit = () => {
       <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
         <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
           <form @submit.prevent="submit" class="space-y-6">
+            <div v-if="userRole === 'admin' && props.franchises && props.franchises.length > 0">
+              <Label for="franchise_id">Franqueado Associado</Label>
+              <Select v-model="form.franchise_id">
+                <SelectTrigger id="franchise_id">
+                  <SelectValue placeholder="Selecione um franqueado" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem v-for="franchise in props.franchises" :key="franchise.id" :value="franchise.id" class="cursor-pointer">
+                    {{ franchise.name }}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+              <InputError class="mt-2" :message="form.errors.franchise_id" />
+            </div>
+
             <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Dados do Usuário (para o Cliente)</h3>
             <div>
               <Label for="user_name">Nome do Usuário</Label>
@@ -103,7 +135,7 @@ const submit = () => {
               <InputError class="mt-2" :message="form.errors.contract_end_date" />
             </div>
             <div class="flex items-center space-x-2 mt-1">
-              <Checkbox id="client_is_monthly_contract" v-model:checked="form.is_monthly_contract" />
+              <Checkbox id="client_is_monthly_contract" :checked="form.is_monthly_contract" @update:checked="form.is_monthly_contract = $event" />
               <Label for="client_is_monthly_contract" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                 Contrato Mensal?
               </Label>

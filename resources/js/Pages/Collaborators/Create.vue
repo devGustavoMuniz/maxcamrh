@@ -1,13 +1,21 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, useForm, Link } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { Head, useForm, Link, usePage } from '@inertiajs/vue3'; // Adicionado usePage
+import { ref, computed } from 'vue'; // Adicionado computed
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'; // Importações do Select
 import InputError from '@/Components/InputError.vue';
+
+const props = defineProps({
+  clients: Array,
+});
+
+const page = usePage();
+const userRole = computed(() => page.props.auth.user?.role);
 
 const currentStep = ref(1);
 const totalSteps = 4;
@@ -20,6 +28,7 @@ const form = useForm({
     password_confirmation: '',
   },
   collaborator: {
+    client_id: null, // CAMPO ADICIONADO PARA ASSOCIAR AO CLIENTE
     photo_file: null,
     curriculum_file: null,
     date_of_birth: '',
@@ -68,16 +77,23 @@ const form = useForm({
   },
 });
 
+// Inicializar client_id se o usuário logado for do tipo 'client' e props.auth_client_id for passado
+// (embora a atribuição final e mais segura seja feita no backend)
+// if (userRole.value === 'client' && props.auth_client_id) {
+//   form.collaborator.client_id = props.auth_client_id;
+// }
+
+
 const photoPreview = ref(null);
-const curriculumPreview = ref(null); // Nome do arquivo
+const curriculumPreview = ref(null);
 
 function handleFileUpload(event, field, previewRef) {
   const file = event.target.files[0];
   if (file) {
     form.collaborator[field] = file;
-    if (previewRef && field === 'photo_file') { // Preview de imagem para foto
+    if (previewRef && field === 'photo_file') {
       previewRef.value = URL.createObjectURL(file);
-    } else if (previewRef) { // Nome do arquivo para currículo
+    } else if (previewRef) {
       previewRef.value = file.name;
     }
   } else {
@@ -100,12 +116,15 @@ function prevStep() {
 
 const submit = () => {
   form.post(route('collaborators.store'), {
-    onSuccess: () => form.reset(), // Resetar todo o formulário
-    // onError: (errors) => console.log(errors)
+    onSuccess: () => {
+      form.reset();
+      photoPreview.value = null;
+      curriculumPreview.value = null;
+      currentStep.value = 1; // Opcional: resetar para a primeira etapa
+    },
   });
 };
 
-// Função para buscar endereço pelo CEP (exemplo básico)
 async function fetchAddressByCep() {
   if (form.address.cep && form.address.cep.replace(/\D/g, '').length === 8) {
     try {
@@ -117,16 +136,13 @@ async function fetchAddressByCep() {
       form.address.neighborhood = data.bairro;
       form.address.city = data.localidade;
       form.address.state = data.uf;
-      // Focar no campo número ou próximo campo
       document.getElementById('address_number')?.focus();
     } catch (error) {
       console.error("Erro ao buscar CEP:", error);
-      // Limpar campos se o CEP for inválido ou não encontrado, exceto o próprio CEP
       form.address.street = '';
       form.address.neighborhood = '';
       form.address.city = '';
       form.address.state = '';
-      // Adicionar feedback ao usuário aqui, se desejar
     }
   }
 }
@@ -147,6 +163,24 @@ async function fetchAddressByCep() {
           <form @submit.prevent="submit" class="space-y-6">
             <section v-if="currentStep === 1" class="space-y-6">
               <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 border-b pb-2 mb-4">Etapa 1: Acesso e Dados Pessoais</h3>
+
+              <div v-if="(userRole === 'admin' || userRole === 'franchise') && props.clients && props.clients.length > 0">
+                <Label for="collaborator_client_id">Cliente Associado</Label>
+                <Select v-model="form.collaborator.client_id">
+                  <SelectTrigger id="collaborator_client_id">
+                    <SelectValue placeholder="Selecione um cliente" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem class="cursor-pointer" v-for="client in props.clients" :key="client.id" :value="client.id">
+                      {{ client.name }} </SelectItem>
+                  </SelectContent>
+                </Select>
+                <InputError class="mt-2" :message="form.errors['collaborator.client_id']" />
+              </div>
+              <div v-if="userRole === 'client'" class="p-3 bg-blue-50 dark:bg-blue-900/50 border border-blue-200 dark:border-blue-700 rounded-md text-sm text-blue-700 dark:text-blue-300">
+                Este colaborador será associado automaticamente ao seu perfil de cliente.
+              </div>
+
               <div>
                 <Label for="user_name">Nome Completo do Usuário</Label>
                 <Input id="user_name" type="text" class="mt-1 block w-full" v-model="form.user.name" required />
@@ -189,7 +223,17 @@ async function fetchAddressByCep() {
               </div>
               <div>
                 <Label for="collaborator_gender">Gênero</Label>
-                <Input id="collaborator_gender" type="text" class="mt-1 block w-full" v-model="form.collaborator.gender" />
+                <Select v-model="form.collaborator.gender">
+                  <SelectTrigger id="collaborator_gender">
+                    <SelectValue placeholder="Selecione o gênero" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem class="cursor-pointer" value="Masculino">Masculino</SelectItem>
+                    <SelectItem class="cursor-pointer" value="Feminino">Feminino</SelectItem>
+                    <SelectItem class="cursor-pointer" value="Outro">Outro</SelectItem>
+                    <SelectItem class="cursor-pointer" value="Não Informado">Prefiro não informar</SelectItem>
+                  </SelectContent>
+                </Select>
                 <InputError class="mt-2" :message="form.errors['collaborator.gender']" />
               </div>
               <div class="flex items-center space-x-2 mt-1">
@@ -199,7 +243,18 @@ async function fetchAddressByCep() {
               </div>
               <div>
                 <Label for="collaborator_marital_status">Estado Civil</Label>
-                <Input id="collaborator_marital_status" type="text" class="mt-1 block w-full" v-model="form.collaborator.marital_status" />
+                <Select v-model="form.collaborator.marital_status">
+                  <SelectTrigger id="collaborator_marital_status">
+                    <SelectValue placeholder="Selecione o estado civil" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem class="cursor-pointer" value="Solteiro(a)">Solteiro(a)</SelectItem>
+                    <SelectItem class="cursor-pointer" value="Casado(a)">Casado(a)</SelectItem>
+                    <SelectItem class="cursor-pointer" value="Divorciado(a)">Divorciado(a)</SelectItem>
+                    <SelectItem class="cursor-pointer" value="Viúvo(a)">Viúvo(a)</SelectItem>
+                    <SelectItem class="cursor-pointer" value="União Estável">União Estável</SelectItem>
+                  </SelectContent>
+                </Select>
                 <InputError class="mt-2" :message="form.errors['collaborator.marital_status']" />
               </div>
               <div>
@@ -222,7 +277,6 @@ async function fetchAddressByCep() {
                 <Input id="collaborator_nationality" type="text" class="mt-1 block w-full" v-model="form.collaborator.nationality" />
                 <InputError class="mt-2" :message="form.errors['collaborator.nationality']" />
               </div>
-
             </section>
 
             <section v-if="currentStep === 2" class="space-y-6">
@@ -318,7 +372,17 @@ async function fetchAddressByCep() {
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <Label for="collaborator_type_of_contract">Tipo de Contrato</Label>
-                  <Input id="collaborator_type_of_contract" type="text" class="mt-1 block w-full" v-model="form.collaborator.type_of_contract" />
+                  <Select v-model="form.collaborator.type_of_contract">
+                    <SelectTrigger id="collaborator_type_of_contract">
+                      <SelectValue placeholder="Selecione o tipo" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem class="cursor-pointer" value="CLT">CLT</SelectItem>
+                      <SelectItem class="cursor-pointer" value="PJ">PJ</SelectItem>
+                      <SelectItem class="cursor-pointer" value="Estágio">Estágio</SelectItem>
+                      <SelectItem class="cursor-pointer" value="Temporário">Temporário</SelectItem>
+                    </SelectContent>
+                  </Select>
                   <InputError class="mt-2" :message="form.errors['collaborator.type_of_contract']" />
                 </div>
                 <div>

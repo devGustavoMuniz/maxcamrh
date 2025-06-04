@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\Collaborator;
 use App\Models\User;
 use App\Models\Address;
+use App\Models\Client; // Importar Client
 use App\Enums\UserRole;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth; // Importar Auth
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
@@ -19,19 +21,18 @@ class CollaboratorController extends Controller
 {
   protected function formatCollaboratorData(Collaborator $collaborator): array
   {
-    $collaborator->load(['user.addresses']); // Carrega usuário e seus endereços
-    $mainAddress = $collaborator->user->addresses->first(); // Pega o primeiro endereço como principal
+    $collaborator->loadMissing(['user.addresses', 'client.user']);
+    $mainAddress = $collaborator->user->addresses->first();
 
     return [
       'id' => $collaborator->id,
-      // Collaborator fields
       'photo_url' => $collaborator->photo_url,
       'photo_full_url' => $collaborator->photo_url ? Storage::disk('public')->url($collaborator->photo_url) : null,
       'curriculum_url' => $collaborator->curriculum_url,
       'curriculum_full_url' => $collaborator->curriculum_url ? Storage::disk('public')->url($collaborator->curriculum_url) : null,
       'date_of_birth' => $collaborator->date_of_birth ? $collaborator->date_of_birth->format('Y-m-d') : null,
       'gender' => $collaborator->gender,
-      'is_special_needs_person' => $collaborator->is_special_needs_person,
+      'is_special_needs_person' => (bool) $collaborator->is_special_needs_person,
       'marital_status' => $collaborator->marital_status,
       'scholarity' => $collaborator->scholarity,
       'father_name' => $collaborator->father_name,
@@ -63,17 +64,17 @@ class CollaboratorController extends Controller
       'banco' => $collaborator->banco,
       'agencia' => $collaborator->agencia,
       'conta_corrente' => $collaborator->conta_corrente,
+      'client_id' => $collaborator->client_id,
+      'client_name' => $collaborator->client && $collaborator->client->user ? $collaborator->client->user->name : 'N/A',
       'created_at' => $collaborator->created_at->format('d/m/Y H:i:s'),
       'updated_at' => $collaborator->updated_at->format('d/m/Y H:i:s'),
-      // User fields
       'user' => $collaborator->user ? [
         'id' => $collaborator->user->id,
         'name' => $collaborator->user->name,
         'email' => $collaborator->user->email,
       ] : null,
-      // Address fields (do primeiro endereço)
       'address' => $mainAddress ? [
-        'id' => $mainAddress->id, // Para update
+        'id' => $mainAddress->id,
         'cep' => $mainAddress->cep,
         'street' => $mainAddress->street,
         'number' => $mainAddress->number,
@@ -81,18 +82,36 @@ class CollaboratorController extends Controller
         'neighborhood' => $mainAddress->neighborhood,
         'state' => $mainAddress->state,
         'city' => $mainAddress->city,
-      ] : null, // Envia nulo se não houver endereço
+      ] : null,
     ];
   }
 
-
   public function index(): Response
   {
-    $collaborators = Collaborator::with(['user.addresses' => function ($query) {
-      // Opcional: ordenar ou pegar apenas o primeiro endereço se houver muitos
-      // $query->orderBy('created_at', 'asc')->limit(1);
-    }])
-      ->orderByDesc('created_at')
+    $this->authorize('viewAny', Collaborator::class);
+
+    $user = Auth::user();
+    $query = Collaborator::with(['user.addresses', 'client.user']);
+
+    if ($user->role === UserRole::FRANCHISE) {
+      if ($user->franchise) {
+        $franchiseId = $user->franchise->id;
+        $query->whereHas('client', function ($q) use ($franchiseId) {
+          $q->where('franchise_id', $franchiseId);
+        });
+      } else {
+        $query->whereRaw('1 = 0');
+      }
+    } elseif ($user->role === UserRole::CLIENT) {
+      if ($user->client) {
+        $query->where('client_id', $user->client->id);
+      } else {
+        $query->whereRaw('1 = 0');
+      }
+    }
+    // Admin vê todos
+
+    $collaborators = $query->orderByDesc('collaborators.created_at')
       ->paginate(10)
       ->through(fn ($collaborator) => [
         'id' => $collaborator->id,
@@ -101,7 +120,8 @@ class CollaboratorController extends Controller
         'user_email' => $collaborator->user->email,
         'department' => $collaborator->department,
         'position' => $collaborator->position,
-        'city' => $collaborator->user->addresses->first()->city ?? 'N/A', // Pega a cidade do primeiro endereço
+        'client_name' => $collaborator->client && $collaborator->client->user ? $collaborator->client->user->name : 'N/A',
+        'city' => $collaborator->user->addresses->first()->city ?? 'N/A',
       ]);
 
     return Inertia::render('Collaborators/Index', [
@@ -111,13 +131,32 @@ class CollaboratorController extends Controller
 
   public function create(): Response
   {
-    return Inertia::render('Collaborators/Create');
+    $this->authorize('create', Collaborator::class);
+
+    $clients = [];
+    $user = Auth::user();
+
+    if ($user->role === UserRole::ADMIN) {
+      $clients = Client::with('user')->get()->map(fn($c) => ['id' => $c->id, 'name' => $c->user->name . ($c->cnpj ? ' (CNPJ: ' . $c->cnpj . ')' : '')]);
+    } elseif ($user->role === UserRole::FRANCHISE && $user->franchise) {
+      $clients = Client::with('user')->where('franchise_id', $user->franchise->id)->get()->map(fn($c) => ['id' => $c->id, 'name' => $c->user->name . ($c->cnpj ? ' (CNPJ: ' . $c->cnpj . ')' : '')]);
+    }
+    // Se for UserRole::CLIENT, o client_id será o do próprio usuário e não precisa de lista para seleção.
+
+    return Inertia::render('Collaborators/Create', [
+      'clients' => $clients,
+      // Passar o ID do cliente do usuário logado se ele for um cliente, para o form usar se necessário
+      'auth_client_id' => $user->role === UserRole::CLIENT && $user->client ? $user->client->id : null,
+    ]);
   }
 
   public function store(Request $request)
   {
-    // Validação agrupada
-    $validated = $request->validate([
+    $this->authorize('create', Collaborator::class);
+
+    $loggedInUser = Auth::user();
+
+    $validationRules = [ /* Suas regras de validação completas como no seu código original */
       // User
       'user.name' => 'required|string|max:255',
       'user.email' => 'required|string|email|max:255|unique:users,email',
@@ -133,8 +172,8 @@ class CollaboratorController extends Controller
       'collaborator.father_name' => 'nullable|string|max:255',
       'collaborator.mother_name' => 'nullable|string|max:255',
       'collaborator.nationality' => 'nullable|string|max:255',
-      'collaborator.personal_email' => 'nullable|string|email|max:255|unique:collaborators,personal_email',
-      'collaborator.business_email' => 'nullable|string|email|max:255|unique:collaborators,business_email',
+      'collaborator.personal_email' => ['nullable', 'string', 'email', 'max:255', Rule::unique('collaborators', 'personal_email')],
+      'collaborator.business_email' => ['nullable', 'string', 'email', 'max:255', Rule::unique('collaborators', 'business_email')],
       'collaborator.phone' => 'nullable|string|max:20',
       'collaborator.cellphone' => 'nullable|string|max:20',
       'collaborator.emergency_phone' => 'nullable|string|max:20',
@@ -148,9 +187,9 @@ class CollaboratorController extends Controller
       'collaborator.observations' => 'nullable|string',
       'collaborator.contract_start_date' => 'nullable|date',
       'collaborator.contract_expiration' => 'nullable|date|after_or_equal:collaborator.contract_start_date',
-      'collaborator.cpf' => 'nullable|string|max:14|unique:collaborators,cpf', // Adicionar validação de formato de CPF se necessário
+      'collaborator.cpf' => ['nullable', 'string', 'max:14', Rule::unique('collaborators', 'cpf')],
       'collaborator.rg' => 'nullable|string|max:20',
-      'collaborator.cnh' => 'nullable|string|max:20|unique:collaborators,cnh',
+      'collaborator.cnh' => ['nullable', 'string', 'max:20', Rule::unique('collaborators', 'cnh')],
       'collaborator.reservista' => 'nullable|string|max:30',
       'collaborator.titulo_eleitor' => 'nullable|string|max:30',
       'collaborator.zona_eleitoral' => 'nullable|string|max:10',
@@ -159,7 +198,7 @@ class CollaboratorController extends Controller
       'collaborator.banco' => 'nullable|string|max:255',
       'collaborator.agencia' => 'nullable|string|max:10',
       'collaborator.conta_corrente' => 'nullable|string|max:20',
-      // Address (opcional, mas se fornecido, alguns campos são obrigatórios)
+      // Address
       'address.cep' => 'required_with:address.street,address.city,address.state|nullable|string|max:9',
       'address.street' => 'required_with:address.cep,address.city,address.state|nullable|string|max:255',
       'address.number' => 'nullable|string|max:20',
@@ -167,13 +206,38 @@ class CollaboratorController extends Controller
       'address.neighborhood' => 'nullable|string|max:255',
       'address.state' => 'required_with:address.cep,address.street,address.city|nullable|string|max:2', // UF
       'address.city' => 'required_with:address.cep,address.street,address.state|nullable|string|max:255',
-    ]);
+    ];
+    if ($loggedInUser->role === UserRole::ADMIN || $loggedInUser->role === UserRole::FRANCHISE) {
+      $validationRules['collaborator.client_id'] = 'required|exists:clients,id';
+    }
+    $validated = $request->validate($validationRules);
 
     $userData = $validated['user'];
     $collaboratorData = $validated['collaborator'];
-    $addressData = $validated['address'] ?? null; // Pode ser nulo se não fornecido
+    $addressData = $validated['address'] ?? null;
 
-    // Uploads
+    // Definir client_id corretamente
+    if ($loggedInUser->role === UserRole::CLIENT) {
+      if (!$loggedInUser->client) abort(403, 'Usuário cliente não associado a um registro de cliente.');
+      $collaboratorData['client_id'] = $loggedInUser->client->id;
+    } elseif (isset($validated['collaborator']['client_id'])) {
+      $clientIdFromRequest = $validated['collaborator']['client_id'];
+      if ($loggedInUser->role === UserRole::FRANCHISE) {
+        if(!$loggedInUser->franchise) abort(403, 'Usuário franqueado não associado a uma franquia.');
+        $client = Client::where('id', $clientIdFromRequest)
+          ->where('franchise_id', $loggedInUser->franchise->id)
+          ->first();
+        if (!$client) {
+          abort(403, 'Franqueado não pode atribuir colaborador a este cliente.');
+        }
+      }
+      $collaboratorData['client_id'] = $clientIdFromRequest;
+    } else {
+      // Admin ou Franqueado não especificaram client_id (validação já deve ter pego)
+      abort(403, 'Client ID é obrigatório e não foi fornecido ou é inválido.');
+    }
+
+
     if ($request->hasFile('collaborator.photo_file')) {
       $collaboratorData['photo_url'] = $request->file('collaborator.photo_file')->store('collaborator_photos', 'public');
     }
@@ -189,10 +253,8 @@ class CollaboratorController extends Controller
         'role' => UserRole::COLLABORATOR->value,
         'email_verified_at' => now(),
       ]);
-
       $user->collaborator()->create($collaboratorData);
-
-      if ($addressData && !empty(array_filter($addressData))) { // Cria endereço apenas se dados foram fornecidos
+      if ($addressData && !empty(array_filter($addressData))) {
         $user->addresses()->create($addressData);
       }
     });
@@ -202,6 +264,7 @@ class CollaboratorController extends Controller
 
   public function show(Collaborator $collaborator): Response
   {
+    $this->authorize('view', $collaborator);
     return Inertia::render('Collaborators/Show', [
       'collaborator_data' => $this->formatCollaboratorData($collaborator),
     ]);
@@ -209,31 +272,38 @@ class CollaboratorController extends Controller
 
   public function edit(Collaborator $collaborator): Response
   {
+    $this->authorize('update', $collaborator);
+    $clients = [];
+    $user = Auth::user();
+    if ($user->role === UserRole::ADMIN) {
+      $clients = Client::with('user')->get()->map(fn($c) => ['id' => $c->id, 'name' => $c->user->name . ($c->cnpj ? ' (CNPJ: ' . $c->cnpj . ')' : '')]);
+    } elseif ($user->role === UserRole::FRANCHISE && $user->franchise) {
+      $clients = Client::with('user')->where('franchise_id', $user->franchise->id)->get()->map(fn($c) => ['id' => $c->id, 'name' => $c->user->name . ($c->cnpj ? ' (CNPJ: ' . $c->cnpj . ')' : '')]);
+    }
+    $collaborator->loadMissing(['user.addresses', 'client.user']);
+
     return Inertia::render('Collaborators/Edit', [
       'collaborator_data' => $this->formatCollaboratorData($collaborator),
+      'clients' => $clients,
     ]);
   }
 
   public function update(Request $request, Collaborator $collaborator)
   {
-    $user = $collaborator->user;
-    $mainAddress = $user->addresses->first(); // Pega o primeiro endereço para atualização
+    $this->authorize('update', $collaborator);
 
-    // Validação agrupada
-    $validated = $request->validate([
+    $collaboratorUser = $collaborator->user; // Usuário do colaborador que está sendo editado
+    $mainAddress = $collaboratorUser->addresses->first();
+    $loggedInUser = Auth::user(); // Usuário logado que está fazendo a ação
+
+    $validationRules = [ /* Suas regras de validação completas */
       // User
       'user.name' => 'required|string|max:255',
-      'user.email' => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
+      'user.email' => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->ignore($collaboratorUser->id)],
       'user.password' => ['nullable', 'confirmed', Rules\Password::defaults()],
       // Collaborator
       'collaborator.photo_file' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
       'collaborator.curriculum_file' => 'nullable|file|mimes:pdf,doc,docx|max:5120',
-      // ... (copiar todas as validações de 'collaborator' do store, ajustando unique)
-      'collaborator.personal_email' => ['nullable', 'string', 'email', 'max:255', Rule::unique('collaborators', 'personal_email')->ignore($collaborator->id)],
-      'collaborator.business_email' => ['nullable', 'string', 'email', 'max:255', Rule::unique('collaborators', 'business_email')->ignore($collaborator->id)],
-      'collaborator.cpf' => ['nullable', 'string', 'max:14', Rule::unique('collaborators', 'cpf')->ignore($collaborator->id)],
-      'collaborator.cnh' => ['nullable', 'string', 'max:20', Rule::unique('collaborators', 'cnh')->ignore($collaborator->id)],
-      // ... (restante dos campos de collaborator)
       'collaborator.date_of_birth' => 'nullable|date',
       'collaborator.gender' => 'nullable|string|max:255',
       'collaborator.is_special_needs_person' => 'boolean',
@@ -242,6 +312,8 @@ class CollaboratorController extends Controller
       'collaborator.father_name' => 'nullable|string|max:255',
       'collaborator.mother_name' => 'nullable|string|max:255',
       'collaborator.nationality' => 'nullable|string|max:255',
+      'collaborator.personal_email' => ['nullable', 'string', 'email', 'max:255', Rule::unique('collaborators', 'personal_email')->ignore($collaborator->id)],
+      'collaborator.business_email' => ['nullable', 'string', 'email', 'max:255', Rule::unique('collaborators', 'business_email')->ignore($collaborator->id)],
       'collaborator.phone' => 'nullable|string|max:20',
       'collaborator.cellphone' => 'nullable|string|max:20',
       'collaborator.emergency_phone' => 'nullable|string|max:20',
@@ -255,7 +327,9 @@ class CollaboratorController extends Controller
       'collaborator.observations' => 'nullable|string',
       'collaborator.contract_start_date' => 'nullable|date',
       'collaborator.contract_expiration' => 'nullable|date|after_or_equal:collaborator.contract_start_date',
+      'collaborator.cpf' => ['nullable', 'string', 'max:14', Rule::unique('collaborators', 'cpf')->ignore($collaborator->id)],
       'collaborator.rg' => 'nullable|string|max:20',
+      'collaborator.cnh' => ['nullable', 'string', 'max:20', Rule::unique('collaborators', 'cnh')->ignore($collaborator->id)],
       'collaborator.reservista' => 'nullable|string|max:30',
       'collaborator.titulo_eleitor' => 'nullable|string|max:30',
       'collaborator.zona_eleitoral' => 'nullable|string|max:10',
@@ -272,49 +346,63 @@ class CollaboratorController extends Controller
       'address.neighborhood' => 'nullable|string|max:255',
       'address.state' => 'required_with:address.cep,address.street,address.city|nullable|string|max:2',
       'address.city' => 'required_with:address.cep,address.street,address.state|nullable|string|max:255',
-    ]);
+    ];
+    if ($loggedInUser->role === UserRole::ADMIN || $loggedInUser->role === UserRole::FRANCHISE) {
+      $validationRules['collaborator.client_id'] = 'required|exists:clients,id';
+    }
+    $validated = $request->validate($validationRules);
 
     $userData = $validated['user'];
     $collaboratorData = $validated['collaborator'];
     $addressData = $validated['address'] ?? null;
 
-    // Uploads
     if ($request->hasFile('collaborator.photo_file')) {
-      if ($collaborator->photo_url) {
-        Storage::disk('public')->delete($collaborator->photo_url);
-      }
+      if ($collaborator->photo_url) { Storage::disk('public')->delete($collaborator->photo_url); }
       $collaboratorData['photo_url'] = $request->file('collaborator.photo_file')->store('collaborator_photos', 'public');
     }
     if ($request->hasFile('collaborator.curriculum_file')) {
-      if ($collaborator->curriculum_url) {
-        Storage::disk('public')->delete($collaborator->curriculum_url);
-      }
+      if ($collaborator->curriculum_url) { Storage::disk('public')->delete($collaborator->curriculum_url); }
       $collaboratorData['curriculum_url'] = $request->file('collaborator.curriculum_file')->store('collaborator_curriculums', 'public');
     }
 
-    DB::transaction(function () use ($userData, $collaboratorData, $addressData, $user, $collaborator, $mainAddress) {
-      // User
+    DB::transaction(function () use ($userData, $collaboratorData, $addressData, $collaboratorUser, $collaborator, $mainAddress, $loggedInUser) {
       if (!empty($userData['password'])) {
         $userData['password'] = Hash::make($userData['password']);
       } else {
-        unset($userData['password']); // Não atualiza a senha se vazia
+        unset($userData['password']);
       }
-      $user->update($userData);
+      $collaboratorUser->update($userData);
 
-      // Collaborator
+      // Apenas Admin ou Franqueado (que pode editar este colaborador) podem mudar o client_id
+      if (($loggedInUser->role === UserRole::ADMIN || $loggedInUser->role === UserRole::FRANCHISE) && isset($collaboratorData['client_id'])) {
+        $clientIdFromRequest = $collaboratorData['client_id'];
+        // Validação extra para Franqueado: só pode atribuir a um de seus clientes
+        if ($loggedInUser->role === UserRole::FRANCHISE) {
+          if(!$loggedInUser->franchise) abort(403, 'Usuário franqueado não associado a uma franquia.');
+          $client = Client::where('id', $clientIdFromRequest)
+            ->where('franchise_id', $loggedInUser->franchise->id)
+            ->first();
+          if (!$client) {
+            abort(403, 'Franqueado não pode atribuir colaborador a este cliente.');
+          }
+        }
+        // Se passou na policy 'update' e aqui, então pode setar.
+        // A policy já deve ter validado se este franqueado PODE editar este colaborador.
+      } else {
+        // Se não for admin/franqueado, ou client_id não está no request, não muda o client_id.
+        // A policy de update deve garantir que um Cliente não possa mudar o client_id do seu colaborador.
+        unset($collaboratorData['client_id']);
+      }
       $collaborator->update($collaboratorData);
 
-      // Address
-      if ($addressData && !empty(array_filter($addressData))) { // Se algum dado de endereço foi enviado
+      if ($addressData && !empty(array_filter($addressData))) {
         if ($mainAddress) {
           $mainAddress->update($addressData);
         } else {
-          // Cria um novo endereço se não existia antes
-          $user->addresses()->create($addressData);
+          $collaboratorUser->addresses()->create($addressData);
         }
       } elseif ($mainAddress && (empty($addressData) || empty(array_filter($addressData)))) {
-        // Se os campos de endereço foram esvaziados e existia um endereço, remove-o
-        // $mainAddress->delete(); // Ou apenas desassocia, dependendo da regra
+        // $mainAddress->delete(); // Opção de deletar endereço se campos forem esvaziados
       }
     });
 
@@ -323,6 +411,8 @@ class CollaboratorController extends Controller
 
   public function destroy(Collaborator $collaborator)
   {
+    $this->authorize('delete', $collaborator);
+
     DB::transaction(function () use ($collaborator) {
       if ($collaborator->photo_url) {
         Storage::disk('public')->delete($collaborator->photo_url);
@@ -330,14 +420,15 @@ class CollaboratorController extends Controller
       if ($collaborator->curriculum_url) {
         Storage::disk('public')->delete($collaborator->curriculum_url);
       }
-
       $user = $collaborator->user;
-      // Excluir endereços associados ao usuário
-      $user->addresses()->delete(); // Isso excluirá todos os endereços do usuário
-      $collaborator->delete(); // Exclui o registro do colaborador
-      $user->delete(); // Exclui o usuário (onDelete('cascade') na FK de collaborators cuidaria disso também)
+      if ($user) {
+        $user->addresses()->delete();
+      }
+      $collaborator->delete();
+      if ($user) {
+        $user->delete();
+      }
     });
-
     return redirect()->route('collaborators.index')->with('success', 'Colaborador e dados associados excluídos com sucesso.');
   }
 }

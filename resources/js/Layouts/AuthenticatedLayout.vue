@@ -1,24 +1,77 @@
 <script setup>
-import { ref } from 'vue';
-import { Link } from '@inertiajs/vue3';
+import {computed, ref} from 'vue';
+import {Link, usePage} from '@inertiajs/vue3';
 // Você pode querer importar ícones para os links da sidebar, ex: lucide-vue-next
 // import { HomeIcon, UsersIcon, BriefcaseIcon, UserCheckIcon, UserCogIcon } from 'lucide-vue-next';
-
 // Para o dropdown de usuário (se mantiver o do Breeze)
 import Dropdown from '@/Components/Dropdown.vue';
 import DropdownLink from '@/Components/DropdownLink.vue';
-import NavLink from '@/Components/NavLink.vue'; // Pode ser útil para links da sidebar também
-import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
 
 const showingNavigationDropdown = ref(false);
 
-const sidebarLinks = ref([
-  { name: 'Dashboard', href: route('dashboard'), /* icon: HomeIcon, */ current: route().current('dashboard') },
-  { name: 'Administradores', href: route('admins.index'), /* icon: UserCogIcon, */ current: false }, // Ex: route('admins.index')
-  { name: 'Franqueados', href: route('franchises.index'), /* icon: BriefcaseIcon, */ current: false }, // Ex: route('franchises.index')
-  { name: 'Clientes', href: route('clients.index'), /* icon: UsersIcon, */ current: false },       // Ex: route('clients.index')
-  { name: 'Colaboradores', href: route('collaborators.index'), /* icon: UserCheckIcon, */ current: false }, // Ex: route('colaborators.index')
-]);
+
+
+const page = usePage();
+
+const allPossibleLinks = [
+  {
+    name: 'Dashboard',
+    href: route('dashboard'),
+    current: () => route().current('dashboard'),
+    canAccess: (user) => {
+      return !!user;
+    }
+  },
+  {
+    name: 'Administradores',
+    href: route('admins.index'),
+    current: () => route().current('admins.*'),
+    canAccess: (user) => {
+      return user && user.role === 'admin';
+    }
+  },
+  {
+    name: 'Franqueados',
+    href: route('franchises.index'),
+    current: () => route().current('franchises.*'),
+    canAccess: (user) => {
+      return user && user.role === 'admin';
+    }
+  },
+  {
+    name: 'Clientes',
+    href: route('clients.index'),
+    current: () => route().current('clients.*'),
+    canAccess: (user) => {
+      return user && (user.role === 'admin' || user.role === 'franchise');
+    }
+  },
+  {
+    name: 'Colaboradores',
+    href: route('collaborators.index'),
+    current: () => route().current('collaborators.*'),
+    canAccess: (user) => {
+      return user && (user.role === 'admin' || user.role === 'franchise' || user.role === 'client');
+    }
+  },
+];
+
+const sidebarLinks = computed(() => {
+  const currentUser = page.props.auth.user;
+
+  if (!currentUser) {
+    return [];
+  }
+
+  const filteredLinks = allPossibleLinks.filter(link => {
+    return link.canAccess(currentUser);
+  });
+
+  return filteredLinks.map(link => ({
+    ...link,
+    current: link.current(),
+  }));
+});
 
 </script>
 

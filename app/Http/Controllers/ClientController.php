@@ -4,11 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\Client;
 use App\Models\User;
+use App\Models\Franchise; // Importar Franchise
 use App\Enums\UserRole;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth; // Importar Auth
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Storage; // <-- Adicione esta linha
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rules;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
@@ -16,45 +18,59 @@ use Inertia\Response;
 
 class ClientController extends Controller
 {
-  // Helper para formatar dados do cliente para a view
   protected function formatClientData(Client $client): array
   {
-    $client->load('user'); // Garante que o usuário está carregado
+    $client->loadMissing(['user', 'franchise.user']);
     return [
       'id' => $client->id,
       'cnpj' => $client->cnpj,
       'test_number' => $client->test_number ?: 'N/A',
       'contract_end_date' => $client->contract_end_date ? $client->contract_end_date->format('d/m/Y') : 'N/A',
-      'contract_end_date_form' => $client->contract_end_date ? $client->contract_end_date->format('Y-m-d') : null, // Para formulários
-      'is_monthly_contract' => $client->is_monthly_contract,
+      'contract_end_date_form' => $client->contract_end_date ? $client->contract_end_date->format('Y-m-d') : null,
+      'is_monthly_contract' => (bool) $client->is_monthly_contract,
       'phone' => $client->phone ?: 'N/A',
-      'logo_url' => $client->logo_url, // O caminho relativo salvo no BD
-      'logo_full_url' => $client->logo_url ? Storage::disk('public')->url($client->logo_url) : null, // URL completa para exibição
+      'logo_url' => $client->logo_url,
+      'logo_full_url' => $client->logo_url ? Storage::disk('public')->url($client->logo_url) : null,
+      'franchise_id' => $client->franchise_id,
+      'franchise_name' => $client->franchise && $client->franchise->user ? $client->franchise->user->name : 'N/A',
       'created_at' => $client->created_at->format('d/m/Y H:i:s'),
       'updated_at' => $client->updated_at->format('d/m/Y H:i:s'),
       'user' => $client->user ? [
         'id' => $client->user->id,
         'name' => $client->user->name,
         'email' => $client->user->email,
-        'role' => $client->user->role->value,
+        'role' => $client->user->role instanceof UserRole ? $client->user->role->value : $client->user->role,
         'user_created_at' => $client->user->created_at->format('d/m/Y H:i:s'),
       ] : null,
     ];
   }
 
-
   public function index(): Response
   {
-    $clients = Client::with('user')
-      ->orderByDesc('created_at')
+    $this->authorize('viewAny', Client::class);
+
+    $user = Auth::user();
+    $query = Client::with(['user', 'franchise.user']);
+
+    if ($user->role === UserRole::FRANCHISE) {
+      if ($user->franchise) {
+        $query->where('franchise_id', $user->franchise->id);
+      } else {
+        $query->whereRaw('1 = 0'); // Franqueado sem franquia não vê clientes
+      }
+    }
+    // Admin vê todos (Gate::before já cuida disso, e a policy viewAny permite admin)
+
+    $clients = $query->orderByDesc('clients.created_at')
       ->paginate(10)
-      ->through(fn ($client) => [ // Usando map para transformar
+      ->through(fn ($client) => [
         'id' => $client->id,
         'cnpj' => $client->cnpj,
-        'is_monthly_contract' => $client->is_monthly_contract,
+        'is_monthly_contract' => (bool) $client->is_monthly_contract,
         'phone' => $client->phone,
         'user_name' => $client->user->name,
         'user_email' => $client->user->email,
+        'franchise_name' => $client->franchise && $client->franchise->user ? $client->franchise->user->name : 'N/A',
         'logo_full_url' => $client->logo_url ? Storage::disk('public')->url($client->logo_url) : null,
       ]);
 
@@ -65,12 +81,31 @@ class ClientController extends Controller
 
   public function create(): Response
   {
-    return Inertia::render('Clients/Create');
+    $this->authorize('create', Client::class);
+
+    $franchises = [];
+    // Apenas Admin precisa selecionar a franquia, para Franqueado é a sua própria.
+    if (Auth::user()->role === UserRole::ADMIN) {
+      $franchises = Franchise::with('user') // Carrega o usuário para pegar o nome da franquia
+      ->get()
+        ->map(fn($franchise) => [
+          'id' => $franchise->id,
+          // Assumindo que o "nome" da franquia é o nome do usuário associado a ela
+          'name' => $franchise->user ? $franchise->user->name : ('Franquia ID: ' . $franchise->id),
+        ]);
+    }
+
+    return Inertia::render('Clients/Create', [
+      'franchises' => $franchises,
+    ]);
   }
 
   public function store(Request $request)
   {
-    $request->validate([
+    $this->authorize('create', Client::class);
+
+    $loggedInUser = Auth::user();
+    $validationRules = [
       'name' => 'required|string|max:255',
       'email' => 'required|string|email|max:255|unique:users,email',
       'password' => ['required', 'confirmed', Rules\Password::defaults()],
@@ -79,31 +114,53 @@ class ClientController extends Controller
       'contract_end_date' => 'nullable|date',
       'is_monthly_contract' => 'required|boolean',
       'phone' => 'nullable|string|max:255',
-      'logo_file' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048', // Alterado de logo_url para logo_file
-    ]);
+      'logo_file' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+    ];
+
+    if ($loggedInUser->role === UserRole::ADMIN) {
+      $validationRules['franchise_id'] = 'required|exists:franchises,id';
+    }
+
+    $validatedData = $request->validate($validationRules);
 
     $logoPath = null;
     if ($request->hasFile('logo_file')) {
-      $logoPath = $request->file('logo_file')->store('client_logos', 'public'); // Salva em storage/app/public/client_logos
+      $logoPath = $request->file('logo_file')->store('client_logos', 'public');
     }
 
-    DB::transaction(function () use ($request, $logoPath) {
-      $user = User::create([
-        'name' => $request->input('name'),
-        'email' => $request->input('email'),
-        'password' => Hash::make($request->input('password')),
+    DB::transaction(function () use ($validatedData, $logoPath, $loggedInUser) {
+      $clientUser = User::create([
+        'name' => $validatedData['name'],
+        'email' => $validatedData['email'],
+        'password' => Hash::make($validatedData['password']),
         'role' => UserRole::CLIENT->value,
         'email_verified_at' => now(),
       ]);
 
-      $user->client()->create([
-        'cnpj' => $request->input('cnpj'),
-        'test_number' => $request->input('test_number'),
-        'contract_end_date' => $request->input('contract_end_date'),
-        'is_monthly_contract' => $request->input('is_monthly_contract'),
-        'phone' => $request->input('phone'),
-        'logo_url' => $logoPath, // Salva o caminho do arquivo
-      ]);
+      $clientData = [
+        'cnpj' => $validatedData['cnpj'],
+        'test_number' => $validatedData['test_number'],
+        'contract_end_date' => $validatedData['contract_end_date'],
+        'is_monthly_contract' => $validatedData['is_monthly_contract'],
+        'phone' => $validatedData['phone'],
+        'logo_url' => $logoPath,
+      ];
+
+      if ($loggedInUser->role === UserRole::ADMIN) {
+        $clientData['franchise_id'] = $validatedData['franchise_id'];
+      } elseif ($loggedInUser->role === UserRole::FRANCHISE) {
+        if (!$loggedInUser->franchise) {
+          // Este caso deve ser prevenido por lógica de negócio ou validação anterior
+          abort(403, 'Usuário franqueado não está associado a uma franquia.');
+        }
+        $clientData['franchise_id'] = $loggedInUser->franchise->id;
+      } else {
+        // Outro papel tentando criar um cliente? A policy deve barrar antes.
+        // Se chegou aqui, é um erro de lógica ou permissão não totalmente coberta.
+        abort(403, 'Ação não permitida para este papel.');
+      }
+
+      $clientUser->client()->create($clientData);
     });
 
     return redirect()->route('clients.index')->with('success', 'Cliente criado com sucesso.');
@@ -111,6 +168,7 @@ class ClientController extends Controller
 
   public function show(Client $client): Response
   {
+    $this->authorize('view', $client);
     return Inertia::render('Clients/Show', [
       'client_data' => $this->formatClientData($client),
     ]);
@@ -118,51 +176,85 @@ class ClientController extends Controller
 
   public function edit(Client $client): Response
   {
+    $this->authorize('update', $client);
+
+    $franchises = [];
+    // Apenas Admin precisa selecionar a franquia, para Franqueado é a sua própria.
+    if (Auth::user()->role === UserRole::ADMIN) {
+      $franchises = Franchise::with('user')
+        ->get()
+        ->map(fn($franchise) => [
+          'id' => $franchise->id,
+          'name' => $franchise->user ? $franchise->user->name : ('Franquia ID: ' . $franchise->id),
+        ]);
+    }
+    $client->loadMissing('user'); // Garante que o user está carregado para o form
+
     return Inertia::render('Clients/Edit', [
       'client_data' => $this->formatClientData($client),
+      'franchises' => $franchises,
     ]);
   }
 
   public function update(Request $request, Client $client)
   {
-    $user = $client->user;
+    $this->authorize('update', $client);
 
-    $request->validate([
+    $clientUser = $client->user; // O usuário associado ao cliente
+    $loggedInUser = Auth::user(); // O usuário que está fazendo a ação
+
+    $validationRules = [
       'name' => 'required|string|max:255',
-      'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
+      'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->ignore($clientUser->id)],
       'password' => ['nullable', 'confirmed', Rules\Password::defaults()],
       'cnpj' => ['required', 'string', 'max:255', Rule::unique('clients', 'cnpj')->ignore($client->id)],
       'test_number' => 'nullable|string|max:255',
       'contract_end_date' => 'nullable|date',
       'is_monthly_contract' => 'required|boolean',
       'phone' => 'nullable|string|max:255',
-      'logo_file' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048', // Para o novo upload
-    ]);
+      'logo_file' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+    ];
 
-    $logoPath = $client->logo_url; // Mantém o logo existente por padrão
+    if ($loggedInUser->role === UserRole::ADMIN) {
+      $validationRules['franchise_id'] = 'required|exists:franchises,id';
+    }
+    // Franqueado não altera o franchise_id de um cliente (policy já garante que ele só edita os seus)
 
+    $validatedData = $request->validate($validationRules);
+
+    $logoPath = $client->logo_url;
     if ($request->hasFile('logo_file')) {
-      // Exclui o logo antigo se existir
       if ($client->logo_url) {
         Storage::disk('public')->delete($client->logo_url);
       }
-      // Salva o novo logo
       $logoPath = $request->file('logo_file')->store('client_logos', 'public');
     }
 
-    DB::transaction(function () use ($request, $user, $client, $logoPath) {
-      $userData = [
-        'name' => $request->input('name'),
-        'email' => $request->input('email'),
+    DB::transaction(function () use ($request, $validatedData, $clientUser, $client, $logoPath, $loggedInUser) {
+      $userDataToUpdate = [
+        'name' => $validatedData['name'],
+        'email' => $validatedData['email'],
       ];
       if ($request->filled('password')) {
-        $userData['password'] = Hash::make($request->input('password'));
+        $userDataToUpdate['password'] = Hash::make($validatedData['password']);
       }
-      $user->update($userData);
+      $clientUser->update($userDataToUpdate);
 
-      $clientData = $request->except(['name', 'email', 'password', 'password_confirmation', 'logo_file']);
-      $clientData['logo_url'] = $logoPath; // Atualiza com o novo caminho do logo (ou o antigo se não mudou)
-      $client->update($clientData);
+      $clientDataToUpdate = [
+        'cnpj' => $validatedData['cnpj'],
+        'test_number' => $validatedData['test_number'],
+        'contract_end_date' => $validatedData['contract_end_date'],
+        'is_monthly_contract' => $validatedData['is_monthly_contract'],
+        'phone' => $validatedData['phone'],
+        'logo_url' => $logoPath,
+      ];
+
+      // Apenas Admin pode mudar o franchise_id de um cliente existente
+      if ($loggedInUser->role === UserRole::ADMIN && isset($validatedData['franchise_id'])) {
+        $clientDataToUpdate['franchise_id'] = $validatedData['franchise_id'];
+      }
+
+      $client->update($clientDataToUpdate);
     });
 
     return redirect()->route('clients.index')->with('success', 'Cliente atualizado com sucesso.');
@@ -170,13 +262,17 @@ class ClientController extends Controller
 
   public function destroy(Client $client)
   {
+    $this->authorize('delete', $client);
+
     DB::transaction(function () use ($client) {
-      // Exclui o logo se existir
       if ($client->logo_url) {
         Storage::disk('public')->delete($client->logo_url);
       }
-
       $user = $client->user;
+      // Lidar com colaboradores associados antes de deletar o cliente
+      // Se onDelete na FK da tabela 'collaborators' para 'client_id' for 'cascade', eles serão deletados.
+      // Se for 'set null', o client_id será null.
+      // Se quiser ter certeza, pode fazer: $client->collaborators()->delete(); ou update(['client_id' => null])
       $client->delete();
       if ($user) {
         $user->delete();

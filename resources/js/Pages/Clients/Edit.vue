@@ -5,45 +5,69 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select'; // Certifique-se que está importado
 import InputError from '@/Components/InputError.vue';
-import { ref } from 'vue';
+import { ref, computed } from 'vue'; // Adicionado computed
 
 const props = defineProps({
-  client_data: Object,
+  client_data: Object, // Dados do cliente, incluindo user e franchise_id
+  franchises: Array,   // Lista de franqueados (apenas para admin)
 });
 
+const page = usePage();
+const userRole = computed(() => page.props.auth.user?.role);
+
 const form = useForm({
-  _method: 'PUT',
+  _method: 'PUT', // Necessário para form.post simular um PUT
   name: props.client_data.user.name,
   email: props.client_data.user.email,
   password: '',
   password_confirmation: '',
   cnpj: props.client_data.cnpj,
   test_number: props.client_data.test_number,
-  contract_end_date: props.client_data.contract_end_date_form,
+  contract_end_date: props.client_data.contract_end_date_form, // Usa o formato YYYY-MM-DD
   is_monthly_contract: props.client_data.is_monthly_contract,
   phone: props.client_data.phone,
-  logo_file: null,
+  logo_file: null, // Para um novo upload
+  franchise_id: props.client_data.franchise_id || null, // Adicionado e inicializado
 });
 
-const logoPreview = ref(props.client_data.logo_full_url); // Começa com o logo existente, se houver
+const logoPreview = ref(props.client_data.logo_full_url);
 
 function handleLogoUpload(event) {
   const file = event.target.files[0];
   if (file) {
     form.logo_file = file;
     logoPreview.value = URL.createObjectURL(file);
+  } else {
+    // Se o usuário cancelar a seleção de arquivo, não limpamos o form.logo_file
+    // para que, se ele não selecionar nada, o backend não receba um 'null' indesejado
+    // e mantenha o logo existente se nenhum novo arquivo for enviado.
+    // O preview pode ser resetado para o logo original se desejado.
+    // form.logo_file = null; // Removido para não limpar se cancelar
+    // logoPreview.value = props.client_data.logo_full_url; // Opção: reverter preview
   }
 }
 
 const submit = () => {
   form.post(route('clients.update', props.client_data.id), {
+    preserveState: true, // pode ser útil para manter o estado da página
+    preserveScroll: true,
     onSuccess: () => {
       form.reset('password', 'password_confirmation');
-      if (!form.logo_file) {
-        logoPreview.value = usePage().props.client_data?.logo_full_url || props.client_data.logo_full_url;
+      if (form.logo_file) {
+        // Se um novo arquivo foi processado, o preview já está mostrando ele.
+        // O ideal é que, após o sucesso, a prop client_data seja atualizada
+        // e o logoPreview reflita props.client_data.logo_full_url atualizado.
+      } else {
+        // Mantém o preview atual se nenhum arquivo novo foi selecionado.
+        // O backend não alterará o logo_url se logo_file não for enviado.
       }
     },
+    onError: (errors) => {
+      // Tratar erros, talvez focar no primeiro campo com erro.
+      console.error('Erros no formulário:', errors);
+    }
   });
 };
 </script>
@@ -61,6 +85,20 @@ const submit = () => {
       <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
         <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
           <form @submit.prevent="submit" class="space-y-6">
+            <div v-if="userRole === 'admin' && props.franchises && props.franchises.length > 0">
+              <Label for="franchise_id">Franqueado Associado</Label>
+              <Select v-model="form.franchise_id">
+                <SelectTrigger id="franchise_id">
+                  <SelectValue placeholder="Selecione um franqueado" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem v-for="franchise in props.franchises" :key="franchise.id" :value="franchise.id" class="cursor-pointer">
+                    {{ franchise.name }} </SelectItem>
+                </SelectContent>
+              </Select>
+              <InputError class="mt-2" :message="form.errors.franchise_id" />
+            </div>
+
             <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Dados do Usuário</h3>
             <div>
               <Label for="user_name">Nome do Usuário</Label>
@@ -87,6 +125,7 @@ const submit = () => {
             </div>
 
             <hr class="my-6 dark:border-gray-700">
+            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Dados da Empresa Cliente</h3>
             <div>
               <Label for="client_cnpj">CNPJ</Label>
               <Input id="client_cnpj" type="text" class="mt-1 block w-full" v-model="form.cnpj" required />
@@ -108,7 +147,7 @@ const submit = () => {
               <InputError class="mt-2" :message="form.errors.contract_end_date" />
             </div>
             <div class="flex items-center space-x-2 mt-1">
-              <Checkbox id="client_is_monthly_contract" v-model:checked="form.is_monthly_contract" />
+              <Checkbox id="client_is_monthly_contract" :checked="form.is_monthly_contract" @update:checked="form.is_monthly_contract = $event" />
               <Label for="client_is_monthly_contract" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                 Contrato Mensal?
               </Label>

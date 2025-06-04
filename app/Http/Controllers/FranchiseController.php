@@ -16,6 +16,8 @@ use Inertia\Response;
 
 class FranchiseController extends Controller
 {
+  // O método formatFranchiseData é um helper e não precisa de autorização direta aqui,
+  // pois será chamado por métodos que já foram autorizados.
   protected function formatFranchiseData(Franchise $franchise): array
   {
     $franchise->load('user');
@@ -28,7 +30,7 @@ class FranchiseController extends Controller
       'contract_start_date' => $franchise->contract_start_date ? $franchise->contract_start_date->format('d/m/Y') : 'N/A',
       'contract_start_date_form' => $franchise->contract_start_date ? $franchise->contract_start_date->format('Y-m-d') : null,
       'actuation_region' => $franchise->actuation_region,
-      'document_url' => $franchise->document_url, // Caminho relativo salvo
+      'document_url' => $franchise->document_url,
       'document_full_url' => $franchise->document_url ? Storage::disk('public')->url($franchise->document_url) : null,
       'observations' => $franchise->observations,
       'created_at' => $franchise->created_at->format('d/m/Y H:i:s'),
@@ -43,6 +45,11 @@ class FranchiseController extends Controller
 
   public function index(): Response
   {
+    // Autoriza se o usuário logado pode ver qualquer registro do tipo Franchise
+    // FranchisePolicy@viewAny e Gate::before (para admin) decidirão.
+    // Conforme nossa policy, apenas admins verão esta lista.
+    $this->authorize('viewAny', Franchise::class);
+
     $franchises = Franchise::with('user')
       ->orderByDesc('created_at')
       ->paginate(10)
@@ -62,23 +69,29 @@ class FranchiseController extends Controller
 
   public function create(): Response
   {
+    // Autoriza se o usuário logado pode criar um Franchise
+    // FranchisePolicy@create e Gate::before (para admin) decidirão.
+    // Conforme nossa policy, apenas admins podem criar.
+    $this->authorize('create', Franchise::class);
+
     return Inertia::render('Franchises/Create');
   }
 
-  public function store(Request $request)
+  public function store(Request $request) // Pode retornar Illuminate\Http\RedirectResponse
   {
+    // Autoriza se o usuário logado pode criar um Franchise
+    $this->authorize('create', Franchise::class);
+
     $request->validate([
-      // User fields
       'name' => 'required|string|max:255',
       'email' => 'required|string|email|max:255|unique:users,email',
       'password' => ['required', 'confirmed', Rules\Password::defaults()],
-      // Franchise fields
       'maxcam_email' => 'required|string|email|max:255|unique:franchises,maxcam_email',
-      'cnpj' => 'required|string|max:18|unique:franchises,cnpj', // Ajuste max se necessário para CNPJ formatado
+      'cnpj' => 'required|string|max:18|unique:franchises,cnpj',
       'max_client' => 'required|integer|min:0',
       'contract_start_date' => 'required|date',
       'actuation_region' => 'required|string|max:255',
-      'document_file' => 'nullable|file|mimes:pdf,doc,docx,jpg,png|max:5120', // Ex: 5MB max
+      'document_file' => 'nullable|file|mimes:pdf,doc,docx,jpg,png|max:5120',
       'observations' => 'nullable|string',
     ]);
 
@@ -92,7 +105,7 @@ class FranchiseController extends Controller
         'name' => $request->input('name'),
         'email' => $request->input('email'),
         'password' => Hash::make($request->input('password')),
-        'role' => UserRole::FRANCHISE->value, // Usando o Enum
+        'role' => UserRole::FRANCHISE->value,
         'email_verified_at' => now(),
       ]);
 
@@ -112,6 +125,10 @@ class FranchiseController extends Controller
 
   public function show(Franchise $franchise): Response
   {
+    // Autoriza se o usuário logado pode ver este $franchise específico
+    // FranchisePolicy@view e Gate::before (para admin) decidirão.
+    $this->authorize('view', $franchise);
+
     return Inertia::render('Franchises/Show', [
       'franchise_data' => $this->formatFranchiseData($franchise),
     ]);
@@ -119,21 +136,26 @@ class FranchiseController extends Controller
 
   public function edit(Franchise $franchise): Response
   {
+    // Autoriza se o usuário logado pode atualizar este $franchise
+    // FranchisePolicy@update e Gate::before (para admin) decidirão.
+    $this->authorize('update', $franchise);
+
     return Inertia::render('Franchises/Edit', [
       'franchise_data' => $this->formatFranchiseData($franchise),
     ]);
   }
 
-  public function update(Request $request, Franchise $franchise)
+  public function update(Request $request, Franchise $franchise) // Pode retornar Illuminate\Http\RedirectResponse
   {
+    // Autoriza se o usuário logado pode atualizar este $franchise
+    $this->authorize('update', $franchise);
+
     $user = $franchise->user;
 
     $request->validate([
-      // User fields
       'name' => 'required|string|max:255',
       'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
       'password' => ['nullable', 'confirmed', Rules\Password::defaults()],
-      // Franchise fields
       'maxcam_email' => ['required', 'string', 'email', 'max:255', Rule::unique('franchises', 'maxcam_email')->ignore($franchise->id)],
       'cnpj' => ['required', 'string', 'max:18', Rule::unique('franchises', 'cnpj')->ignore($franchise->id)],
       'max_client' => 'required|integer|min:0',
@@ -172,16 +194,21 @@ class FranchiseController extends Controller
     return redirect()->route('franchises.index')->with('success', 'Franqueado atualizado com sucesso.');
   }
 
-  public function destroy(Franchise $franchise)
+  public function destroy(Franchise $franchise) // Pode retornar Illuminate\Http\RedirectResponse
   {
+    // Autoriza se o usuário logado pode deletar este $franchise
+    // FranchisePolicy@delete e Gate::before (para admin) decidirão.
+    // Conforme nossa policy, apenas admins podem deletar.
+    $this->authorize('delete', $franchise);
+
     DB::transaction(function () use ($franchise) {
       if ($franchise->document_url) {
         Storage::disk('public')->delete($franchise->document_url);
       }
-      $user = $franchise->user;
+      $user = $franchise->user; // Pega o usuário antes de deletar a franquia, se a relação for nullable
       $franchise->delete();
       if ($user) {
-        $user->delete();
+        $user->delete(); // Deleta o usuário associado
       }
     });
 

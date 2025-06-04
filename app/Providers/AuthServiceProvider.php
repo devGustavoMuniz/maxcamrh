@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Enums\UserRole;
 use App\Models\Client;
 use App\Models\Collaborator;
 use App\Models\Franchise;
@@ -27,10 +28,8 @@ class AuthServiceProvider extends ServiceProvider
     $this->registerPolicies();
 
     Gate::before(function (User $user, string $ability) {
-       if ($user->role === 'admin') {
-           return true;
-       }
-       return null;
+      $userRoleValue = ($user->role instanceof UserRole) ? $user->role->value : $user->role;
+      return ($userRoleValue === UserRole::ADMIN->value);
     });
 
     Gate::define('access-clients-module', function (User $user) {

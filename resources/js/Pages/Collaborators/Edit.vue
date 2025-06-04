@@ -1,32 +1,39 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, useForm, Link } from '@inertiajs/vue3';
-import { ref, watch } from 'vue'; // Adicionado watch
+import { Head, useForm, Link, usePage } from '@inertiajs/vue3'; // Adicionado usePage
+import { ref, watch, computed } from 'vue'; // Adicionado computed
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'; // Importações do Select
 import InputError from '@/Components/InputError.vue';
 
 const props = defineProps({
   collaborator_data: Object,
+  clients: Array, // Adicionado: Lista de clientes para admin/franqueado selecionarem
 });
+
+const page = usePage();
+const userRole = computed(() => page.props.auth.user?.role);
 
 const currentStep = ref(1);
 const totalSteps = 4;
 
 const form = useForm({
-  _method: 'PUT', // Para o update
+  _method: 'PUT',
   user: {
     name: props.collaborator_data.user?.name || '',
     email: props.collaborator_data.user?.email || '',
-    password: '', // Senha é opcional na edição
+    password: '',
     password_confirmation: '',
   },
   collaborator: {
-    photo_file: null, // Para novo upload
-    curriculum_file: null, // Para novo upload
+    client_id: props.collaborator_data.client_id || null, // CAMPO ADICIONADO E INICIALIZADO
+    photo_file: null,
+    curriculum_file: null,
+    // Mantendo os valores existentes do props.collaborator_data para os campos
     date_of_birth: props.collaborator_data.date_of_birth || '',
     gender: props.collaborator_data.gender || '',
     is_special_needs_person: props.collaborator_data.is_special_needs_person || false,
@@ -62,7 +69,7 @@ const form = useForm({
     agencia: props.collaborator_data.agencia || '',
     conta_corrente: props.collaborator_data.conta_corrente || '',
   },
-  address: {
+  address: { // Assumindo que props.collaborator_data.address pode ser null
     cep: props.collaborator_data.address?.cep || '',
     street: props.collaborator_data.address?.street || '',
     number: props.collaborator_data.address?.number || '',
@@ -74,14 +81,15 @@ const form = useForm({
 });
 
 const photoPreview = ref(props.collaborator_data.photo_full_url);
-const curriculumPreview = ref(null); // Nome do arquivo para novo upload
-const existingCurriculumUrl = ref(props.collaborator_data.curriculum_full_url);
+const curriculumPreview = ref(null); // Para o nome do novo arquivo de currículo
+const existingCurriculumUrl = ref(props.collaborator_data.curriculum_full_url); // Link para o currículo existente
 
-
+// Watch para atualizar previews se as props mudarem e nenhum arquivo novo foi selecionado
 watch(() => props.collaborator_data.photo_full_url, (newUrl) => {
   if (!form.collaborator.photo_file) photoPreview.value = newUrl;
 });
 watch(() => props.collaborator_data.curriculum_full_url, (newUrl) => {
+  // Se um novo currículo não foi selecionado para upload, atualiza o link do existente
   if (!form.collaborator.curriculum_file) existingCurriculumUrl.value = newUrl;
 });
 
@@ -89,26 +97,24 @@ watch(() => props.collaborator_data.curriculum_full_url, (newUrl) => {
 function handleFileUpload(event, field, previewRef, isImage = false) {
   const file = event.target.files[0];
   if (file) {
-    form.collaborator[field] = file;
-    if (isImage && previewRef) {
+    form.collaborator[field] = file; // Atribui o objeto File
+    if (isImage && previewRef) { // Para photo_file
       previewRef.value = URL.createObjectURL(file);
-      if (field === 'photo_file') {
-        // No edit, se uma nova foto é selecionada, não precisamos mais do link do currículo existente
-      }
-    } else if (previewRef) {
-      previewRef.value = file.name; // Mostra nome do arquivo
-      if (field === 'curriculum_file') existingCurriculumUrl.value = null;
+    } else if (previewRef) { // Para curriculum_file
+      previewRef.value = file.name; // Mostra nome do novo arquivo
+      existingCurriculumUrl.value = null; // Esconde o link do currículo antigo se um novo for selecionado
     }
   } else {
+    // Se o usuário cancelar a seleção, redefinimos para o estado inicial
     form.collaborator[field] = null;
-    if (isImage && previewRef) previewRef.value = (field === 'photo_file' ? props.collaborator_data.photo_full_url : null);
-    else if (previewRef) previewRef.value = null;
-
-    if (field === 'curriculum_file') existingCurriculumUrl.value = props.collaborator_data.curriculum_full_url;
-
+    if (field === 'photo_file' && previewRef) {
+      previewRef.value = props.collaborator_data.photo_full_url; // Volta para foto original
+    } else if (field === 'curriculum_file' && previewRef) {
+      previewRef.value = null; // Limpa o nome do novo arquivo
+      existingCurriculumUrl.value = props.collaborator_data.curriculum_full_url; // Mostra o link do currículo original novamente
+    }
   }
 }
-
 
 function nextStep() { if (currentStep.value < totalSteps) currentStep.value++; }
 function prevStep() { if (currentStep.value > 1) currentStep.value--; }
@@ -117,9 +123,14 @@ const submit = () => {
   form.post(route('collaborators.update', props.collaborator_data.id), { // form.post com _method: 'PUT'
     onSuccess: () => {
       form.reset('user.password', 'user.password_confirmation');
+      // Limpa os campos de arquivo do formulário após o sucesso para evitar reenvio acidental
       form.collaborator.photo_file = null;
       form.collaborator.curriculum_file = null;
-      // O watch deve cuidar de atualizar os previews com base nas props atualizadas
+      // O Inertia deve recarregar as props, e os 'watch' acima devem atualizar os previews
+      // Se não, pode ser necessário buscar a prop atualizada explicitamente
+      // photoPreview.value = page.props.collaborator_data?.photo_full_url || props.collaborator_data.photo_full_url;
+      // existingCurriculumUrl.value = page.props.collaborator_data?.curriculum_full_url || props.collaborator_data.curriculum_full_url;
+      // curriculumPreview.value = null;
     },
   });
 };
@@ -135,7 +146,7 @@ async function fetchAddressByCep() {
       form.address.neighborhood = data.bairro;
       form.address.city = data.localidade;
       form.address.state = data.uf;
-      document.getElementById('address_number')?.focus();
+      document.getElementById('address_number_edit')?.focus(); // Ajustar ID se necessário
     } catch (error) {
       console.error("Erro ao buscar CEP:", error);
       form.address.street = '';
@@ -145,7 +156,6 @@ async function fetchAddressByCep() {
     }
   }
 }
-
 </script>
 
 <template>
@@ -163,6 +173,25 @@ async function fetchAddressByCep() {
           <form @submit.prevent="submit" class="space-y-6">
             <section v-if="currentStep === 1" class="space-y-6">
               <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 border-b pb-2 mb-4">Etapa 1: Acesso e Dados Pessoais</h3>
+
+              <div v-if="(userRole === 'admin' || userRole === 'franchise')">
+                <Label for="collaborator_client_id_edit">Cliente Associado</Label>
+                <Select v-model="form.collaborator.client_id">
+                  <SelectTrigger id="collaborator_client_id_edit">
+                    <SelectValue placeholder="Selecione um cliente" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem class="cursor-pointer" v-for="client in props.clients" :key="client.id" :value="client.id">
+                      {{ client.name }} </SelectItem>
+                  </SelectContent>
+                </Select>
+                <InputError class="mt-2" :message="form.errors['collaborator.client_id']" />
+              </div>
+              <div v-else-if="userRole === 'client'" class="p-3 bg-blue-50 dark:bg-blue-900/50 border border-blue-200 dark:border-blue-700 rounded-md text-sm text-blue-700 dark:text-blue-300">
+                Colaborador associado ao cliente: {{ props.collaborator_data.client_name || 'Você mesmo' }}. (Não alterável aqui)
+              </div>
+
+
               <div>
                 <Label for="user_name_edit">Nome Completo do Usuário</Label>
                 <Input id="user_name_edit" type="text" class="mt-1 block w-full" v-model="form.user.name" required />
@@ -199,7 +228,7 @@ async function fetchAddressByCep() {
                   <Label for="collaborator_curriculum_file_edit">Novo Currículo (PDF, DOC)</Label>
                   <Input id="collaborator_curriculum_file_edit" type="file" @input="event => handleFileUpload(event, 'curriculum_file', curriculumPreview, false)" class="mt-1 block w-full file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" accept=".pdf,.doc,.docx" />
                   <InputError class="mt-2" :message="form.errors['collaborator.curriculum_file']" />
-                  <p v-if="curriculumPreview" class="mt-2 text-sm text-gray-500 dark:text-gray-400">Novo arquivo: {{ curriculumPreview }}</p>
+                  <p v-if="curriculumPreview" class="mt-2 text-sm text-gray-500 dark:text-gray-400">Novo arquivo selecionado: {{ curriculumPreview }}</p>
                   <div v-if="existingCurriculumUrl && !curriculumPreview" class="mt-2">
                     <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Currículo Atual:</p>
                     <a :href="existingCurriculumUrl" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline break-all">{{ existingCurriculumUrl.split('/').pop() }}</a>
@@ -214,17 +243,38 @@ async function fetchAddressByCep() {
               </div>
               <div>
                 <Label for="collaborator_gender_edit">Gênero</Label>
-                <Input id="collaborator_gender_edit" type="text" class="mt-1 block w-full" v-model="form.collaborator.gender" />
+                <Select v-model="form.collaborator.gender">
+                  <SelectTrigger id="collaborator_gender_edit">
+                    <SelectValue placeholder="Selecione o gênero" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem class="cursor-pointer" value="Masculino">Masculino</SelectItem>
+                    <SelectItem class="cursor-pointer" value="Feminino">Feminino</SelectItem>
+                    <SelectItem class="cursor-pointer" value="Outro">Outro</SelectItem>
+                    <SelectItem class="cursor-pointer" value="Não Informado">Prefiro não informar</SelectItem>
+                  </SelectContent>
+                </Select>
                 <InputError class="mt-2" :message="form.errors['collaborator.gender']" />
               </div>
               <div class="flex items-center space-x-2 mt-1">
-                <Checkbox id="collaborator_is_special_needs_person_edit" v-model:checked="form.collaborator.is_special_needs_person" />
+                <Checkbox id="collaborator_is_special_needs_person_edit" :checked="form.collaborator.is_special_needs_person" @update:checked="form.collaborator.is_special_needs_person = $event" />
                 <Label for="collaborator_is_special_needs_person_edit">Pessoa com Necessidades Especiais?</Label>
                 <InputError class="mt-2" :message="form.errors['collaborator.is_special_needs_person']" />
               </div>
               <div>
                 <Label for="collaborator_marital_status_edit">Estado Civil</Label>
-                <Input id="collaborator_marital_status_edit" type="text" class="mt-1 block w-full" v-model="form.collaborator.marital_status" />
+                <Select v-model="form.collaborator.marital_status">
+                  <SelectTrigger id="collaborator_marital_status_edit">
+                    <SelectValue placeholder="Selecione o estado civil" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem class="cursor-pointer" value="Solteiro(a)">Solteiro(a)</SelectItem>
+                    <SelectItem class="cursor-pointer" value="Casado(a)">Casado(a)</SelectItem>
+                    <SelectItem class="cursor-pointer" value="Divorciado(a)">Divorciado(a)</SelectItem>
+                    <SelectItem class="cursor-pointer" value="Viúvo(a)">Viúvo(a)</SelectItem>
+                    <SelectItem class="cursor-pointer" value="União Estável">União Estável</SelectItem>
+                  </SelectContent>
+                </Select>
                 <InputError class="mt-2" :message="form.errors['collaborator.marital_status']" />
               </div>
               <div>
@@ -342,7 +392,17 @@ async function fetchAddressByCep() {
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <Label for="collaborator_type_of_contract_edit">Tipo de Contrato</Label>
-                  <Input id="collaborator_type_of_contract_edit" type="text" class="mt-1 block w-full" v-model="form.collaborator.type_of_contract" />
+                  <Select v-model="form.collaborator.type_of_contract">
+                    <SelectTrigger id="collaborator_type_of_contract_edit">
+                      <SelectValue placeholder="Selecione o tipo" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem class="cursor-pointer" value="CLT">CLT</SelectItem>
+                      <SelectItem class="cursor-pointer" value="PJ">PJ</SelectItem>
+                      <SelectItem class="cursor-pointer" value="Estágio">Estágio</SelectItem>
+                      <SelectItem class="cursor-pointer" value="Temporário">Temporário</SelectItem>
+                    </SelectContent>
+                  </Select>
                   <InputError class="mt-2" :message="form.errors['collaborator.type_of_contract']" />
                 </div>
                 <div>
