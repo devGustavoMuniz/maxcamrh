@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('collaborators', function (Blueprint $table) {
           $table->uuid('id')->primary();
           $table->foreignUuid('user_id')->unique()->constrained('users')->onDelete('cascade');
+          $table->foreignUuid('client_id')->constrained('clients')->onDelete('cascade');
 
           $table->string('photo_url')->nullable();
           $table->string('curriculum_url')->nullable();

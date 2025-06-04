@@ -14,6 +14,7 @@ return new class extends Migration
     Schema::create('clients', function (Blueprint $table) {
       $table->uuid('id')->primary();
       $table->foreignUuid('user_id')->unique()->constrained('users')->onDelete('cascade');
+      $table->foreignUuid('franchise_id')->constrained('franchises')->onDelete('cascade');
       $table->string('cnpj')->unique();
       $table->string('test_number');
       $table->date('contract_end_date');
