@@ -1,9 +1,9 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, Link, usePage } from '@inertiajs/vue3';
+import { Head, Link, usePage, router } from '@inertiajs/vue3'; // Importado o router
 import { computed } from 'vue';
 
-// Shadcn Vue Table Components (exemplo de importação)
+// Shadcn Vue Table Components
 import {
   Table,
   TableBody,
@@ -19,10 +19,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-// import { MoreHorizontal } from 'lucide-vue-next'; // Ícone para o menu de ações
+
+// Ícones Lucide Vue Next
+import { MoreHorizontal, UserPlus, Eye, FileEdit, Trash2 } from 'lucide-vue-next';
 
 // Para paginação
-import Pagination from '@/components/Pagination.vue'; // Você pode precisar criar/adaptar este componente
+import Pagination from '@/components/Pagination.vue';
 
 defineProps({
   admins: Object, // Objeto de paginação do Laravel
@@ -30,12 +32,12 @@ defineProps({
 
 const flash = computed(() => usePage().props.flash);
 
-// Função para exclusão (pode precisar de um diálogo de confirmação)
+// Função para exclusão
 const deleteAdmin = (adminId) => {
   if (confirm('Tem certeza que deseja excluir este administrador?')) {
     router.delete(route('admins.destroy', adminId), {
       preserveScroll: true,
-      // onSuccess: () => { /* ... */ } // Inertia lida com flash messages
+      // onSuccess e onError podem ser usados para feedback mais robusto
     });
   }
 };
@@ -51,17 +53,20 @@ const deleteAdmin = (adminId) => {
           Gerenciar Administradores
         </h2>
         <Link :href="route('admins.create')">
-          <Button variant="default">Adicionar Administrador</Button>
+          <Button variant="default">
+            <UserPlus class="h-4 w-4 mr-2" />
+            Adicionar Administrador
+          </Button>
         </Link>
       </div>
     </template>
 
     <div class="py-12">
       <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-        <div v-if="flash && flash.success" class="mb-4 p-4 bg-green-100 text-green-700 rounded">
+        <div v-if="flash && flash.success" class="mb-4 p-4 bg-green-100 text-green-700 dark:bg-green-700 dark:text-green-100 rounded">
           {{ flash.success }}
         </div>
-        <div v-if="flash && flash.error" class="mb-4 p-4 bg-red-100 text-red-700 rounded">
+        <div v-if="flash && flash.error" class="mb-4 p-4 bg-red-100 text-red-700 dark:bg-red-700 dark:text-red-100 rounded">
           {{ flash.error }}
         </div>
 
@@ -88,16 +93,24 @@ const deleteAdmin = (adminId) => {
                     <DropdownMenuTrigger as-child>
                       <Button variant="ghost" class="h-8 w-8 p-0">
                         <span class="sr-only">Abrir menu</span>
-                        <span>...</span>
+                        <MoreHorizontal class="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem as-child> <Link :href="route('admins.show', admin.id)">Visualizar</Link>
+                      <DropdownMenuItem as-child>
+                        <Link :href="route('admins.show', admin.id)" class="flex items-center w-full">
+                          <Eye class="h-4 w-4 mr-2" />
+                          Visualizar
+                        </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem as-child>
-                        <Link :href="route('admins.edit', admin.id)">Editar</Link>
+                        <Link :href="route('admins.edit', admin.id)" class="flex items-center w-full">
+                          <FileEdit class="h-4 w-4 mr-2" />
+                          Editar
+                        </Link>
                       </DropdownMenuItem>
-                      <DropdownMenuItem @click="deleteAdmin(admin.id)" class="text-red-600">
+                      <DropdownMenuItem @click="deleteAdmin(admin.id)" class="text-red-600 dark:hover:text-red-400 flex items-center cursor-pointer">
+                        <Trash2 class="h-4 w-4 mr-2" />
                         Excluir
                       </DropdownMenuItem>
                     </DropdownMenuContent>
@@ -112,3 +125,4 @@ const deleteAdmin = (adminId) => {
     </div>
   </AuthenticatedLayout>
 </template>
+
