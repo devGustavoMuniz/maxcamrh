@@ -49,6 +49,7 @@ class Collaborator extends Model
     'banco',
     'agencia',
     'conta_corrente',
+    'client_id'
   ];
 
   protected $casts = [

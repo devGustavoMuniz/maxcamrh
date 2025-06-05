@@ -20,6 +20,7 @@ class Client extends Model
     'is_monthly_contract',
     'phone',
     'logo_url',
+    'franchise_id'
   ];
 
   protected $casts = [
