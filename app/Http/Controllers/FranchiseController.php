@@ -43,27 +43,46 @@ class FranchiseController extends Controller
     ];
   }
 
-  public function index(): Response
+  public function index(Request $request): Response
   {
     // Autoriza se o usuário logado pode ver qualquer registro do tipo Franchise
     // FranchisePolicy@viewAny e Gate::before (para admin) decidirão.
     // Conforme nossa policy, apenas admins verão esta lista.
     $this->authorize('viewAny', Franchise::class);
 
-    $franchises = Franchise::with('user')
-      ->orderByDesc('created_at')
-      ->paginate(10)
+    $searchTerm = $request->input('search');
+
+    $query = Franchise::with('user');
+
+    // Aplica o filtro de busca se um termo foi fornecido
+    if ($searchTerm) {
+      $query->where(function ($q) use ($searchTerm) {
+        $q->where('cnpj', 'like', "%{$searchTerm}%")
+          ->orWhere('maxcam_email', 'like', "%{$searchTerm}%")
+          ->orWhere('actuation_region', 'like', "%{$searchTerm}%")
+          ->orWhereHas('user', function ($uq) use ($searchTerm) {
+            $uq->where('name', 'like', "%{$searchTerm}%")
+              ->orWhere('email', 'like', "%{$searchTerm}%");
+          });
+      });
+    }
+
+    $franchises = $query->orderByDesc('created_at') // Mantido 'created_at' da tabela franchises
+    ->paginate(10)
+      ->withQueryString() // Importante para manter o search e outros params na paginação
       ->through(fn ($franchise) => [
         'id' => $franchise->id,
         'cnpj' => $franchise->cnpj,
         'maxcam_email' => $franchise->maxcam_email,
         'actuation_region' => $franchise->actuation_region,
-        'user_name' => $franchise->user->name,
-        'user_email' => $franchise->user->email,
+        // Assegura que user existe antes de acessar suas propriedades
+        'user_name' => $franchise->user ? $franchise->user->name : 'N/A',
+        'user_email' => $franchise->user ? $franchise->user->email : 'N/A',
       ]);
 
     return Inertia::render('Franchises/Index', [
       'franchises' => $franchises,
+      'filters' => $request->only(['search']), // Passa o filtro de volta para a view
     ]);
   }
 

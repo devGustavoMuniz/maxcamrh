@@ -86,12 +86,24 @@ class CollaboratorController extends Controller
     ];
   }
 
-  public function index(): Response
+  public function index(Request $request): Response
   {
     $this->authorize('viewAny', Collaborator::class);
 
     $user = Auth::user();
+
+    $searchTerm = $request->input('search');
+
     $query = Collaborator::with(['user.addresses', 'client.user']);
+
+    if ($searchTerm) {
+      $query->where(function ($q) use ($searchTerm) {
+        $q->whereHas('user', function ($uq) use ($searchTerm) {
+          $uq->where('name', 'like', "%{$searchTerm}%")
+            ->orWhere('email', 'like', "%{$searchTerm}%");
+        });
+      });
+    }
 
     if ($user->role === UserRole::FRANCHISE) {
       if ($user->franchise) {
@@ -113,6 +125,7 @@ class CollaboratorController extends Controller
 
     $collaborators = $query->orderByDesc('collaborators.created_at')
       ->paginate(10)
+      ->withQueryString()
       ->through(fn ($collaborator) => [
         'id' => $collaborator->id,
         'photo_full_url' => $collaborator->photo_url ? Storage::disk('public')->url($collaborator->photo_url) : null,
@@ -126,6 +139,7 @@ class CollaboratorController extends Controller
 
     return Inertia::render('Collaborators/Index', [
       'collaborators' => $collaborators,
+      'filters' => $request->only(['search'])
     ]);
   }
 

@@ -16,23 +16,34 @@ class AdminController extends Controller
   /**
    * Display a listing of the resource.
    */
-  public function index(): Response
+  public function index(Request $request): Response // Modificado para aceitar Request
   {
-    // Autoriza se o usuário logado pode ver qualquer registro do tipo User
-    // A UserPolicy@viewAny decidirá (ou o Gate::before para admin)
     $this->authorize('viewAny', User::class);
 
+    $searchTerm = $request->input('search'); // Captura o termo de busca
+
+    $query = User::where('role', UserRole::ADMIN->value);
+
+    if ($searchTerm) {
+      $query->where(function ($q) use ($searchTerm) {
+        $q->where('name', 'like', "%{$searchTerm}%")
+          ->orWhere('email', 'like', "%{$searchTerm}%");
+      });
+    }
+
+    $admins = $query->orderBy('name')
+      ->paginate(10)
+      ->withQueryString() // Mantém o search param na paginação
+      ->through(fn ($user) => [
+        'id' => $user->id,
+        'name' => $user->name,
+        'email' => $user->email,
+        'created_at' => $user->created_at->toFormattedDateString(),
+      ]);
+
     return Inertia::render('Admins/Index', [
-      'admins' => User::where('role', UserRole::ADMIN->value)
-        ->orderBy('name')
-        ->paginate(10)
-        ->withQueryString()
-        ->through(fn ($user) => [
-          'id' => $user->id,
-          'name' => $user->name,
-          'email' => $user->email,
-          'created_at' => $user->created_at->toFormattedDateString(),
-        ]),
+      'admins' => $admins,
+      'filters' => $request->only(['search']), // Passa o filtro de volta para a view
     ]);
   }
 

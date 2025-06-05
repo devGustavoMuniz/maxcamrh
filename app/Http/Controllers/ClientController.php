@@ -45,11 +45,13 @@ class ClientController extends Controller
     ];
   }
 
-  public function index(): Response
+  public function index(Request $request): Response
   {
     $this->authorize('viewAny', Client::class);
 
     $user = Auth::user();
+    $searchTerm = $request->input('search');
+
     $query = Client::with(['user', 'franchise.user']);
 
     if ($user->role === UserRole::FRANCHISE) {
@@ -59,10 +61,27 @@ class ClientController extends Controller
         $query->whereRaw('1 = 0'); // Franqueado sem franquia não vê clientes
       }
     }
+
+    if ($searchTerm) {
+      $query->where(function ($q) use ($searchTerm) {
+        $q->where('cnpj', 'like', "%{$searchTerm}%")
+          ->orWhere('phone', 'like', "%{$searchTerm}%")
+          ->orWhere('test_number', 'like', "%{$searchTerm}%") // Adicionado, se aplicável
+          ->orWhereHas('user', function ($uq) use ($searchTerm) {
+            $uq->where('name', 'like', "%{$searchTerm}%")
+              ->orWhere('email', 'like', "%{$searchTerm}%");
+          })
+          ->orWhereHas('franchise.user', function ($fuq) use ($searchTerm) { // Busca por nome da franquia
+            $fuq->where('name', 'like', "%{$searchTerm}%");
+          });
+      });
+    }
+
     // Admin vê todos (Gate::before já cuida disso, e a policy viewAny permite admin)
 
     $clients = $query->orderByDesc('clients.created_at')
       ->paginate(10)
+      ->withQueryString()
       ->through(fn ($client) => [
         'id' => $client->id,
         'cnpj' => $client->cnpj,
@@ -76,6 +95,7 @@ class ClientController extends Controller
 
     return Inertia::render('Clients/Index', [
       'clients' => $clients,
+      'filters' => $request->only(['search'])
     ]);
   }
 
