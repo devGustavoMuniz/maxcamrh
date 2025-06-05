@@ -1,76 +1,109 @@
 <script setup>
 import { computed, ref } from 'vue';
 import { Link, usePage } from '@inertiajs/vue3';
-import ApplicationLogo from '@/Components/ApplicationLogo.vue'; // Assumindo que este componente existe
+import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 
 // Ícones Lucide Vue Next
 import {
   LayoutDashboard,
-  UserCog, // Para Administradores
-  Store,     // Para Franqueados
-  Building2, // Para Clientes
-  Users,     // Para Colaboradores
-  LogOut,    // Para Logout
-  CircleUserRound, // Para Perfil
+  UserCog,
+  Store,
+  Building2,
+  Users,
+  LogOut,
+  CircleUserRound,
+  UsersRound, // Ícone para o grupo "Adm. Pessoas"
+  ChevronDown, // Ícone para a seta do dropdown
 } from 'lucide-vue-next';
 
-// Componentes Dropdown do Breeze
+// Componentes Dropdown do Breeze (para o perfil do usuário)
 import Dropdown from '@/Components/Dropdown.vue';
 import DropdownLink from '@/Components/DropdownLink.vue';
 
-const showingNavigationDropdown = ref(false);
-const page = usePage();
+// Componentes Collapsible do Shadcn Vue
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible'; // Verifique o caminho se for diferente
 
-const allPossibleLinks = [
+const page = usePage();
+const isAdmPessoasOpen = ref(false); // Estado para controlar se o dropdown está aberto
+
+// Links que NÃO estarão no dropdown
+const mainLinksConfig = [
   {
     name: 'Dashboard',
     href: route('dashboard'),
     current: () => route().current('dashboard'),
     canAccess: (user) => !!user,
-    icon: LayoutDashboard, // Ícone adicionado
+    icon: LayoutDashboard,
   },
+  // Adicione outros links de nível superior aqui se necessário
+];
+
+// Links que ESTARÃO DENTRO do dropdown "Adm. Pessoas"
+const admPessoasSubLinksConfig = [
   {
     name: 'Administradores',
     href: route('admins.index'),
     current: () => route().current('admins.*'),
     canAccess: (user) => user?.role === 'admin',
-    icon: UserCog, // Ícone adicionado
+    icon: UserCog,
   },
   {
     name: 'Franqueados',
     href: route('franchises.index'),
     current: () => route().current('franchises.*'),
     canAccess: (user) => user?.role === 'admin',
-    icon: Store, // Ícone adicionado
+    icon: Store,
   },
   {
     name: 'Clientes',
     href: route('clients.index'),
     current: () => route().current('clients.*'),
     canAccess: (user) => user && (user.role === 'admin' || user.role === 'franchise'),
-    icon: Building2, // Ícone adicionado
+    icon: Building2,
   },
   {
     name: 'Colaboradores',
     href: route('collaborators.index'),
     current: () => route().current('collaborators.*'),
     canAccess: (user) => user && (user.role === 'admin' || user.role === 'franchise' || user.role === 'client'),
-    icon: Users, // Ícone adicionado
+    icon: Users,
   },
 ];
 
-const sidebarLinks = computed(() => {
-  const currentUser = page.props.auth.user;
-  if (!currentUser) {
-    return [];
-  }
-  return allPossibleLinks
-    .filter(link => link.canAccess(currentUser))
-    .map(link => ({
-      ...link,
-      current: link.current(),
-    }));
+const currentUser = computed(() => page.props.auth.user);
+
+// Links principais processados (Dashboard, etc.)
+const processedMainLinks = computed(() => {
+  if (!currentUser.value) return [];
+  return mainLinksConfig
+    .filter(link => link.canAccess(currentUser.value))
+    .map(link => ({ ...link, current: link.current() }));
 });
+
+// Sublinks de "Adm. Pessoas" processados
+const processedAdmPessoasSubLinks = computed(() => {
+  if (!currentUser.value) return [];
+  return admPessoasSubLinksConfig
+    .filter(link => link.canAccess(currentUser.value))
+    .map(link => ({ ...link, current: link.current() }));
+});
+
+// Determina se o grupo "Adm. Pessoas" deve ser exibido
+const showAdmPessoasGroup = computed(() => processedAdmPessoasSubLinks.value.length > 0);
+
+// Determina se o cabeçalho do grupo "Adm. Pessoas" deve parecer ativo
+const isAdmPessoasGroupActive = computed(() => {
+  return processedAdmPessoasSubLinks.value.some(link => link.current);
+});
+
+// Define o estado inicial de abertura do Collapsible se uma rota filha estiver ativa
+// O componente Collapsible também tem uma prop :defaultOpen que poderia ser usada.
+// Este ref é para controlar a rotação da seta.
+isAdmPessoasOpen.value = isAdmPessoasGroupActive.value;
 
 </script>
 
@@ -83,7 +116,7 @@ const sidebarLinks = computed(() => {
         </Link>
 
         <nav class="mt-5 flex-grow">
-          <template v-for="item in sidebarLinks" :key="item.name">
+          <template v-for="item in processedMainLinks" :key="item.name">
             <Link
               :href="item.href"
               class="flex items-center px-3 py-2.5 mt-1 text-sm font-medium rounded-md transition-colors duration-150"
@@ -91,19 +124,52 @@ const sidebarLinks = computed(() => {
                 ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100'
                 : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100'"
             >
-              <component :is="item.icon" class="h-5 w-5 mr-3 flex-shrink-0" />
+              <component :is="item.icon" class="h-5 w-5 mr-3 flex-shrink-0"/>
               <span>{{ item.name }}</span>
             </Link>
           </template>
+
+          <Collapsible v-if="showAdmPessoasGroup" v-model:open="isAdmPessoasOpen" class="mt-1">
+            <CollapsibleTrigger
+              class="flex items-center justify-between w-full px-3 py-2.5 text-sm font-medium rounded-md transition-colors duration-150"
+              :class="isAdmPessoasGroupActive && !isAdmPessoasOpen  // Destaca se ativo mas fechado
+                ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100'
+                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100'"
+            >
+              <div class="flex items-center">
+                <UsersRound class="h-5 w-5 mr-3 flex-shrink-0"/>
+                <span>Adm. Pessoas</span>
+              </div>
+              <ChevronDown class="h-4 w-4 transition-transform duration-200"
+                           :class="[isAdmPessoasOpen && 'rotate-180']"/>
+            </CollapsibleTrigger>
+            <CollapsibleContent
+              class="pt-1 pl-4 border-l-2 border-gray-200 dark:border-gray-700 ml-[10px] mr-[-10px] space-y-px">
+              <template v-for="item in processedAdmPessoasSubLinks" :key="item.name">
+                <Link
+                  :href="item.href"
+                  class="flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors duration-150"
+                  :class="item.current
+                    ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100'
+                    : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-800 dark:hover:text-gray-200'"
+                >
+                  <component :is="item.icon" class="h-4 w-4 mr-2.5 flex-shrink-0"/>
+                  <span>{{ item.name }}</span>
+                </Link>
+              </template>
+            </CollapsibleContent>
+          </Collapsible>
+
         </nav>
       </div>
       <div class="p-4 mt-auto border-t border-gray-200 dark:border-gray-700">
         <Link
           :href="route('logout')"
           method="post"
+          as="button"
           class="w-full flex items-center px-3 py-2.5 text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100 rounded-md"
         >
-          <LogOut class="h-5 w-5 mr-3 flex-shrink-0" />
+          <LogOut class="h-5 w-5 mr-3 flex-shrink-0"/>
           <span>Logout</span>
         </Link>
       </div>
@@ -112,8 +178,7 @@ const sidebarLinks = computed(() => {
     <div class="flex-1 flex flex-col overflow-hidden">
       <header class="bg-white dark:bg-gray-800 shadow" v-if="$page.props.auth.user">
         <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center h-16">
-          <slot name="header" />
-
+          <slot name="header"/>
           <div class="hidden sm:flex sm:items-center sm:ms-6">
             <div class="ms-3 relative">
               <Dropdown align="right" width="48">
@@ -141,11 +206,12 @@ const sidebarLinks = computed(() => {
                 </template>
                 <template #content>
                   <DropdownLink :href="route('profile.edit')" class="flex items-center">
-                    <CircleUserRound class="h-4 w-4 mr-2" />
+                    <CircleUserRound class="h-4 w-4 mr-2"/>
                     Perfil
                   </DropdownLink>
-                  <DropdownLink :href="route('logout')" method="post" as="button" class="flex items-center w-full text-left">
-                    <LogOut class="h-4 w-4 mr-2" />
+                  <DropdownLink :href="route('logout')" method="post" as="button"
+                                class="flex items-center w-full text-left">
+                    <LogOut class="h-4 w-4 mr-2"/>
                     Logout
                   </DropdownLink>
                 </template>
@@ -156,7 +222,7 @@ const sidebarLinks = computed(() => {
       </header>
 
       <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 dark:bg-gray-900 p-6">
-        <slot />
+        <slot/>
       </main>
     </div>
   </div>

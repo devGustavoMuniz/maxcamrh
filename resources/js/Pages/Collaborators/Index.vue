@@ -76,7 +76,7 @@ const deleteCollaborator = (collaboratorId) => {
             </div>
           </div>
           <Link :href="route('collaborators.create')">
-            <Button variant="default" class="bg-white">
+            <Button variant="default" class="bg-gray-800 text-white hover:bg-gray-700 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600">
               <UserPlus class="h-4 w-4 mr-2" />
               Adicionar Colaborador
             </Button>

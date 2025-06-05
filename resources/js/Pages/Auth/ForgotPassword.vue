@@ -1,68 +1,83 @@
 <script setup>
-import GuestLayout from '@/Layouts/GuestLayout.vue';
-import InputError from '@/Components/InputError.vue';
-import InputLabel from '@/Components/InputLabel.vue';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
-import TextInput from '@/Components/TextInput.vue';
 import { Head, useForm } from '@inertiajs/vue3';
+import GuestLayout from '@/Layouts/GuestLayout.vue';
+import InputError from '@/Components/InputError.vue'; // Mantido para exibir erros
+
+// Componentes Shadcn Vue
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+
+// Ícone para o estado de carregamento do botão
+import { Loader2 } from 'lucide-vue-next';
 
 defineProps({
-    status: {
-        type: String,
-    },
+  status: {
+    type: String,
+  },
 });
 
 const form = useForm({
-    email: '',
+  email: '',
 });
 
 const submit = () => {
-    form.post(route('password.email'));
+  form.post(route('password.email'));
 };
 </script>
 
 <template>
-    <GuestLayout>
-        <Head title="Forgot Password" />
+  <GuestLayout>
+    <Head title="Esqueceu a Senha" />
 
-        <div class="mb-4 text-sm text-gray-600 dark:text-gray-400">
-            Forgot your password? No problem. Just let us know your email
-            address and we will email you a password reset link that will allow
-            you to choose a new one.
+    <Card class="w-full max-w-md mx-auto">
+      <CardHeader class="text-center">
+        <CardTitle class="text-2xl">Redefinir Senha</CardTitle>
+        <CardDescription>
+          Esqueceu sua senha? Sem problemas. Informe seu endereço de e-mail
+          e enviaremos um link para redefinir sua senha, permitindo que você
+          escolha uma nova.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div v-if="status" class="mb-4 text-sm font-medium text-green-600 dark:text-green-400">
+          {{ status }}
         </div>
 
-        <div
-            v-if="status"
-            class="mb-4 text-sm font-medium text-green-600 dark:text-green-400"
-        >
-            {{ status }}
-        </div>
+        <form @submit.prevent="submit" class="space-y-6">
+          <div>
+            <Label for="email">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              class="mt-1 block w-full"
+              v-model="form.email"
+              required
+              autofocus
+              autocomplete="username"
+              placeholder="seuemail@exemplo.com"
+            />
+            <InputError class="mt-2" :message="form.errors.email" />
+          </div>
 
-        <form @submit.prevent="submit">
-            <div>
-                <InputLabel for="email" value="Email" />
-
-                <TextInput
-                    id="email"
-                    type="email"
-                    class="mt-1 block w-full"
-                    v-model="form.email"
-                    required
-                    autofocus
-                    autocomplete="username"
-                />
-
-                <InputError class="mt-2" :message="form.errors.email" />
-            </div>
-
-            <div class="mt-4 flex items-center justify-end">
-                <PrimaryButton
-                    :class="{ 'opacity-25': form.processing }"
-                    :disabled="form.processing"
-                >
-                    Email Password Reset Link
-                </PrimaryButton>
-            </div>
+          <Button
+            type="submit"
+            class="w-full"
+            :disabled="form.processing"
+          >
+            <Loader2 v-if="form.processing" class="mr-2 h-4 w-4 animate-spin" />
+            Enviar Link de Redefinição de Senha
+          </Button>
         </form>
-    </GuestLayout>
+      </CardContent>
+    </Card>
+  </GuestLayout>
 </template>
