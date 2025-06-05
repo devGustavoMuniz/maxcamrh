@@ -1,0 +1,13 @@
+.env
+.git
+.github
+.DS_Store
+node_modules
+vendor
+storage/app/public # Será montado como volume
+storage/framework/cache/data/*
+storage/framework/sessions/*
+storage/framework/views/*
+storage/logs/*.log
+public/storage # Este é um symlink
+public/hot
