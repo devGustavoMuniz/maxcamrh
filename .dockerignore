@@ -1,13 +1,29 @@
-.env
+# .dockerignore
+
+# Ignorar arquivos do Git
 .git
 .github
+.gitignore
+
+# Ignorar dependências locais
+/node_modules
+/vendor
+
+# Ignorar arquivos de storage e logs locais
+/storage/app/public
+/storage/framework/cache/data/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+/storage/logs/*.log
+
+# Ignorar arquivos de ambiente e IDE
+.env
 .DS_Store
-node_modules
-vendor
-storage/app/public # Será montado como volume
-storage/framework/cache/data/*
-storage/framework/sessions/*
-storage/framework/views/*
-storage/logs/*.log
-public/storage # Este é um symlink
-public/hot
+
+# Ignorar symlink do storage
+/public/storage
+/public/hot
+
+# --- LINHA MAIS IMPORTANTE PARA RESOLVER O ERRO ---
+# Impede que o cache de pacotes do ambiente de desenvolvimento seja copiado
+/bootstrap/cache/*.php
