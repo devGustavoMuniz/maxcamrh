@@ -32,7 +32,7 @@ const submit = () => {
 
     <div class="py-12">
       <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
-        <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-6 md:p-8">
+        <div class="bg-gray-100 dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-6 md:p-8">
           <form @submit.prevent="submit" class="space-y-6">
             <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 border-b dark:border-gray-700 pb-2">Dados de Acesso do Administrador</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -63,7 +63,7 @@ const submit = () => {
 
             <div class="flex items-center justify-end mt-6 pt-6 border-t dark:border-gray-700">
               <Link :href="route('admins.index')" class="mr-4">
-                <Button variant="outline" type="button">Cancelar</Button>
+                <Button variant="outline" class="bg-gray-100" type="button">Cancelar</Button>
               </Link>
               <Button type="submit" variant="black" class="bg-gray-800 text-white hover:bg-gray-700 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600" :disabled="form.processing">
                 Salvar Administrador

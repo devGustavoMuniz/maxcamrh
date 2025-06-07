@@ -46,7 +46,6 @@ const submit = () => {
 
     <Card class="w-full max-w-md mx-auto">
       <CardHeader class="text-center">
-        <CardTitle class="text-2xl">Acesse sua Conta</CardTitle>
         <CardDescription>
           Bem-vindo de volta! Digite seus dados para continuar.
         </CardDescription>

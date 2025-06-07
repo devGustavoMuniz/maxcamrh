@@ -26,7 +26,7 @@ const submit = () => {
 </script>
 
 <template>
-  <Head :title="'Editar Administrador: ' + admin_user.name" />
+  <Head :title="'Editar Administrador: ' + admin_user.name"/>
 
   <AuthenticatedLayout>
     <template #header>
@@ -36,41 +36,53 @@ const submit = () => {
     </template>
 
     <div class="py-12">
-      <div class="max-w-2xl mx-auto sm:px-6 lg:px-8">
-        <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
-          <form @submit.prevent="submit">
-            <div>
-              <Label for="name">Nome</Label>
-              <Input id="name" type="text" class="mt-1 block w-full" v-model="form.name" required autofocus />
-              <InputError class="mt-2" :message="form.errors.name" />
-            </div>
+      <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
+        <div class="bg-gray-100 dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-6 md:p-8">
+          <form @submit.prevent="submit" class="space-y-6">
 
-            <div class="mt-4">
-              <Label for="email">Email</Label>
-              <Input id="email" type="email" class="mt-1 block w-full" v-model="form.email" required />
-              <InputError class="mt-2" :message="form.errors.email" />
-            </div>
-
-            <div class="mt-4 border-t pt-4">
-              <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">Alterar Senha (deixe em branco para não modificar)</p>
-              <div>
-                <Label for="password">Nova Senha</Label>
-                <Input id="password" type="password" class="mt-1 block w-full" v-model="form.password" />
-                <InputError class="mt-2" :message="form.errors.password" />
-              </div>
-
-              <div class="mt-4">
-                <Label for="password_confirmation">Confirmar Nova Senha</Label>
-                <Input id="password_confirmation" type="password" class="mt-1 block w-full" v-model="form.password_confirmation" />
-                <InputError class="mt-2" :message="form.errors.password_confirmation" />
+            <div class="space-y-4">
+              <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 border-b dark:border-gray-700 pb-2">Dados
+                do Usuário</h3>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label for="name">Nome</Label>
+                  <Input id="name" type="text" class="mt-1 block w-full" v-model="form.name" required autofocus/>
+                  <InputError class="mt-2" :message="form.errors.name"/>
+                </div>
+                <div>
+                  <Label for="email">Email</Label>
+                  <Input id="email" type="email" class="mt-1 block w-full" v-model="form.email" required/>
+                  <InputError class="mt-2" :message="form.errors.email"/>
+                </div>
               </div>
             </div>
 
-            <div class="flex items-center justify-end mt-6">
+            <div class="space-y-4">
+              <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 border-b dark:border-gray-700 pb-2">
+                Alterar Senha</h3>
+              <p class="text-sm text-gray-600 dark:text-gray-400 -mt-2">Deixe os campos abaixo em branco para não
+                modificar a senha atual.</p>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label for="password">Nova Senha</Label>
+                  <Input id="password" type="password" class="mt-1 block w-full" v-model="form.password"/>
+                  <InputError class="mt-2" :message="form.errors.password"/>
+                </div>
+                <div>
+                  <Label for="password_confirmation">Confirmar Nova Senha</Label>
+                  <Input id="password_confirmation" type="password" class="mt-1 block w-full"
+                         v-model="form.password_confirmation"/>
+                  <InputError class="mt-2" :message="form.errors.password_confirmation"/>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-end pt-6 border-t dark:border-gray-700">
               <Link :href="route('admins.index')" class="mr-4">
-                <Button variant="outline">Cancelar</Button>
+                <Button variant="outline" class="bg-gray-100" type="button">Cancelar</Button>
               </Link>
-              <Button type="submit" :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
+              <Button type="submit" variant="black" class="bg-gray-800 text-white hover:bg-gray-700 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600"
+                      :disabled="form.processing">
                 Atualizar Administrador
               </Button>
             </div>

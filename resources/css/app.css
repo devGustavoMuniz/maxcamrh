@@ -7,7 +7,7 @@
     --background: hsl(0 0% 100%);
     --foreground: hsl(240 10% 3.9%);
 
-    --card: hsl(0 0% 100%);
+    --card: rgb(243 244 246);
     --card-foreground: hsl(240 10% 3.9%);
 
     --popover: hsl(0 0% 100%);

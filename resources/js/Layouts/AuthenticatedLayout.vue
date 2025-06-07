@@ -96,7 +96,7 @@ isAdmPessoasOpen.value = isAdmPessoasGroupActive.value;
 
 <template>
   <div class="min-h-screen bg-gray-100 dark:bg-gray-900 flex">
-    <aside class="w-64 bg-white dark:bg-gray-800 shadow-md flex-shrink-0 flex flex-col">
+    <aside class="w-64 bg-gray-100 dark:bg-gray-800 shadow-md flex-shrink-0 flex flex-col">
       <div class="p-4">
         <Link :href="route('dashboard')" class="flex items-center justify-center mb-6">
           <ApplicationLogo class="h-9 w-auto" />
@@ -163,7 +163,7 @@ isAdmPessoasOpen.value = isAdmPessoasGroupActive.value;
     </aside>
 
     <div class="flex-1 flex flex-col overflow-hidden">
-      <header class="bg-white dark:bg-gray-800 shadow" v-if="$page.props.auth.user">
+      <header class="bg-gray-100 dark:bg-gray-800 shadow" v-if="$page.props.auth.user">
         <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center h-16">
           <slot name="header"/>
           <div class="hidden sm:flex sm:items-center sm:ms-6">
@@ -192,10 +192,6 @@ isAdmPessoasOpen.value = isAdmPessoasGroupActive.value;
                   </span>
                 </template>
                 <template #content>
-                  <DropdownLink :href="route('profile.edit')" class="flex items-center">
-                    <CircleUserRound class="h-4 w-4 mr-2"/>
-                    Perfil
-                  </DropdownLink>
                   <DropdownLink :href="route('logout')" method="post" as="button"
                                 class="flex items-center w-full text-left">
                     <LogOut class="h-4 w-4 mr-2"/>
@@ -208,7 +204,7 @@ isAdmPessoasOpen.value = isAdmPessoasGroupActive.value;
         </div>
       </header>
 
-      <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 dark:bg-gray-900 p-6">
+      <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-200 dark:bg-gray-900 p-6">
         <slot/>
       </main>
     </div>

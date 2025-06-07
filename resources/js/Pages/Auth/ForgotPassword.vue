@@ -68,7 +68,7 @@ const submit = () => {
 
           <Button
             type="submit"
-            class="w-full"
+            class="bg-gray-800 text-white hover:bg-gray-700 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600 w-full"
             :disabled="form.processing"
           >
             <Loader2 v-if="form.processing" class="mr-2 h-4 w-4 animate-spin" />

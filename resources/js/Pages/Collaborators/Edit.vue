@@ -170,7 +170,7 @@ async function fetchAddressByCep() {
 
     <div class="py-12">
       <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
-        <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-6 md:p-8">
+        <div class="bg-gray-100 dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-6 md:p-8">
           <form @submit.prevent="submit" class="space-y-6">
 
             <section v-if="currentStep === 1" class="space-y-4">
@@ -380,11 +380,11 @@ async function fetchAddressByCep() {
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <input id="collaborator_photo_file_edit" ref="photoFileInput" type="file" class="hidden" @change="event => handleFileUpload(event, 'photo_file', photoPreview, true)" accept="image/*" />
-                      <Button type="button" variant="outline" @click="photoFileInput?.click()" class="w-full justify-center">Nova Foto</Button>
+                      <Button type="button" variant="outline" @click="photoFileInput?.click()" class="w-full bg-gray-100 justify-center">Nova Foto</Button>
                     </div>
                     <div>
                       <input id="collaborator_curriculum_file_edit" ref="curriculumFileInput" type="file" class="hidden" @change="event => handleFileUpload(event, 'curriculum_file', curriculumFileName, false)" accept=".pdf,.doc,.docx" />
-                      <Button type="button" variant="outline" @click="curriculumFileInput?.click()" class="w-full justify-center">Novo Currículo</Button>
+                      <Button type="button" variant="outline" @click="curriculumFileInput?.click()" class="w-full bg-gray-100 justify-center">Novo Currículo</Button>
                       <p v-if="curriculumFileName" class="mt-2 text-sm text-gray-600 dark:text-gray-400 truncate text-center">{{ curriculumFileName }}</p>
                     </div>
                   </div>
@@ -409,11 +409,11 @@ async function fetchAddressByCep() {
 
             <div class="flex justify-between items-center mt-8 pt-6 border-t dark:border-gray-700">
               <div>
-                <Button type="button" variant="outline" @click="prevStep" v-if="currentStep > 1">Anterior</Button>
+                <Button type="button" variant="outline" class="bg-gray-100" @click="prevStep" v-if="currentStep > 1">Anterior</Button>
               </div>
               <div class="flex items-center space-x-3">
-                <Link :href="route('collaborators.index')"><Button variant="ghost" type="button">Cancelar</Button></Link>
-                <Button type="button" @click="nextStep" v-if="currentStep < totalSteps">Próximo</Button>
+                <Link :href="route('collaborators.index')"><Button variant="outline" class="bg-gray-100" type="button">Cancelar</Button></Link>
+                <Button type="button" class="bg-gray-800 text-white hover:bg-gray-700 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600" @click="nextStep" v-if="currentStep < totalSteps">Próximo</Button>
                 <Button type="submit" variant="black" class="bg-gray-800 text-white hover:bg-gray-700 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600" :disabled="form.processing" v-if="currentStep === totalSteps">Atualizar Colaborador</Button>
               </div>
             </div>

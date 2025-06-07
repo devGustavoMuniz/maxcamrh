@@ -71,7 +71,7 @@ const submit = () => {
 
     <div class="py-12">
       <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
-        <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-6 md:p-8">
+        <div class="bg-gray-100 dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-6 md:p-8">
           <form @submit.prevent="submit" class="space-y-6">
 
             <div class="space-y-4">
@@ -130,7 +130,7 @@ const submit = () => {
                   <Label>Novo Logo (opcional)</Label>
                   <div class="mt-1 flex items-center gap-4">
                     <input ref="logoFileInput" type="file" class="hidden" @change="handleLogoUpload" accept="image/*"/>
-                    <Button type="button" variant="outline" @click="logoFileInput?.click()">Escolher Arquivo</Button>
+                    <Button type="button" variant="outline" class="bg-gray-100" @click="logoFileInput?.click()">Escolher Arquivo</Button>
                     <img v-if="logoPreview" :src="logoPreview" alt="Preview Logo"
                          class="h-12 w-auto rounded-md object-cover"/>
                   </div>
@@ -160,7 +160,7 @@ const submit = () => {
 
             <div class="flex items-center justify-end mt-6 pt-6 border-t dark:border-gray-700">
               <Link :href="route('clients.index')" class="mr-4">
-                <Button variant="outline" type="button">Cancelar</Button>
+                <Button variant="outline" class="bg-gray-100" type="button">Cancelar</Button>
               </Link>
               <Button type="submit" variant="black" class="bg-gray-800 text-white hover:bg-gray-700 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600"
                       :disabled="form.processing">

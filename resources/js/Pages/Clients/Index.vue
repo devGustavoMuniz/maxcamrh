@@ -9,14 +9,11 @@ import {
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 
-import { MoreHorizontal, Plus, Eye, FileEdit, Trash2, Search } from 'lucide-vue-next';
+import { Plus, FileEdit, Trash2, Search } from 'lucide-vue-next';
 
 import Pagination from '@/components/Pagination.vue';
-import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar/index.js";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar/index.js";
 
 const props = defineProps({
   clients: Object,
@@ -69,84 +66,71 @@ const deleteClient = (clientId) => {
             <Input
               type="text"
               v-model="search"
-              placeholder="Buscar por nome, CNPJ, email..."
-              class="pl-10 w-full bg-white dark:bg-gray-800"
+              placeholder="Buscar por nome, email, CNPJ..."
+              class="pl-10 w-full bg-gray-100 dark:bg-gray-800"
             />
             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <Search class="h-5 w-5 text-gray-400" />
             </div>
           </div>
           <Link :href="route('clients.create')">
-            <Button variant="default" class="bg-gray-800 text-white hover:bg-gray-700 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600">
+            <Button variant="black" class="bg-gray-800 text-white hover:bg-gray-700 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600">
               <Plus class="h-4 w-4 mr-2" />
               Adicionar Cliente
             </Button>
           </Link>
         </div>
 
-        <div class="bg-white dark:bg-gray-800 overflow-x-auto shadow-sm sm:rounded-lg">
+        <div class="bg-gray-100 dark:bg-gray-800 overflow-x-auto shadow-sm sm:rounded-lg">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead class="w-[60px] px-6 py-4">Logo</TableHead>
-                <TableHead class="px-6 py-4">Nome (Usuário)</TableHead>
-                <TableHead class="px-6 py-4">Email (Usuário)</TableHead>
-                <TableHead class="px-6 py-4">CNPJ</TableHead>
-                <TableHead class="px-6 py-4">Telefone</TableHead>
-                <TableHead class="px-6 py-4">Contrato Mensal</TableHead>
-                <TableHead class="text-right w-[80px] px-6 py-4">Ações</TableHead>
+                <TableHead class="px-4 py-3 w-[60px]">Logo</TableHead>
+                <TableHead class="px-4 py-3">Nome</TableHead>
+                <TableHead class="px-4 py-3">Email</TableHead>
+                <TableHead class="px-4 py-3">CNPJ</TableHead>
+                <TableHead class="px-4 py-3">Telefone</TableHead>
+                <TableHead class="text-right px-4 py-3">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               <TableRow v-if="clients.data.length === 0">
-                <TableCell colspan="7" class="text-center py-10 text-gray-500 dark:text-gray-400 px-6">
+                <TableCell colspan="7" class="text-center py-8 text-gray-500 dark:text-gray-400 px-4">
                   {{ search ? 'Nenhum cliente encontrado para "' + search + '".' : 'Nenhum cliente encontrado.' }}
                 </TableCell>
               </TableRow>
-              <TableRow v-for="client in clients.data" :key="client.id">
-                <TableCell class="px-6">
+              <TableRow v-for="client in clients.data" :key="client.id" class="[&>td]:py-2">
+                <TableCell class="px-4">
                   <Avatar class="h-10 w-10">
                     <AvatarImage :src="client.logo_full_url" :alt="client.user_name" />
                     <AvatarFallback>{{ client.user_name?.substring(0,2).toUpperCase() || 'C' }}</AvatarFallback>
                   </Avatar>
                 </TableCell>
-                <TableCell class="font-medium px-6">{{ client.user_name }}</TableCell>
-                <TableCell class="px-6">{{ client.user_email }}</TableCell>
-                <TableCell class="px-6">{{ client.cnpj }}</TableCell>
-                <TableCell class="px-6">{{ client.phone || 'N/A' }}</TableCell>
-                <TableCell class="px-6">
-                  <span :class="client.is_monthly_contract ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">
-                    {{ client.is_monthly_contract ? 'Sim' : 'Não' }}
-                  </span>
-                </TableCell>
-                <TableCell class="text-right px-6">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger as-child>
-                      <Button variant="ghost" class="h-8 w-8 p-0">
-                        <span class="sr-only">Abrir menu</span>
-                        <MoreHorizontal class="h-4 w-4" />
+                <TableCell class="font-medium px-4">{{ client.user_name }}</TableCell>
+                <TableCell class="px-4">{{ client.user_email }}</TableCell>
+                <TableCell class="px-4">{{ client.cnpj }}</TableCell>
+                <TableCell class="px-4">{{ client.phone || 'N/A' }}</TableCell>
+
+                <TableCell class="text-right px-4">
+                  <div class="flex items-center justify-end gap-2">
+                    <Link :href="route('clients.edit', client.id)">
+                      <Button variant="outline" size="icon" class="h-8 w-8">
+                        <FileEdit class="h-4 w-4" />
+                        <span class="sr-only">Editar</span>
                       </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem as-child>
-                        <Link :href="route('clients.show', client.id)" class="flex items-center w-full">
-                          <Eye class="h-4 w-4 mr-2" />
-                          Visualizar
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem as-child>
-                        <Link :href="route('clients.edit', client.id)" class="flex items-center w-full">
-                          <FileEdit class="h-4 w-4 mr-2" />
-                          Editar
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem @click="deleteClient(client.id)" class="text-red-600 dark:hover:text-red-400 hover:text-red-700 flex items-center cursor-pointer">
-                        <Trash2 class="h-4 w-4 mr-2" />
-                        Excluir
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                    </Link>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      @click="deleteClient(client.id)"
+                      class="h-8 w-8 text-red-600 hover:text-red-700 hover:border-red-400 dark:hover:border-red-600"
+                    >
+                      <Trash2 class="h-4 w-4" />
+                      <span class="sr-only">Excluir</span>
+                    </Button>
+                  </div>
                 </TableCell>
+
               </TableRow>
             </TableBody>
           </Table>

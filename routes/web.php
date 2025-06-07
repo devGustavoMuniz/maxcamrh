@@ -9,14 +9,10 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\FranchiseController;
 use App\Http\Controllers\CollaboratorController;
+use Illuminate\Support\Facades\Redirect;
 
 Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
-    ]);
+    return Redirect::route('dashboard');
 });
 
 Route::middleware('auth')->group(function () {
