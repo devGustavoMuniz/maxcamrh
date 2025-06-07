@@ -1,9 +1,8 @@
 <script setup>
 import { Head, useForm } from '@inertiajs/vue3';
 import GuestLayout from '@/Layouts/GuestLayout.vue';
-import InputError from '@/Components/InputError.vue'; // Mantido para exibir erros
+import InputError from '@/Components/InputError.vue';
 
-// Componentes Shadcn Vue
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -16,7 +15,6 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 
-// Ícone para o estado de carregamento do botão
 import { Loader2 } from 'lucide-vue-next';
 
 defineProps({

@@ -3,7 +3,6 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
 
-// Componentes Shadcn Vue
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -14,25 +13,21 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 
-// Ícones Lucide Vue Next
 import {
-  Users,       // Para Colaboradores, Clientes (geral), Adm. Pessoas
-  Store,       // Para Franqueados
-  Building2,   // Para Clientes (empresas)
-  UserCog,     // Para Administradores (gerenciamento)
-  Briefcase,   // Para um link de "Minha Empresa" ou "Meu Contrato"
-  Settings2,   // Para Perfil
-  LayoutDashboard // Para o Dashboard em si
+  Users,
+  Store,
+  Building2,
+  UserCog,
+  Briefcase,
+  Settings2,
+  LayoutDashboard
 } from 'lucide-vue-next';
 
-// Props que viriam do controller com dados para o dashboard
-// Por enquanto, vamos focar no layout e acesso por papel
 const props = defineProps({
-  stats: { // Exemplo: stats: { totalFranchises: 10, totalClients: 50, ... }
+  stats: {
     type: Object,
     default: () => ({}),
   },
-  // Você pode adicionar mais props específicas aqui conforme necessário
 });
 
 const currentUser = computed(() => usePage().props.auth.user);

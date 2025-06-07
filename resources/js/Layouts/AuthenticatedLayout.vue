@@ -3,7 +3,6 @@ import { computed, ref } from 'vue';
 import { Link, usePage } from '@inertiajs/vue3';
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 
-// Ícones Lucide Vue Next
 import {
   LayoutDashboard,
   UserCog,
@@ -12,25 +11,22 @@ import {
   Users,
   LogOut,
   CircleUserRound,
-  UsersRound, // Ícone para o grupo "Adm. Pessoas"
-  ChevronDown, // Ícone para a seta do dropdown
+  UsersRound,
+  ChevronDown,
 } from 'lucide-vue-next';
 
-// Componentes Dropdown do Breeze (para o perfil do usuário)
 import Dropdown from '@/Components/Dropdown.vue';
 import DropdownLink from '@/Components/DropdownLink.vue';
 
-// Componentes Collapsible do Shadcn Vue
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from '@/components/ui/collapsible'; // Verifique o caminho se for diferente
+} from '@/components/ui/collapsible';
 
 const page = usePage();
-const isAdmPessoasOpen = ref(false); // Estado para controlar se o dropdown está aberto
+const isAdmPessoasOpen = ref(false);
 
-// Links que NÃO estarão no dropdown
 const mainLinksConfig = [
   {
     name: 'Dashboard',
@@ -39,10 +35,8 @@ const mainLinksConfig = [
     canAccess: (user) => !!user,
     icon: LayoutDashboard,
   },
-  // Adicione outros links de nível superior aqui se necessário
 ];
 
-// Links que ESTARÃO DENTRO do dropdown "Adm. Pessoas"
 const admPessoasSubLinksConfig = [
   {
     name: 'Administradores',
@@ -76,7 +70,6 @@ const admPessoasSubLinksConfig = [
 
 const currentUser = computed(() => page.props.auth.user);
 
-// Links principais processados (Dashboard, etc.)
 const processedMainLinks = computed(() => {
   if (!currentUser.value) return [];
   return mainLinksConfig
@@ -84,7 +77,6 @@ const processedMainLinks = computed(() => {
     .map(link => ({ ...link, current: link.current() }));
 });
 
-// Sublinks de "Adm. Pessoas" processados
 const processedAdmPessoasSubLinks = computed(() => {
   if (!currentUser.value) return [];
   return admPessoasSubLinksConfig
@@ -92,17 +84,12 @@ const processedAdmPessoasSubLinks = computed(() => {
     .map(link => ({ ...link, current: link.current() }));
 });
 
-// Determina se o grupo "Adm. Pessoas" deve ser exibido
 const showAdmPessoasGroup = computed(() => processedAdmPessoasSubLinks.value.length > 0);
 
-// Determina se o cabeçalho do grupo "Adm. Pessoas" deve parecer ativo
 const isAdmPessoasGroupActive = computed(() => {
   return processedAdmPessoasSubLinks.value.some(link => link.current);
 });
 
-// Define o estado inicial de abertura do Collapsible se uma rota filha estiver ativa
-// O componente Collapsible também tem uma prop :defaultOpen que poderia ser usada.
-// Este ref é para controlar a rotação da seta.
 isAdmPessoasOpen.value = isAdmPessoasGroupActive.value;
 
 </script>
@@ -132,7 +119,7 @@ isAdmPessoasOpen.value = isAdmPessoasGroupActive.value;
           <Collapsible v-if="showAdmPessoasGroup" v-model:open="isAdmPessoasOpen" class="mt-1">
             <CollapsibleTrigger
               class="flex items-center justify-between w-full px-3 py-2.5 text-sm font-medium rounded-md transition-colors duration-150"
-              :class="isAdmPessoasGroupActive && !isAdmPessoasOpen  // Destaca se ativo mas fechado
+              :class="isAdmPessoasGroupActive && !isAdmPessoasOpen
                 ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100'
                 : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100'"
             >

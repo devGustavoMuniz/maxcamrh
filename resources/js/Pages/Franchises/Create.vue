@@ -11,12 +11,10 @@ import { ref } from 'vue';
 const documentFileInput = ref(null);
 
 const form = useForm({
-  // User fields
   name: '',
   email: '',
   password: '',
   password_confirmation: '',
-  // Franchise fields
   maxcam_email: '',
   cnpj: '',
   max_client: 0,
@@ -40,7 +38,6 @@ function handleDocumentUpload(event) {
 }
 
 const submit = () => {
-  // Limpa a máscara do CNPJ antes de enviar
   form.transform(data => ({
     ...data,
     cnpj: data.cnpj.replace(/\D/g, ''),

@@ -4,7 +4,7 @@ import { Head, Link } from '@inertiajs/vue3';
 import { Button } from '@/components/ui/button';
 
 const props = defineProps({
-  client_data: Object, // Recebe 'client_data' do controller
+  client_data: Object,
 });
 </script>
 

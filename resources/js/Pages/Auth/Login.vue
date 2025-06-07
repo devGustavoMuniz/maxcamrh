@@ -1,9 +1,8 @@
 <script setup>
 import { Head, Link, useForm } from '@inertiajs/vue3';
-import GuestLayout from '@/Layouts/GuestLayout.vue'; // Mantido para o layout geral da página de convidado
-import InputError from '@/Components/InputError.vue'; // Mantido para exibir erros de validação
+import GuestLayout from '@/Layouts/GuestLayout.vue';
+import InputError from '@/Components/InputError.vue';
 
-// Componentes Shadcn Vue
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
@@ -17,7 +16,6 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 
-// Ícone para o estado de carregamento do botão
 import { Loader2 } from 'lucide-vue-next';
 
 defineProps({

@@ -40,7 +40,6 @@ class DashboardController extends Controller
         $stats['myCompanyCollaborators'] = 0;
       }
     }
-    // Adicionar mais lógica para outros papéis se necessário
 
     return Inertia::render('Dashboard', [
       'stats' => $stats,

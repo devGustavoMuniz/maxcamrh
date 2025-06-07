@@ -1,10 +1,9 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link, usePage, router } from '@inertiajs/vue3';
-import { computed, ref, watch } from 'vue'; // Adicionado ref e watch
-import debounce from 'lodash/debounce'; // Importar debounce
+import { computed, ref, watch } from 'vue';
+import debounce from 'lodash/debounce';
 
-// Shadcn Vue Table Components
 import {
   Table,
   TableBody,
@@ -14,7 +13,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input'; // Importar Input
+import { Input } from '@/components/ui/input';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,23 +21,19 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
-// Ícones Lucide Vue Next
-import { MoreHorizontal, UserPlus, Eye, FileEdit, Trash2, Search } from 'lucide-vue-next'; // Adicionado Search
+import { MoreHorizontal, UserPlus, Eye, FileEdit, Trash2, Search } from 'lucide-vue-next';
 
-// Para paginação
 import Pagination from '@/components/Pagination.vue';
 
 const props = defineProps({
-  admins: Object, // Objeto de paginação do Laravel
-  filters: Object, // Para filtros de busca
+  admins: Object,
+  filters: Object,
 });
 
 const flash = computed(() => usePage().props.flash);
 
-// Estado reativo para o campo de busca
 const search = ref(props.filters?.search || '');
 
-// Observar mudanças no campo de busca
 watch(search, debounce((value) => {
   router.get(route('admins.index'), { search: value }, {
     preserveState: true,
@@ -47,7 +42,6 @@ watch(search, debounce((value) => {
   });
 }, 300));
 
-// Função para exclusão
 const deleteAdmin = (adminId) => {
   if (confirm('Tem certeza que deseja excluir este administrador? Esta ação não poderá ser desfeita.')) {
     router.delete(route('admins.destroy', adminId), {

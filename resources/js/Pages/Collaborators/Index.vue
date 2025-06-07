@@ -15,7 +15,6 @@ import {
 import Pagination from '@/components/Pagination.vue';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
-// Ícones Lucide Vue Next
 import { MoreHorizontal, UserPlus, Eye, FileEdit, Trash2, Search } from 'lucide-vue-next';
 
 const props = defineProps({

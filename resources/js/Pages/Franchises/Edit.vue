@@ -12,7 +12,6 @@ const props = defineProps({
   franchise_data: Object,
 });
 
-// Ref para o input de arquivo escondido
 const documentFileInput = ref(null);
 
 const form = useForm({

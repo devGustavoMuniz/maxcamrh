@@ -1,34 +1,31 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link, usePage, router } from '@inertiajs/vue3';
-import { computed, ref, watch } from 'vue'; // Adicionado ref e watch
-import debounce from 'lodash/debounce'; // Importar debounce
+import { computed, ref, watch } from 'vue';
+import debounce from 'lodash/debounce';
 
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input'; // Importar Input
+import { Input } from '@/components/ui/input';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
-// Ícones Lucide Vue Next
-import { MoreHorizontal, Plus, Eye, FileEdit, Trash2, Search } from 'lucide-vue-next'; // Adicionado Search
+import { MoreHorizontal, Plus, Eye, FileEdit, Trash2, Search } from 'lucide-vue-next';
 
 import Pagination from '@/components/Pagination.vue';
 
 const props = defineProps({
   franchises: Object,
-  filters: Object, // Para filtros de busca
+  filters: Object,
 });
 
 const flash = computed(() => usePage().props.flash);
 
-// Estado reativo para o campo de busca
 const search = ref(props.filters?.search || '');
 
-// Observar mudanças no campo de busca
 watch(search, debounce((value) => {
   router.get(route('franchises.index'), { search: value }, {
     preserveState: true,

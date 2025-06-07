@@ -7,11 +7,11 @@ import { Label } from '@/components/ui/label';
 import InputError from '@/Components/InputError.vue';
 
 const props = defineProps({
-  admin_user: Object, // 'admin_user' conforme passado pelo controller
+  admin_user: Object,
 });
 
 const form = useForm({
-  _method: 'PUT', // Necessário para submissão de formulário de atualização
+  _method: 'PUT',
   name: props.admin_user.name,
   email: props.admin_user.email,
   password: '',
@@ -19,7 +19,7 @@ const form = useForm({
 });
 
 const submit = () => {
-  form.post(route('admins.update', props.admin_user.id), { // form.post com _method: 'PUT' simula um PUT
+  form.post(route('admins.update', props.admin_user.id), {
     onFinish: () => form.reset('password', 'password_confirmation'),
   });
 };

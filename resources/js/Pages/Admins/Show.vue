@@ -1,7 +1,7 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link } from '@inertiajs/vue3';
-import { Button } from '@/components/ui/button'; // Para os botões de ação
+import { Button } from '@/components/ui/button';
 
 const props = defineProps({
   admin_user: Object,

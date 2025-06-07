@@ -17,7 +17,6 @@ const props = defineProps({
 const page = usePage();
 const userRole = computed(() => page.props.auth.user?.role);
 
-// Ref para o input de arquivo escondido
 const logoFileInput = ref(null);
 
 const form = useForm({
@@ -46,7 +45,6 @@ function handleLogoUpload(event) {
 }
 
 const submit = () => {
-  // Remove as máscaras antes de enviar
   form.transform(data => ({
     ...data,
     cnpj: data.cnpj.replace(/\D/g, ''),
@@ -76,7 +74,6 @@ const submit = () => {
         <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-6 md:p-8">
           <form @submit.prevent="submit" class="space-y-6">
 
-            <!-- Dados de Acesso -->
             <div class="space-y-4">
               <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 border-b dark:border-gray-700 pb-2">Dados
                 de Acesso</h3>
@@ -161,7 +158,6 @@ const submit = () => {
               </div>
             </div>
 
-            <!-- Ações do Formulário -->
             <div class="flex items-center justify-end mt-6 pt-6 border-t dark:border-gray-700">
               <Link :href="route('clients.index')" class="mr-4">
                 <Button variant="outline" type="button">Cancelar</Button>

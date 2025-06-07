@@ -16,7 +16,6 @@ const props = defineProps({
 const page = usePage();
 const userRole = computed(() => page.props.auth.user?.role);
 
-// Ref para o nosso input de arquivo escondido
 const logoFileInput = ref(null);
 
 const form = useForm({
@@ -46,7 +45,6 @@ function handleLogoUpload(event) {
   }
 }
 
-// Função para acionar o clique no input de arquivo
 function selectNewLogo() {
   logoFileInput.value.click();
 }

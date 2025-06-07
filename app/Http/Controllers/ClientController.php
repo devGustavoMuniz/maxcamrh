@@ -4,10 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Client;
 use App\Models\User;
-use App\Models\Franchise; // Importar Franchise
+use App\Models\Franchise;
 use App\Enums\UserRole;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth; // Importar Auth
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
@@ -58,7 +58,7 @@ class ClientController extends Controller
       if ($user->franchise) {
         $query->where('franchise_id', $user->franchise->id);
       } else {
-        $query->whereRaw('1 = 0'); // Franqueado sem franquia não vê clientes
+        $query->whereRaw('1 = 0');
       }
     }
 
@@ -66,18 +66,16 @@ class ClientController extends Controller
       $query->where(function ($q) use ($searchTerm) {
         $q->where('cnpj', 'like', "%{$searchTerm}%")
           ->orWhere('phone', 'like', "%{$searchTerm}%")
-          ->orWhere('test_number', 'like', "%{$searchTerm}%") // Adicionado, se aplicável
+          ->orWhere('test_number', 'like', "%{$searchTerm}%")
           ->orWhereHas('user', function ($uq) use ($searchTerm) {
             $uq->where('name', 'like', "%{$searchTerm}%")
               ->orWhere('email', 'like', "%{$searchTerm}%");
           })
-          ->orWhereHas('franchise.user', function ($fuq) use ($searchTerm) { // Busca por nome da franquia
+          ->orWhereHas('franchise.user', function ($fuq) use ($searchTerm) {
             $fuq->where('name', 'like', "%{$searchTerm}%");
           });
       });
     }
-
-    // Admin vê todos (Gate::before já cuida disso, e a policy viewAny permite admin)
 
     $clients = $query->orderByDesc('clients.created_at')
       ->paginate(10)
@@ -104,13 +102,11 @@ class ClientController extends Controller
     $this->authorize('create', Client::class);
 
     $franchises = [];
-    // Apenas Admin precisa selecionar a franquia, para Franqueado é a sua própria.
     if (Auth::user()->role === UserRole::ADMIN) {
-      $franchises = Franchise::with('user') // Carrega o usuário para pegar o nome da franquia
+      $franchises = Franchise::with('user')
       ->get()
         ->map(fn($franchise) => [
           'id' => $franchise->id,
-          // Assumindo que o "nome" da franquia é o nome do usuário associado a ela
           'name' => $franchise->user ? $franchise->user->name : ('Franquia ID: ' . $franchise->id),
         ]);
     }
@@ -170,13 +166,10 @@ class ClientController extends Controller
         $clientData['franchise_id'] = $validatedData['franchise_id'];
       } elseif ($loggedInUser->role === UserRole::FRANCHISE) {
         if (!$loggedInUser->franchise) {
-          // Este caso deve ser prevenido por lógica de negócio ou validação anterior
           abort(403, 'Usuário franqueado não está associado a uma franquia.');
         }
         $clientData['franchise_id'] = $loggedInUser->franchise->id;
       } else {
-        // Outro papel tentando criar um cliente? A policy deve barrar antes.
-        // Se chegou aqui, é um erro de lógica ou permissão não totalmente coberta.
         abort(403, 'Ação não permitida para este papel.');
       }
 
@@ -199,7 +192,6 @@ class ClientController extends Controller
     $this->authorize('update', $client);
 
     $franchises = [];
-    // Apenas Admin precisa selecionar a franquia, para Franqueado é a sua própria.
     if (Auth::user()->role === UserRole::ADMIN) {
       $franchises = Franchise::with('user')
         ->get()
@@ -208,7 +200,7 @@ class ClientController extends Controller
           'name' => $franchise->user ? $franchise->user->name : ('Franquia ID: ' . $franchise->id),
         ]);
     }
-    $client->loadMissing('user'); // Garante que o user está carregado para o form
+    $client->loadMissing('user');
 
     return Inertia::render('Clients/Edit', [
       'client_data' => $this->formatClientData($client),
@@ -220,8 +212,8 @@ class ClientController extends Controller
   {
     $this->authorize('update', $client);
 
-    $clientUser = $client->user; // O usuário associado ao cliente
-    $loggedInUser = Auth::user(); // O usuário que está fazendo a ação
+    $clientUser = $client->user;
+    $loggedInUser = Auth::user();
 
     $validationRules = [
       'name' => 'required|string|max:255',
@@ -238,7 +230,6 @@ class ClientController extends Controller
     if ($loggedInUser->role === UserRole::ADMIN) {
       $validationRules['franchise_id'] = 'required|exists:franchises,id';
     }
-    // Franqueado não altera o franchise_id de um cliente (policy já garante que ele só edita os seus)
 
     $validatedData = $request->validate($validationRules);
 
@@ -269,7 +260,6 @@ class ClientController extends Controller
         'logo_url' => $logoPath,
       ];
 
-      // Apenas Admin pode mudar o franchise_id de um cliente existente
       if ($loggedInUser->role === UserRole::ADMIN && isset($validatedData['franchise_id'])) {
         $clientDataToUpdate['franchise_id'] = $validatedData['franchise_id'];
       }
@@ -289,10 +279,7 @@ class ClientController extends Controller
         Storage::disk('public')->delete($client->logo_url);
       }
       $user = $client->user;
-      // Lidar com colaboradores associados antes de deletar o cliente
-      // Se onDelete na FK da tabela 'collaborators' para 'client_id' for 'cascade', eles serão deletados.
-      // Se for 'set null', o client_id será null.
-      // Se quiser ter certeza, pode fazer: $client->collaborators()->delete(); ou update(['client_id' => null])
+
       $client->delete();
       if ($user) {
         $user->delete();
