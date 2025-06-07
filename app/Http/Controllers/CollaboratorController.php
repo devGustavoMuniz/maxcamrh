@@ -22,7 +22,7 @@ class CollaboratorController extends Controller
   protected function formatCollaboratorData(Collaborator $collaborator): array
   {
     $collaborator->loadMissing(['user.addresses', 'client.user']);
-    $mainAddress = $collaborator->user->addresses->first();
+    $mainAddress = $collaborator->user->addresses?->first();
 
     return [
       'id' => $collaborator->id,
@@ -134,7 +134,7 @@ class CollaboratorController extends Controller
         'department' => $collaborator->department,
         'position' => $collaborator->position,
         'client_name' => $collaborator->client && $collaborator->client->user ? $collaborator->client->user->name : 'N/A',
-        'city' => $collaborator->user->addresses->first()->city ?? 'N/A',
+        'city' => $collaborator->user->addresses?->first()->city ?? 'N/A',
       ]);
 
     return Inertia::render('Collaborators/Index', [
@@ -167,9 +167,7 @@ class CollaboratorController extends Controller
   public function store(Request $request)
   {
     $this->authorize('create', Collaborator::class);
-
     $loggedInUser = Auth::user();
-
     $validationRules = [ /* Suas regras de validação completas como no seu código original */
       // User
       'user.name' => 'required|string|max:255',
@@ -194,14 +192,14 @@ class CollaboratorController extends Controller
       'collaborator.department' => 'nullable|string|max:255',
       'collaborator.position' => 'nullable|string|max:255',
       'collaborator.type_of_contract' => 'nullable|string|max:255',
-      'collaborator.salary' => 'nullable|numeric|min:0',
+      'collaborator.salary' => 'nullable|string|max:255',
       'collaborator.admission_date' => 'nullable|date',
       'collaborator.direct_superior_name' => 'nullable|string|max:255',
       'collaborator.hierarchical_degree' => 'nullable|string|max:255',
       'collaborator.observations' => 'nullable|string',
       'collaborator.contract_start_date' => 'nullable|date',
       'collaborator.contract_expiration' => 'nullable|date|after_or_equal:collaborator.contract_start_date',
-      'collaborator.cpf' => ['nullable', 'string', 'max:14', Rule::unique('collaborators', 'cpf')],
+      'collaborator.cpf' => ['nullable', 'string', 'max:20', Rule::unique('collaborators', 'cpf')],
       'collaborator.rg' => 'nullable|string|max:20',
       'collaborator.cnh' => ['nullable', 'string', 'max:20', Rule::unique('collaborators', 'cnh')],
       'collaborator.reservista' => 'nullable|string|max:30',
@@ -250,7 +248,6 @@ class CollaboratorController extends Controller
       // Admin ou Franqueado não especificaram client_id (validação já deve ter pego)
       abort(403, 'Client ID é obrigatório e não foi fornecido ou é inválido.');
     }
-
 
     if ($request->hasFile('collaborator.photo_file')) {
       $collaboratorData['photo_url'] = $request->file('collaborator.photo_file')->store('collaborator_photos', 'public');
@@ -341,7 +338,7 @@ class CollaboratorController extends Controller
       'collaborator.observations' => 'nullable|string',
       'collaborator.contract_start_date' => 'nullable|date',
       'collaborator.contract_expiration' => 'nullable|date|after_or_equal:collaborator.contract_start_date',
-      'collaborator.cpf' => ['nullable', 'string', 'max:14', Rule::unique('collaborators', 'cpf')->ignore($collaborator->id)],
+      'collaborator.cpf' => ['nullable', 'string', 'max:20', Rule::unique('collaborators', 'cpf')->ignore($collaborator->id)],
       'collaborator.rg' => 'nullable|string|max:20',
       'collaborator.cnh' => ['nullable', 'string', 'max:20', Rule::unique('collaborators', 'cnh')->ignore($collaborator->id)],
       'collaborator.reservista' => 'nullable|string|max:30',

@@ -1,18 +1,18 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, useForm, Link, usePage } from '@inertiajs/vue3'; // Adicionado usePage
-import { ref, watch, computed } from 'vue'; // Adicionado computed
+import { Head, useForm, Link, usePage } from '@inertiajs/vue3';
+import { ref, watch, computed } from 'vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'; // Importações do Select
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import InputError from '@/Components/InputError.vue';
 
 const props = defineProps({
   collaborator_data: Object,
-  clients: Array, // Adicionado: Lista de clientes para admin/franqueado selecionarem
+  clients: Array,
 });
 
 const page = usePage();
@@ -20,6 +20,9 @@ const userRole = computed(() => page.props.auth.user?.role);
 
 const currentStep = ref(1);
 const totalSteps = 4;
+
+const photoFileInput = ref(null);
+const curriculumFileInput = ref(null);
 
 const form = useForm({
   _method: 'PUT',
@@ -30,10 +33,9 @@ const form = useForm({
     password_confirmation: '',
   },
   collaborator: {
-    client_id: props.collaborator_data.client_id || null, // CAMPO ADICIONADO E INICIALIZADO
+    client_id: props.collaborator_data.client_id || null,
     photo_file: null,
     curriculum_file: null,
-    // Mantendo os valores existentes do props.collaborator_data para os campos
     date_of_birth: props.collaborator_data.date_of_birth || '',
     gender: props.collaborator_data.gender || '',
     is_special_needs_person: props.collaborator_data.is_special_needs_person || false,
@@ -69,7 +71,7 @@ const form = useForm({
     agencia: props.collaborator_data.agencia || '',
     conta_corrente: props.collaborator_data.conta_corrente || '',
   },
-  address: { // Assumindo que props.collaborator_data.address pode ser null
+  address: {
     cep: props.collaborator_data.address?.cep || '',
     street: props.collaborator_data.address?.street || '',
     number: props.collaborator_data.address?.number || '',
@@ -80,38 +82,34 @@ const form = useForm({
   },
 });
 
-const photoPreview = ref(props.collaborator_data.photo_full_url);
-const curriculumPreview = ref(null); // Para o nome do novo arquivo de currículo
-const existingCurriculumUrl = ref(props.collaborator_data.curriculum_full_url); // Link para o currículo existente
+const moneyConfig = {
+  decimal: ',',
+  thousands: '.',
+  prefix: 'R$ ',
+  precision: 2,
+  masked: false,
+};
 
-// Watch para atualizar previews se as props mudarem e nenhum arquivo novo foi selecionado
+const photoPreview = ref(props.collaborator_data.photo_full_url);
+const curriculumFileName = ref(null);
+const existingCurriculumUrl = ref(props.collaborator_data.curriculum_full_url);
+
 watch(() => props.collaborator_data.photo_full_url, (newUrl) => {
   if (!form.collaborator.photo_file) photoPreview.value = newUrl;
 });
 watch(() => props.collaborator_data.curriculum_full_url, (newUrl) => {
-  // Se um novo currículo não foi selecionado para upload, atualiza o link do existente
   if (!form.collaborator.curriculum_file) existingCurriculumUrl.value = newUrl;
 });
-
 
 function handleFileUpload(event, field, previewRef, isImage = false) {
   const file = event.target.files[0];
   if (file) {
-    form.collaborator[field] = file; // Atribui o objeto File
-    if (isImage && previewRef) { // Para photo_file
+    form.collaborator[field] = file;
+    if (isImage) {
       previewRef.value = URL.createObjectURL(file);
-    } else if (previewRef) { // Para curriculum_file
-      previewRef.value = file.name; // Mostra nome do novo arquivo
-      existingCurriculumUrl.value = null; // Esconde o link do currículo antigo se um novo for selecionado
-    }
-  } else {
-    // Se o usuário cancelar a seleção, redefinimos para o estado inicial
-    form.collaborator[field] = null;
-    if (field === 'photo_file' && previewRef) {
-      previewRef.value = props.collaborator_data.photo_full_url; // Volta para foto original
-    } else if (field === 'curriculum_file' && previewRef) {
-      previewRef.value = null; // Limpa o nome do novo arquivo
-      existingCurriculumUrl.value = props.collaborator_data.curriculum_full_url; // Mostra o link do currículo original novamente
+    } else {
+      previewRef.value = file.name;
+      existingCurriculumUrl.value = null;
     }
   }
 }
@@ -120,17 +118,24 @@ function nextStep() { if (currentStep.value < totalSteps) currentStep.value++; }
 function prevStep() { if (currentStep.value > 1) currentStep.value--; }
 
 const submit = () => {
-  form.post(route('collaborators.update', props.collaborator_data.id), { // form.post com _method: 'PUT'
+  form.transform(data => {
+    const transformedData = JSON.parse(JSON.stringify(data));
+    const fieldsToClean = ['cpf', 'rg', 'cnh', 'phone', 'cellphone', 'emergency_phone'];
+    fieldsToClean.forEach(field => {
+      if (transformedData.collaborator[field]) {
+        transformedData.collaborator[field] = String(transformedData.collaborator[field]).replace(/\D/g, '');
+      }
+    });
+    if (transformedData.address.cep) {
+      transformedData.address.cep = transformedData.address.cep.replace(/\D/g, '');
+    }
+    return transformedData;
+  }).post(route('collaborators.update', props.collaborator_data.id), {
     onSuccess: () => {
       form.reset('user.password', 'user.password_confirmation');
-      // Limpa os campos de arquivo do formulário após o sucesso para evitar reenvio acidental
       form.collaborator.photo_file = null;
       form.collaborator.curriculum_file = null;
-      // O Inertia deve recarregar as props, e os 'watch' acima devem atualizar os previews
-      // Se não, pode ser necessário buscar a prop atualizada explicitamente
-      // photoPreview.value = page.props.collaborator_data?.photo_full_url || props.collaborator_data.photo_full_url;
-      // existingCurriculumUrl.value = page.props.collaborator_data?.curriculum_full_url || props.collaborator_data.curriculum_full_url;
-      // curriculumPreview.value = null;
+      curriculumFileName.value = null;
     },
   });
 };
@@ -146,13 +151,9 @@ async function fetchAddressByCep() {
       form.address.neighborhood = data.bairro;
       form.address.city = data.localidade;
       form.address.state = data.uf;
-      document.getElementById('address_number_edit')?.focus(); // Ajustar ID se necessário
+      document.getElementById('address_number_edit')?.focus();
     } catch (error) {
       console.error("Erro ao buscar CEP:", error);
-      form.address.street = '';
-      form.address.neighborhood = '';
-      form.address.city = '';
-      form.address.state = '';
     }
   }
 }
@@ -171,368 +172,249 @@ async function fetchAddressByCep() {
       <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
         <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-6 md:p-8">
           <form @submit.prevent="submit" class="space-y-6">
-            <section v-if="currentStep === 1" class="space-y-6">
+
+            <section v-if="currentStep === 1" class="space-y-4">
               <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 border-b pb-2 mb-4">Etapa 1: Acesso e Dados Pessoais</h3>
-
-              <div v-if="(userRole === 'admin' || userRole === 'franchise')">
-                <Label for="collaborator_client_id_edit">Cliente Associado</Label>
-                <Select v-model="form.collaborator.client_id">
-                  <SelectTrigger id="collaborator_client_id_edit">
-                    <SelectValue placeholder="Selecione um cliente" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem class="cursor-pointer" v-for="client in props.clients" :key="client.id" :value="client.id">
-                      {{ client.name }} </SelectItem>
-                  </SelectContent>
-                </Select>
-                <InputError class="mt-2" :message="form.errors['collaborator.client_id']" />
-              </div>
-              <div v-else-if="userRole === 'client'" class="p-3 bg-blue-50 dark:bg-blue-900/50 border border-blue-200 dark:border-blue-700 rounded-md text-sm text-blue-700 dark:text-blue-300">
-                Colaborador associado ao cliente: {{ props.collaborator_data.client_name || 'Você mesmo' }}. (Não alterável aqui)
-              </div>
-
-
-              <div>
-                <Label for="user_name_edit">Nome Completo do Usuário</Label>
-                <Input id="user_name_edit" type="text" class="mt-1 block w-full" v-model="form.user.name" required />
-                <InputError class="mt-2" :message="form.errors['user.name']" />
-              </div>
-              <div>
-                <Label for="user_email_edit">Email de Acesso</Label>
-                <Input id="user_email_edit" type="email" class="mt-1 block w-full" v-model="form.user.email" required />
-                <InputError class="mt-2" :message="form.errors['user.email']" />
-              </div>
-              <div class="border-t dark:border-gray-700 pt-4">
-                <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">Alterar Senha (deixe em branco para não modificar)</p>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <Label for="user_password_edit">Nova Senha</Label>
-                    <Input id="user_password_edit" type="password" class="mt-1 block w-full" v-model="form.user.password" />
-                    <InputError class="mt-2" :message="form.errors['user.password']" />
-                  </div>
-                  <div>
-                    <Label for="user_password_confirmation_edit">Confirmar Nova Senha</Label>
-                    <Input id="user_password_confirmation_edit" type="password" class="mt-1 block w-full" v-model="form.user.password_confirmation" />
-                  </div>
-                </div>
-              </div>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <Label for="collaborator_photo_file_edit">Nova Foto (3x4)</Label>
-                  <Input id="collaborator_photo_file_edit" type="file" @input="event => handleFileUpload(event, 'photo_file', photoPreview, true)" class="mt-1 block w-full file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" accept="image/*" />
-                  <InputError class="mt-2" :message="form.errors['collaborator.photo_file']" />
-                  <img v-if="photoPreview" :src="photoPreview" alt="Preview Foto" class="mt-2 h-24 w-auto rounded"/>
-                  <p v-else-if="!form.collaborator.photo_file && !props.collaborator_data.photo_full_url" class="mt-2 text-sm text-gray-500">Nenhuma foto.</p>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="md:col-span-2" v-if="(userRole === 'admin' || userRole === 'franchise')">
+                  <Label for="collaborator_client_id_edit">Cliente Associado</Label>
+                  <Select v-model="form.collaborator.client_id">
+                    <SelectTrigger id="collaborator_client_id_edit"><SelectValue placeholder="Selecione um cliente" /></SelectTrigger>
+                    <SelectContent><SelectItem class="cursor-pointer" v-for="client in props.clients" :key="client.id" :value="client.id">{{ client.name }}</SelectItem></SelectContent>
+                  </Select>
+                  <InputError class="mt-2" :message="form.errors['collaborator.client_id']" />
                 </div>
                 <div>
-                  <Label for="collaborator_curriculum_file_edit">Novo Currículo (PDF, DOC)</Label>
-                  <Input id="collaborator_curriculum_file_edit" type="file" @input="event => handleFileUpload(event, 'curriculum_file', curriculumPreview, false)" class="mt-1 block w-full file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" accept=".pdf,.doc,.docx" />
-                  <InputError class="mt-2" :message="form.errors['collaborator.curriculum_file']" />
-                  <p v-if="curriculumPreview" class="mt-2 text-sm text-gray-500 dark:text-gray-400">Novo arquivo selecionado: {{ curriculumPreview }}</p>
-                  <div v-if="existingCurriculumUrl && !curriculumPreview" class="mt-2">
-                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Currículo Atual:</p>
-                    <a :href="existingCurriculumUrl" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline break-all">{{ existingCurriculumUrl.split('/').pop() }}</a>
-                  </div>
-                  <p v-else-if="!existingCurriculumUrl && !curriculumPreview" class="mt-2 text-sm text-gray-500">Nenhum currículo.</p>
+                  <Label for="user_name_edit">Nome Completo</Label>
+                  <Input id="user_name_edit" type="text" class="mt-1 block w-full" v-model="form.user.name" required />
                 </div>
-              </div>
-              <div>
-                <Label for="collaborator_date_of_birth_edit">Data de Nascimento</Label>
-                <Input id="collaborator_date_of_birth_edit" type="date" class="mt-1 block w-full" v-model="form.collaborator.date_of_birth" />
-                <InputError class="mt-2" :message="form.errors['collaborator.date_of_birth']" />
-              </div>
-              <div>
-                <Label for="collaborator_gender_edit">Gênero</Label>
-                <Select v-model="form.collaborator.gender">
-                  <SelectTrigger id="collaborator_gender_edit">
-                    <SelectValue placeholder="Selecione o gênero" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem class="cursor-pointer" value="Masculino">Masculino</SelectItem>
-                    <SelectItem class="cursor-pointer" value="Feminino">Feminino</SelectItem>
-                    <SelectItem class="cursor-pointer" value="Outro">Outro</SelectItem>
-                    <SelectItem class="cursor-pointer" value="Não Informado">Prefiro não informar</SelectItem>
-                  </SelectContent>
-                </Select>
-                <InputError class="mt-2" :message="form.errors['collaborator.gender']" />
-              </div>
-              <div class="flex items-center space-x-2 mt-1">
-                <Checkbox id="collaborator_is_special_needs_person_edit" :checked="form.collaborator.is_special_needs_person" @update:checked="form.collaborator.is_special_needs_person = $event" />
-                <Label for="collaborator_is_special_needs_person_edit">Pessoa com Necessidades Especiais?</Label>
-                <InputError class="mt-2" :message="form.errors['collaborator.is_special_needs_person']" />
-              </div>
-              <div>
-                <Label for="collaborator_marital_status_edit">Estado Civil</Label>
-                <Select v-model="form.collaborator.marital_status">
-                  <SelectTrigger id="collaborator_marital_status_edit">
-                    <SelectValue placeholder="Selecione o estado civil" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem class="cursor-pointer" value="Solteiro(a)">Solteiro(a)</SelectItem>
-                    <SelectItem class="cursor-pointer" value="Casado(a)">Casado(a)</SelectItem>
-                    <SelectItem class="cursor-pointer" value="Divorciado(a)">Divorciado(a)</SelectItem>
-                    <SelectItem class="cursor-pointer" value="Viúvo(a)">Viúvo(a)</SelectItem>
-                    <SelectItem class="cursor-pointer" value="União Estável">União Estável</SelectItem>
-                  </SelectContent>
-                </Select>
-                <InputError class="mt-2" :message="form.errors['collaborator.marital_status']" />
-              </div>
-              <div>
-                <Label for="collaborator_scholarity_edit">Escolaridade</Label>
-                <Input id="collaborator_scholarity_edit" type="text" class="mt-1 block w-full" v-model="form.collaborator.scholarity" />
-                <InputError class="mt-2" :message="form.errors['collaborator.scholarity']" />
-              </div>
-              <div>
-                <Label for="collaborator_father_name_edit">Nome do Pai</Label>
-                <Input id="collaborator_father_name_edit" type="text" class="mt-1 block w-full" v-model="form.collaborator.father_name" />
-                <InputError class="mt-2" :message="form.errors['collaborator.father_name']" />
-              </div>
-              <div>
-                <Label for="collaborator_mother_name_edit">Nome da Mãe</Label>
-                <Input id="collaborator_mother_name_edit" type="text" class="mt-1 block w-full" v-model="form.collaborator.mother_name" />
-                <InputError class="mt-2" :message="form.errors['collaborator.mother_name']" />
-              </div>
-              <div>
-                <Label for="collaborator_nationality_edit">Nacionalidade</Label>
-                <Input id="collaborator_nationality_edit" type="text" class="mt-1 block w-full" v-model="form.collaborator.nationality" />
-                <InputError class="mt-2" :message="form.errors['collaborator.nationality']" />
+                <div>
+                  <Label for="user_email_edit">Email de Acesso</Label>
+                  <Input id="user_email_edit" type="email" class="mt-1 block w-full" v-model="form.user.email" required />
+                </div>
+                <div>
+                  <Label for="collaborator_date_of_birth_edit">Data de Nascimento</Label>
+                  <Input id="collaborator_date_of_birth_edit" type="date" class="mt-1 block w-full" v-model="form.collaborator.date_of_birth" />
+                </div>
+                <div>
+                  <Label for="collaborator_gender_edit">Gênero</Label>
+                  <Select v-model="form.collaborator.gender"><SelectTrigger id="collaborator_gender_edit"><SelectValue placeholder="Selecione..." /></SelectTrigger><SelectContent><SelectItem value="Masculino">Masculino</SelectItem><SelectItem value="Feminino">Feminino</SelectItem><SelectItem value="Outro">Outro</SelectItem><SelectItem value="Não Informado">Não Informar</SelectItem></SelectContent></Select>
+                </div>
+                <div>
+                  <Label for="collaborator_marital_status_edit">Estado Civil</Label>
+                  <Select v-model="form.collaborator.marital_status"><SelectTrigger id="collaborator_marital_status_edit"><SelectValue placeholder="Selecione..." /></SelectTrigger><SelectContent><SelectItem value="Solteiro(a)">Solteiro(a)</SelectItem><SelectItem value="Casado(a)">Casado(a)</SelectItem><SelectItem value="Divorciado(a)">Divorciado(a)</SelectItem><SelectItem value="Viúvo(a)">Viúvo(a)</SelectItem><SelectItem value="União Estável">União Estável</SelectItem></SelectContent></Select>
+                </div>
+                <div>
+                  <Label for="collaborator_scholarity_edit">Escolaridade</Label>
+                  <Input id="collaborator_scholarity_edit" type="text" class="mt-1 block w-full" v-model="form.collaborator.scholarity" />
+                </div>
+                <div>
+                  <Label for="collaborator_father_name_edit">Nome do Pai</Label>
+                  <Input id="collaborator_father_name_edit" type="text" class="mt-1 block w-full" v-model="form.collaborator.father_name" />
+                </div>
+                <div>
+                  <Label for="collaborator_mother_name_edit">Nome da Mãe</Label>
+                  <Input id="collaborator_mother_name_edit" type="text" class="mt-1 block w-full" v-model="form.collaborator.mother_name" />
+                </div>
+                <div>
+                  <Label for="collaborator_nationality_edit">Nacionalidade</Label>
+                  <Input id="collaborator_nationality_edit" type="text" class="mt-1 block w-full" v-model="form.collaborator.nationality" />
+                </div>
+                <div class="flex items-center space-x-2 self-end pb-1">
+                  <Checkbox id="collaborator_is_special_needs_person_edit" :checked="form.collaborator.is_special_needs_person" @update:checked="form.collaborator.is_special_needs_person = $event" />
+                  <Label for="collaborator_is_special_needs_person_edit">PCD?</Label>
+                </div>
+                <div class="md:col-span-2 dark:border-gray-700">
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label for="user_password_edit">Nova Senha</Label>
+                      <Input id="user_password_edit" type="password" class="mt-1 block w-full" v-model="form.user.password" />
+                      <InputError class="mt-2" :message="form.errors['user.password']" />
+                    </div>
+                    <div>
+                      <Label for="user_password_confirmation_edit">Confirmar Nova Senha</Label>
+                      <Input id="user_password_confirmation_edit" type="password" class="mt-1 block w-full" v-model="form.user.password_confirmation" />
+                    </div>
+                  </div>
+                </div>
               </div>
             </section>
 
-            <section v-if="currentStep === 2" class="space-y-6">
+            <section v-if="currentStep === 2" class="space-y-4">
               <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 border-b pb-2 mb-4">Etapa 2: Contato e Endereço</h3>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label for="collaborator_personal_email_edit">Email Pessoal</Label>
                   <Input id="collaborator_personal_email_edit" type="email" class="mt-1 block w-full" v-model="form.collaborator.personal_email" />
-                  <InputError class="mt-2" :message="form.errors['collaborator.personal_email']" />
                 </div>
                 <div>
                   <Label for="collaborator_business_email_edit">Email Comercial</Label>
                   <Input id="collaborator_business_email_edit" type="email" class="mt-1 block w-full" v-model="form.collaborator.business_email" />
-                  <InputError class="mt-2" :message="form.errors['collaborator.business_email']" />
                 </div>
-              </div>
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
                   <Label for="collaborator_phone_edit">Telefone Fixo</Label>
-                  <Input id="collaborator_phone_edit" type="tel" class="mt-1 block w-full" v-model="form.collaborator.phone" />
-                  <InputError class="mt-2" :message="form.errors['collaborator.phone']" />
+                  <Input id="collaborator_phone_edit" type="tel" class="mt-1 block w-full" v-model="form.collaborator.phone" v-mask="['(##) ####-####', '(##) #####-####']" />
                 </div>
                 <div>
                   <Label for="collaborator_cellphone_edit">Celular</Label>
-                  <Input id="collaborator_cellphone_edit" type="tel" class="mt-1 block w-full" v-model="form.collaborator.cellphone" />
-                  <InputError class="mt-2" :message="form.errors['collaborator.cellphone']" />
+                  <Input id="collaborator_cellphone_edit" type="tel" class="mt-1 block w-full" v-model="form.collaborator.cellphone" v-mask="['(##) ####-####', '(##) #####-####']" />
+                </div>
+                <div class="md:col-span-2">
+                  <Label for="collaborator_emergency_phone_edit">Telefone de Emergência</Label>
+                  <Input id="collaborator_emergency_phone_edit" type="tel" class="mt-1 block w-full" v-model="form.collaborator.emergency_phone" v-mask="['(##) ####-####', '(##) #####-####']" />
                 </div>
                 <div>
-                  <Label for="collaborator_emergency_phone_edit">Telefone de Emergência</Label>
-                  <Input id="collaborator_emergency_phone_edit" type="tel" class="mt-1 block w-full" v-model="form.collaborator.emergency_phone" />
-                  <InputError class="mt-2" :message="form.errors['collaborator.emergency_phone']" />
+                  <Label for="address_cep_edit">CEP</Label>
+                  <Input id="address_cep_edit" type="text" class="mt-1 block w-full" v-model="form.address.cep" @blur="fetchAddressByCep" v-mask="'#####-###'" />
                 </div>
-              </div>
-
-              <h4 class="text-md font-medium text-gray-900 dark:text-gray-100 pt-4">Endereço Principal</h4>
-              <div>
-                <Label for="address_cep_edit">CEP</Label>
-                <Input id="address_cep_edit" type="text" class="mt-1 block w-full" v-model="form.address.cep" @blur="fetchAddressByCep" placeholder="00000-000" />
-                <InputError class="mt-2" :message="form.errors['address.cep']" />
-              </div>
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="md:col-span-2">
+                <div>
                   <Label for="address_street_edit">Logradouro (Rua, Av.)</Label>
                   <Input id="address_street_edit" type="text" class="mt-1 block w-full" v-model="form.address.street" />
-                  <InputError class="mt-2" :message="form.errors['address.street']" />
                 </div>
                 <div>
                   <Label for="address_number_edit">Número</Label>
                   <Input id="address_number_edit" type="text" class="mt-1 block w-full" v-model="form.address.number" />
-                  <InputError class="mt-2" :message="form.errors['address.number']" />
                 </div>
-              </div>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <Label for="address_complement_edit">Complemento</Label>
                   <Input id="address_complement_edit" type="text" class="mt-1 block w-full" v-model="form.address.complement" />
-                  <InputError class="mt-2" :message="form.errors['address.complement']" />
                 </div>
                 <div>
                   <Label for="address_neighborhood_edit">Bairro</Label>
                   <Input id="address_neighborhood_edit" type="text" class="mt-1 block w-full" v-model="form.address.neighborhood" />
-                  <InputError class="mt-2" :message="form.errors['address.neighborhood']" />
                 </div>
-              </div>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <Label for="address_city_edit">Cidade</Label>
                   <Input id="address_city_edit" type="text" class="mt-1 block w-full" v-model="form.address.city" />
-                  <InputError class="mt-2" :message="form.errors['address.city']" />
                 </div>
                 <div>
                   <Label for="address_state_edit">Estado (UF)</Label>
                   <Input id="address_state_edit" type="text" class="mt-1 block w-full" v-model="form.address.state" maxlength="2" />
-                  <InputError class="mt-2" :message="form.errors['address.state']" />
                 </div>
               </div>
             </section>
 
-            <section v-if="currentStep === 3" class="space-y-6">
+            <section v-if="currentStep === 3" class="space-y-4">
               <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 border-b pb-2 mb-4">Etapa 3: Dados Contratuais</h3>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label for="collaborator_department_edit">Departamento</Label>
                   <Input id="collaborator_department_edit" type="text" class="mt-1 block w-full" v-model="form.collaborator.department" />
-                  <InputError class="mt-2" :message="form.errors['collaborator.department']" />
                 </div>
                 <div>
                   <Label for="collaborator_position_edit">Cargo</Label>
                   <Input id="collaborator_position_edit" type="text" class="mt-1 block w-full" v-model="form.collaborator.position" />
-                  <InputError class="mt-2" :message="form.errors['collaborator.position']" />
                 </div>
-              </div>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <Label for="collaborator_type_of_contract_edit">Tipo de Contrato</Label>
-                  <Select v-model="form.collaborator.type_of_contract">
-                    <SelectTrigger id="collaborator_type_of_contract_edit">
-                      <SelectValue placeholder="Selecione o tipo" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem class="cursor-pointer" value="CLT">CLT</SelectItem>
-                      <SelectItem class="cursor-pointer" value="PJ">PJ</SelectItem>
-                      <SelectItem class="cursor-pointer" value="Estágio">Estágio</SelectItem>
-                      <SelectItem class="cursor-pointer" value="Temporário">Temporário</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <InputError class="mt-2" :message="form.errors['collaborator.type_of_contract']" />
+                  <Select v-model="form.collaborator.type_of_contract"><SelectTrigger id="collaborator_type_of_contract_edit"><SelectValue placeholder="Selecione..." /></SelectTrigger><SelectContent><SelectItem value="CLT">CLT</SelectItem><SelectItem value="PJ">PJ</SelectItem><SelectItem value="Estágio">Estágio</SelectItem><SelectItem value="Temporário">Temporário</SelectItem></SelectContent></Select>
                 </div>
                 <div>
                   <Label for="collaborator_salary_edit">Salário (R$)</Label>
-                  <Input id="collaborator_salary_edit" type="number" step="0.01" class="mt-1 block w-full" v-model.number="form.collaborator.salary" />
-                  <InputError class="mt-2" :message="form.errors['collaborator.salary']" />
+                  <Input id="collaborator_salary_edit" type="text" class="mt-1 block w-full" v-model="form.collaborator.salary" v-money3="moneyConfig" />
                 </div>
-              </div>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <Label for="collaborator_admission_date_edit">Data de Admissão</Label>
                   <Input id="collaborator_admission_date_edit" type="date" class="mt-1 block w-full" v-model="form.collaborator.admission_date" />
-                  <InputError class="mt-2" :message="form.errors['collaborator.admission_date']" />
                 </div>
                 <div>
-                  <Label for="collaborator_contract_start_date_edit">Data Início Efetivo Contrato</Label>
+                  <Label for="collaborator_contract_start_date_edit">Início Efetivo Contrato</Label>
                   <Input id="collaborator_contract_start_date_edit" type="date" class="mt-1 block w-full" v-model="form.collaborator.contract_start_date" />
-                  <InputError class="mt-2" :message="form.errors['collaborator.contract_start_date']" />
                 </div>
-              </div>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <Label for="collaborator_contract_expiration_edit">Data Fim do Contrato (se houver)</Label>
+                  <Label for="collaborator_contract_expiration_edit">Fim do Contrato (opcional)</Label>
                   <Input id="collaborator_contract_expiration_edit" type="date" class="mt-1 block w-full" v-model="form.collaborator.contract_expiration" />
-                  <InputError class="mt-2" :message="form.errors['collaborator.contract_expiration']" />
                 </div>
                 <div>
-                  <Label for="collaborator_direct_superior_name_edit">Nome do Superior Direto</Label>
+                  <Label for="collaborator_direct_superior_name_edit">Superior Direto</Label>
                   <Input id="collaborator_direct_superior_name_edit" type="text" class="mt-1 block w-full" v-model="form.collaborator.direct_superior_name" />
-                  <InputError class="mt-2" :message="form.errors['collaborator.direct_superior_name']" />
                 </div>
-              </div>
-              <div>
-                <Label for="collaborator_hierarchical_degree_edit">Grau Hierárquico</Label>
-                <Input id="collaborator_hierarchical_degree_edit" type="text" class="mt-1 block w-full" v-model="form.collaborator.hierarchical_degree" />
-                <InputError class="mt-2" :message="form.errors['collaborator.hierarchical_degree']" />
-              </div>
-              <div>
-                <Label for="collaborator_observations_edit">Observações Contratuais</Label>
-                <Textarea id="collaborator_observations_edit" class="mt-1 block w-full" v-model="form.collaborator.observations" rows="3" />
-                <InputError class="mt-2" :message="form.errors['collaborator.observations']" />
+                <div class="md:col-span-2">
+                  <Label for="collaborator_hierarchical_degree_edit">Grau Hierárquico</Label>
+                  <Input id="collaborator_hierarchical_degree_edit" type="text" class="mt-1 block w-full" v-model="form.collaborator.hierarchical_degree" />
+                </div>
+                <div class="md:col-span-2">
+                  <Label for="collaborator_observations_edit">Observações Contratuais</Label>
+                  <Textarea id="collaborator_observations_edit" class="mt-1 block w-full" v-model="form.collaborator.observations" rows="3" />
+                </div>
               </div>
             </section>
 
-            <section v-if="currentStep === 4" class="space-y-6">
+            <section v-if="currentStep === 4" class="space-y-4">
               <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 border-b pb-2 mb-4">Etapa 4: Documentos e Dados Bancários</h3>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label for="collaborator_cpf_edit">CPF</Label>
-                  <Input id="collaborator_cpf_edit" type="text" class="mt-1 block w-full" v-model="form.collaborator.cpf" />
-                  <InputError class="mt-2" :message="form.errors['collaborator.cpf']" />
+                  <Input id="collaborator_cpf_edit" type="text" class="mt-1 block w-full" v-model="form.collaborator.cpf" v-mask="'###.###.###-##'" />
                 </div>
                 <div>
                   <Label for="collaborator_rg_edit">RG</Label>
-                  <Input id="collaborator_rg_edit" type="text" class="mt-1 block w-full" v-model="form.collaborator.rg" />
-                  <InputError class="mt-2" :message="form.errors['collaborator.rg']" />
+                  <Input id="collaborator_rg_edit" type="text" class="mt-1 block w-full" v-model="form.collaborator.rg" v-mask="'##.###.###-A'" />
                 </div>
-              </div>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <Label for="collaborator_cnh_edit">CNH (Número)</Label>
-                  <Input id="collaborator_cnh_edit" type="text" class="mt-1 block w-full" v-model="form.collaborator.cnh" />
-                  <InputError class="mt-2" :message="form.errors['collaborator.cnh']" />
+                  <Input id="collaborator_cnh_edit" type="text" class="mt-1 block w-full" v-model="form.collaborator.cnh" v-mask="'###########'" />
                 </div>
                 <div>
                   <Label for="collaborator_reservista_edit">Certificado de Reservista</Label>
                   <Input id="collaborator_reservista_edit" type="text" class="mt-1 block w-full" v-model="form.collaborator.reservista" />
-                  <InputError class="mt-2" :message="form.errors['collaborator.reservista']" />
                 </div>
-              </div>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <Label for="collaborator_titulo_eleitor_edit">Título de Eleitor</Label>
                   <Input id="collaborator_titulo_eleitor_edit" type="text" class="mt-1 block w-full" v-model="form.collaborator.titulo_eleitor" />
-                  <InputError class="mt-2" :message="form.errors['collaborator.titulo_eleitor']" />
                 </div>
                 <div>
                   <Label for="collaborator_zona_eleitoral_edit">Zona Eleitoral</Label>
                   <Input id="collaborator_zona_eleitoral_edit" type="text" class="mt-1 block w-full" v-model="form.collaborator.zona_eleitoral" />
-                  <InputError class="mt-2" :message="form.errors['collaborator.zona_eleitoral']" />
                 </div>
-              </div>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <Label for="collaborator_pis_ctps_numero_edit">PIS/PASEP ou Nº CTPS</Label>
                   <Input id="collaborator_pis_ctps_numero_edit" type="text" class="mt-1 block w-full" v-model="form.collaborator.pis_ctps_numero" />
-                  <InputError class="mt-2" :message="form.errors['collaborator.pis_ctps_numero']" />
                 </div>
                 <div>
                   <Label for="collaborator_ctps_serie_edit">Série CTPS</Label>
                   <Input id="collaborator_ctps_serie_edit" type="text" class="mt-1 block w-full" v-model="form.collaborator.ctps_serie" />
-                  <InputError class="mt-2" :message="form.errors['collaborator.ctps_serie']" />
+                </div>
+                <div class="md:col-span-2">
+                  <Label>Arquivos (opcional: envie novos para substituir)</Label>
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <input id="collaborator_photo_file_edit" ref="photoFileInput" type="file" class="hidden" @change="event => handleFileUpload(event, 'photo_file', photoPreview, true)" accept="image/*" />
+                      <Button type="button" variant="outline" @click="photoFileInput?.click()" class="w-full justify-center">Nova Foto</Button>
+                    </div>
+                    <div>
+                      <input id="collaborator_curriculum_file_edit" ref="curriculumFileInput" type="file" class="hidden" @change="event => handleFileUpload(event, 'curriculum_file', curriculumFileName, false)" accept=".pdf,.doc,.docx" />
+                      <Button type="button" variant="outline" @click="curriculumFileInput?.click()" class="w-full justify-center">Novo Currículo</Button>
+                      <p v-if="curriculumFileName" class="mt-2 text-sm text-gray-600 dark:text-gray-400 truncate text-center">{{ curriculumFileName }}</p>
+                    </div>
+                  </div>
                 </div>
               </div>
-              <h4 class="text-md font-medium text-gray-900 dark:text-gray-100 pt-4">Dados Bancários</h4>
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <h4 class="text-md font-medium text-gray-900 dark:text-gray-100">Dados Bancários</h4>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <Label for="collaborator_banco_edit">Banco</Label>
                   <Input id="collaborator_banco_edit" type="text" class="mt-1 block w-full" v-model="form.collaborator.banco" />
-                  <InputError class="mt-2" :message="form.errors['collaborator.banco']" />
                 </div>
                 <div>
                   <Label for="collaborator_agencia_edit">Agência</Label>
                   <Input id="collaborator_agencia_edit" type="text" class="mt-1 block w-full" v-model="form.collaborator.agencia" />
-                  <InputError class="mt-2" :message="form.errors['collaborator.agencia']" />
                 </div>
                 <div>
-                  <Label for="collaborator_conta_corrente_edit">Conta Corrente (com dígito)</Label>
+                  <Label for="collaborator_conta_corrente_edit">Conta (com dígito)</Label>
                   <Input id="collaborator_conta_corrente_edit" type="text" class="mt-1 block w-full" v-model="form.collaborator.conta_corrente" />
-                  <InputError class="mt-2" :message="form.errors['collaborator.conta_corrente']" />
                 </div>
               </div>
             </section>
 
             <div class="flex justify-between items-center mt-8 pt-6 border-t dark:border-gray-700">
               <div>
-                <Button type="button" variant="outline" @click="prevStep" v-if="currentStep > 1">
-                  Anterior
-                </Button>
+                <Button type="button" variant="outline" @click="prevStep" v-if="currentStep > 1">Anterior</Button>
               </div>
               <div class="flex items-center space-x-3">
-                <Link :href="route('collaborators.index')">
-                  <Button variant="ghost" type="button">Cancelar</Button>
-                </Link>
-                <Button type="button" variant="default" @click="nextStep" v-if="currentStep < totalSteps">
-                  Próximo
-                </Button>
-                <Button type="submit" :class="{ 'opacity-25': form.processing }" :disabled="form.processing" v-if="currentStep === totalSteps">
-                  Atualizar Colaborador
-                </Button>
+                <Link :href="route('collaborators.index')"><Button variant="ghost" type="button">Cancelar</Button></Link>
+                <Button type="button" @click="nextStep" v-if="currentStep < totalSteps">Próximo</Button>
+                <Button type="submit" variant="black" class="bg-gray-800 text-white hover:bg-gray-700 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600" :disabled="form.processing" v-if="currentStep === totalSteps">Atualizar Colaborador</Button>
               </div>
             </div>
           </form>

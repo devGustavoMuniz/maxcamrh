@@ -176,7 +176,7 @@ class FranchiseController extends Controller
       'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
       'password' => ['nullable', 'confirmed', Rules\Password::defaults()],
       'maxcam_email' => ['required', 'string', 'email', 'max:255', Rule::unique('franchises', 'maxcam_email')->ignore($franchise->id)],
-      'cnpj' => ['required', 'string', 'max:18', Rule::unique('franchises', 'cnpj')->ignore($franchise->id)],
+      'cnpj' => ['required', 'string', 'max:14', Rule::unique('franchises', 'cnpj')->ignore($franchise->id)],
       'max_client' => 'required|integer|min:0',
       'contract_start_date' => 'required|date',
       'actuation_region' => 'required|string|max:255',

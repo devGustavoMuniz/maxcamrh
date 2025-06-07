@@ -22,7 +22,7 @@ class AdminController extends Controller
 
     $searchTerm = $request->input('search'); // Captura o termo de busca
 
-    $query = User::where('role', UserRole::ADMIN->value);
+    $query = User::where('role', UserRole::ADMIN);
 
     if ($searchTerm) {
       $query->where(function ($q) use ($searchTerm) {
@@ -78,7 +78,7 @@ class AdminController extends Controller
       'name' => $request->name,
       'email' => $request->email,
       'password' => Hash::make($request->password),
-      'role' => UserRole::ADMIN->value,
+      'role' => UserRole::ADMIN,
       'email_verified_at' => now(),
     ]);
 
@@ -95,7 +95,7 @@ class AdminController extends Controller
     $this->authorize('view', $admin);
 
     // Adicionada verificação para garantir que apenas admins sejam mostrados por este controller
-    if ($admin->role !== UserRole::ADMIN->value) {
+    if ($admin->role !== UserRole::ADMIN) {
       abort(404); // Ou 403, mas 404 se a rota /admins/{id} não deveria achar não-admins
     }
 
@@ -121,7 +121,7 @@ class AdminController extends Controller
     $this->authorize('update', $admin);
 
     // Adicionada verificação para garantir que apenas admins sejam editados por este controller
-    if ($admin->role !== UserRole::ADMIN->value) {
+    if ($admin->role !== UserRole::ADMIN) {
       abort(404);
     }
 
@@ -144,7 +144,7 @@ class AdminController extends Controller
     $this->authorize('update', $admin);
 
     // Adicionada verificação para garantir que apenas admins sejam atualizados por este controller
-    if ($admin->role !== UserRole::ADMIN->value) {
+    if ($admin->role !== UserRole::ADMIN) {
       abort(403); // Não deveria ter chegado aqui se o edit já barrou, mas como defesa
     }
 
@@ -179,7 +179,7 @@ class AdminController extends Controller
     // ou totalmente delegada à Policy. Se a policy for bem específica sobre
     // quem um admin pode deletar (ex: apenas outros admins), esta checagem de role
     // pode ser redundante ou parte da lógica da policy.
-    if ($admin->role !== UserRole::ADMIN->value) {
+    if ($admin->role !== UserRole::ADMIN) {
       // Se a UserPolicy@delete já não cobrir que um admin só pode deletar outro admin (ou qualquer user),
       // esta linha garante que este controller só delete admins.
       // Se a UserPolicy@delete for genérica para qualquer user, esta linha é uma restrição do AdminController.

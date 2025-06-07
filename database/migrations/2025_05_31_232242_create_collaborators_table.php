@@ -37,7 +37,7 @@ return new class extends Migration
           $table->string('department')->nullable();
           $table->string('position')->nullable();
           $table->string('type_of_contract')->nullable();
-          $table->decimal('salary', 10, 2)->nullable();
+          $table->string('salary')->nullable();
           $table->date('admission_date')->nullable();
           $table->string('direct_superior_name')->nullable();
           $table->string('hierarchical_degree')->nullable();

@@ -8,6 +8,7 @@ use App\Models\Client;
 use App\Models\Collaborator;
 use App\Models\Address; // Se for criar endereços avulsos, mas vamos integrar
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -16,7 +17,9 @@ class DatabaseSeeder extends Seeder
     // 1. Criar um Admin
     User::factory()->admin()->create([
       'name' => 'Admin Principal',
-      'email' => 'admin@maxcamrh.com', // Email fixo para fácil acesso
+      'email' => 'admin@maxcamrh.com',
+      'password' => 'password',
+      'role' => 'admin'
     ]);
 
     // 2. Criar alguns Franqueados (cada um já cria seu User e Address via UserFactory.franchiseUser)
