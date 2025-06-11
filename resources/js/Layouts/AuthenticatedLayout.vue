@@ -164,7 +164,7 @@ isAdmPessoasOpen.value = isAdmPessoasGroupActive.value;
 
     <div class="flex-1 flex flex-col overflow-hidden">
       <header class="bg-gray-100 dark:bg-gray-800 shadow" v-if="$page.props.auth.user">
-        <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center h-16">
+        <div class="w-full px-6 mx-auto flex justify-between items-center h-16">
           <slot name="header"/>
           <div class="hidden sm:flex sm:items-center sm:ms-6">
             <div class="ms-3 relative">

@@ -69,8 +69,7 @@ const submit = () => {
       </h2>
     </template>
 
-    <div class="py-6">
-      <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
+    <div class="mx-auto w-full">
         <div class="bg-gray-100 dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
           <form @submit.prevent="submit" class="space-y-6">
             <div class="space-y-4">
@@ -175,6 +174,5 @@ const submit = () => {
           </form>
         </div>
       </div>
-    </div>
   </AuthenticatedLayout>
 </template>

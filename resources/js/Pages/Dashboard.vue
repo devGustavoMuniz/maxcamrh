@@ -48,8 +48,7 @@ const userRole = computed(() => currentUser.value?.role);
       </div>
     </template>
 
-    <div class="py-6">
-      <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
+    <div class="mx-auto w-full">
         <div class="mb-8">
           <h1 class="text-2xl font-semibold text-gray-900 dark:text-gray-100">
             Bem-vindo(a) de volta, {{ currentUser?.name }}!
@@ -204,6 +203,5 @@ const userRole = computed(() => currentUser.value?.role);
         </div>
 
       </div>
-    </div>
   </AuthenticatedLayout>
 </template>

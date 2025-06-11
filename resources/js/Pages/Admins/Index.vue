@@ -58,8 +58,7 @@ const deleteAdmin = (adminId) => {
       </div>
     </template>
 
-    <div class="py-6">
-      <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+    <div class="mx-auto w-full">
         <div v-if="flash && flash.success" class="mb-4 p-4 rounded-md bg-green-100 dark:bg-green-700 text-sm font-medium text-green-700 dark:text-green-100">
           {{ flash.success }}
         </div>
@@ -135,6 +134,5 @@ const deleteAdmin = (adminId) => {
           :links="admins.links"
         />
       </div>
-    </div>
   </AuthenticatedLayout>
 </template>
