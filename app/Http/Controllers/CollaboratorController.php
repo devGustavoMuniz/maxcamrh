@@ -92,11 +92,14 @@ class CollaboratorController extends Controller
 
     $user = Auth::user();
 
-    $searchTerm = $request->input('search');
-
     $query = Collaborator::with(['user.addresses', 'client.user']);
 
-    if ($searchTerm) {
+    if ($request->filled('client_id')) {
+      $query->where('client_id', $request->input('client_id'));
+    }
+
+    if ($request->filled('search')) {
+      $searchTerm = $request->input('search');
       $query->where(function ($q) use ($searchTerm) {
         $q->whereHas('user', function ($uq) use ($searchTerm) {
           $uq->where('name', 'like', "%{$searchTerm}%")
@@ -122,6 +125,24 @@ class CollaboratorController extends Controller
       }
     }
 
+    $clientsForDropdown = collect();
+
+    if ($user->role === UserRole::ADMIN || $user->role === UserRole::FRANCHISE) {
+      $clientsQuery = Client::query()->with('user');
+
+      if ($user->role === UserRole::FRANCHISE && $user->franchise) {
+        $clientsQuery->where('franchise_id', $user->franchise->id);
+      }
+
+      $clientsForDropdown = $clientsQuery->get()->map(function ($client) {
+        return [
+          'id' => $client->id,
+          'name' => $client->user->name,
+        ];
+      });
+    }
+
+
     $collaborators = $query->orderByDesc('collaborators.created_at')
       ->paginate(10)
       ->withQueryString()
@@ -138,7 +159,8 @@ class CollaboratorController extends Controller
 
     return Inertia::render('Collaborators/Index', [
       'collaborators' => $collaborators,
-      'filters' => $request->only(['search'])
+      'clients' => $clientsForDropdown,
+      'filters' => $request->only(['search', 'client_id'])
     ]);
   }
 

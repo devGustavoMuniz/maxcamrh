@@ -5,6 +5,16 @@ import {computed, ref, watch} from 'vue';
 import debounce from 'lodash/debounce';
 
 import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+
+import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table';
 import {Button} from '@/components/ui/button';
@@ -18,13 +28,19 @@ import {UserPlus, FileEdit, Trash2, Search} from 'lucide-vue-next';
 const props = defineProps({
   collaborators: Object,
   filters: Object,
+  clients: Array,
 });
+
+
+const user = computed(() => usePage().props.auth.user);
 
 const flash = computed(() => usePage().props.flash);
 const search = ref(props.filters?.search || '');
+const selectedClient = ref(props.filters.client_id || '');
 
-watch(search, debounce((value) => {
-  router.get(route('collaborators.index'), {search: value}, {
+
+watch([search, selectedClient], debounce(([searchValue, clientIdValue]) => {
+  router.get(route('collaborators.index'), {search: searchValue, client_id: clientIdValue}, {
     preserveState: true,
     replace: true,
     preserveScroll: true,
@@ -62,17 +78,37 @@ const deleteCollaborator = (collaboratorId) => {
         </div>
 
         <div class="flex justify-between items-center mb-4">
-          <div class="relative w-full max-w-xs">
-            <Input
-              type="text"
-              v-model="search"
-              placeholder="Buscar por nome, email..."
-              class="pl-10 w-full bg-gray-100 dark:bg-gray-800"
-            />
-            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Search class="h-5 w-5 text-gray-400"/>
-            </div>
-          </div>
+         <div class="flex gap-5">
+           <div class="relative w-full max-w-xs">
+             <Input
+               type="text"
+               v-model="search"
+               placeholder="Buscar por nome, email..."
+               class="pl-10 w-full bg-gray-100 dark:bg-gray-800"
+             />
+             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+               <Search class="h-5 w-5 text-gray-400"/>
+             </div>
+           </div>
+           <div v-if="user.role === 'admin' || user.role === 'franchise'">
+             <Select v-model="selectedClient">
+               <SelectTrigger class="w-[280px] bg-gray-100 dark:bg-gray-800">
+                 <SelectValue placeholder="Filtrar por cliente" />
+               </SelectTrigger>
+               <SelectContent>
+                 <SelectGroup>
+                   <SelectItem :value="null">
+                     Todos os Clientes
+                   </SelectItem>
+                   <SelectItem v-for="client in props.clients" :key="client.id" :value="client.id">
+                     {{ client.name }}
+                   </SelectItem>
+                 </SelectGroup>
+               </SelectContent>
+             </Select>
+           </div>
+         </div>
+
           <Link :href="route('collaborators.create')">
             <Button variant="black" class="bg-gray-800 text-white hover:bg-gray-700 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600">
               <UserPlus class="h-4 w-4 mr-2"/>
@@ -88,6 +124,7 @@ const deleteCollaborator = (collaboratorId) => {
                 <TableHead class="px-4 py-3 w-[60px]">Foto</TableHead>
                 <TableHead class="px-4 py-3">Nome</TableHead>
                 <TableHead class="px-4 py-3">Email</TableHead>
+                <TableHead class="px-4 py-3">Cliente Associado</TableHead>
                 <TableHead class="px-4 py-3">Cidade</TableHead>
                 <TableHead class="text-right px-4 py-3">Ações</TableHead>
               </TableRow>
@@ -109,7 +146,8 @@ const deleteCollaborator = (collaboratorId) => {
                 </TableCell>
                 <TableCell class="font-medium px-4">{{ collab.user_name }}</TableCell>
                 <TableCell class="px-4">{{ collab.user_email }}</TableCell>
-                <TableCell class="px-4">{{ collab.city || 'N/A' }}</TableCell>
+                <TableCell class="px-4">{{ collab.client_name}}</TableCell>
+                <TableCell class="px-4">{{ collab.city }}</TableCell>
 
                 <TableCell class="text-right px-4">
                   <div class="flex items-center justify-end gap-2">
