@@ -105,7 +105,7 @@ const deleteCollaborator = (collaboratorId) => {
                     Todos os Clientes
                   </SelectItem>
                   <SelectItem v-for="client in props.clients" :key="client.id" :value="String(client.id)">
-                    {{ client.user_name }}
+                    {{ client.name }}
                   </SelectItem>
                 </SelectGroup>
               </SelectContent>
