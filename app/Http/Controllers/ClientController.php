@@ -46,56 +46,96 @@ class ClientController extends Controller
   }
 
   public function index(Request $request): Response
-  {
-    $this->authorize('viewAny', Client::class);
+    {
+        $this->authorize('viewAny', Client::class);
 
-    $user = Auth::user();
-    $searchTerm = $request->input('search');
+        $user = Auth::user();
+        // A chave 'franchise_id' aqui pode ser null ou uma string, dependendo do frontend
+        $filters = $request->only(['search', 'franchise_id']);
 
-    $query = Client::with(['user', 'franchise.user']);
+        $query = Client::with(['franchise.user']);
 
-    if ($user->role === UserRole::FRANCHISE) {
-      if ($user->franchise) {
-        $query->where('franchise_id', $user->franchise->id);
-      } else {
-        $query->whereRaw('1 = 0');
-      }
+        $clients = $query->orderByDesc('clients.created_at')
+            ->when($request->filled('franchise_id'), function ($q) use ($request) {
+                $q->where('franchise_id', $request->input('franchise_id'));
+            })
+            ->paginate(100)
+            ->withQueryString();
+
+            dd($clients);
+
+        if ($request->filled('franchise_id')) {
+          $query->where('franchise_id', $request->input('franchise_id'));
+        }
+
+        // --- Lógica de Filtro Principal ---
+        if ($user->role === UserRole::FRANCHISE) {
+            // Franqueado logado: sempre filtra pelos clientes da sua própria franquia
+            if ($user->franchise) {
+                $query->where('franchise_id', $user->franchise->id);
+            } else {
+                // Se um franqueado não tem franquia associada, não mostra clientes
+                $query->whereRaw('1 = 0');
+            }
+        } 
+
+
+        // Lógica de busca existente
+        if ($request->filled('search')) {
+            $searchTerm = $request->input('search');
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('cnpj', 'like', "%{$searchTerm}%")
+                  ->orWhere('phone', 'like', "%{$searchTerm}%")
+                  ->orWhere('test_number', 'like', "%{$searchTerm}%")
+                  ->orWhereHas('user', function ($uq) use ($searchTerm) {
+                      $uq->where('name', 'like', "%{$searchTerm}%")
+                        ->orWhere('email', 'like', "%{$searchTerm}%");
+                  })
+                  ->orWhereHas('franchise.user', function ($fuq) use ($searchTerm) {
+                      $fuq->where('name', 'like', "%{$searchTerm}%");
+                  });
+            });
+        }
+
+        // Lógica para obter franqueados para o dropdown
+        $franchiseesForDropdown = collect();
+
+        // Apenas para admin, que pode filtrar por franqueado
+        if ($user->role === UserRole::ADMIN) {
+            // Carrega todos os usuários que são franqueados
+            $franchiseesQuery = User::where('role', UserRole::FRANCHISE)->with('franchise');
+
+            $franchiseesForDropdown = $franchiseesQuery->get()->map(function ($franchiseeUser) {
+                // Assumindo que o nome do franqueado está no campo 'name' do modelo User.
+                // Se o nome do franqueado estiver no modelo Franchise (ex: $franchiseeUser->franchise->name), ajuste aqui.
+                return [
+                    'id' => $franchiseeUser->id, // O ID do usuário franqueado
+                    'name' => $franchiseeUser->name, // O nome do usuário franqueado
+                ];
+            });
+        }
+
+        $clients = $query->orderByDesc('clients.created_at')
+            ->paginate(10)
+            ->withQueryString()
+            ->through(fn ($client) => [
+                'id' => $client->id,
+                'cnpj' => $client->cnpj,
+                'phone' => $client->phone,
+                'user_name' => $client->user->name,
+                'user_email' => $client->user->email,
+                'franchise_name' => $client->franchise && $client->franchise->user ? $client->franchise->user->name : 'N/A',
+                'logo_full_url' => $client->logo_url ? Storage::disk('public')->url($client->logo_url) : null,
+            ]);
+
+        // dd($clients); // Para depuração, agora deveria mostrar dados
+
+        return Inertia::render('Clients/Index', [
+            'clients' => $clients,
+            'filters' => $filters,
+            'franchisees' => $franchiseesForDropdown,
+        ]);
     }
-
-    if ($searchTerm) {
-      $query->where(function ($q) use ($searchTerm) {
-        $q->where('cnpj', 'like', "%{$searchTerm}%")
-          ->orWhere('phone', 'like', "%{$searchTerm}%")
-          ->orWhere('test_number', 'like', "%{$searchTerm}%")
-          ->orWhereHas('user', function ($uq) use ($searchTerm) {
-            $uq->where('name', 'like', "%{$searchTerm}%")
-              ->orWhere('email', 'like', "%{$searchTerm}%");
-          })
-          ->orWhereHas('franchise.user', function ($fuq) use ($searchTerm) {
-            $fuq->where('name', 'like', "%{$searchTerm}%");
-          });
-      });
-    }
-
-    $clients = $query->orderByDesc('clients.created_at')
-      ->paginate(10)
-      ->withQueryString()
-      ->through(fn ($client) => [
-        'id' => $client->id,
-        'cnpj' => $client->cnpj,
-        'is_monthly_contract' => (bool) $client->is_monthly_contract,
-        'phone' => $client->phone,
-        'user_name' => $client->user->name,
-        'user_email' => $client->user->email,
-        'franchise_name' => $client->franchise && $client->franchise->user ? $client->franchise->user->name : 'N/A',
-        'logo_full_url' => $client->logo_url ? Storage::disk('public')->url($client->logo_url) : null,
-      ]);
-
-    return Inertia::render('Clients/Index', [
-      'clients' => $clients,
-      'filters' => $request->only(['search'])
-    ]);
-  }
 
   public function create(): Response
   {

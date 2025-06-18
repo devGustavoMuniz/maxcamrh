@@ -1,23 +1,17 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import {Head, Link, usePage, router} from '@inertiajs/vue3';
-import {computed, ref, watch} from 'vue';
+import { Head, Link, usePage, router } from '@inertiajs/vue3';
+import { computed, ref, watch } from 'vue';
 import debounce from 'lodash/debounce';
 
 // Componentes da UI
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+// Removendo Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue
+// pois serão substituídos pelo Combobox
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table';
-import {Button} from '@/components/ui/button';
-import {Input} from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
   Card,
   CardContent,
@@ -26,16 +20,22 @@ import {
   CardDescription,
   CardFooter
 } from '@/components/ui/card';
-import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Pagination from '@/components/Pagination.vue';
 
+// --- NOVO: Importações para o Combobox ---
+import { Check, ChevronsUpDown } from 'lucide-vue-next';
+import { cn } from '@/lib/utils'; // Função utilitária para classes condicionais, se você a tiver
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+
 // Ícones
-import {UserPlus, FileEdit, Trash2, Search} from 'lucide-vue-next';
+import { UserPlus, FileEdit, Trash2, Search } from 'lucide-vue-next';
 
 const props = defineProps({
   collaborators: Object,
   filters: Object,
-  clients: Array,
+  clients: Array, // Certifique-se de que cada cliente tem { id: number, name: string }
 });
 
 // Lógica de Filtros e Busca
@@ -44,10 +44,18 @@ const flash = computed(() => usePage().props.flash);
 const search = ref(props.filters?.search || '');
 const selectedClient = ref(props.filters.client_id || '');
 
+// --- NOVO: Estados para o Combobox de Clientes ---
+const openClientCombobox = ref(false); // Estado para controlar a abertura/fechamento do Popover
+const currentClientLabel = computed(() => {
+  // Encontra o nome do cliente selecionado para exibir no trigger do combobox
+  const client = props.clients.find(c => String(c.id) === selectedClient.value);
+  return client ? client.name : 'Filtrar por cliente...';
+});
+
+
 watch([search, selectedClient], debounce(([searchValue, clientIdValue]) => {
-  // Converte null para uma string vazia para a URL
   const finalClientId = clientIdValue === null ? '' : clientIdValue;
-  router.get(route('collaborators.index'), {search: searchValue, client_id: finalClientId}, {
+  router.get(route('collaborators.index'), { search: searchValue, client_id: finalClientId }, {
     preserveState: true,
     replace: true,
     preserveScroll: true,
@@ -95,22 +103,61 @@ const deleteCollaborator = (collaboratorId) => {
             </div>
           </div>
           <div v-if="user.role === 'admin' || user.role === 'franchise'" class="w-full sm:w-auto">
-            <Select v-model="selectedClient">
-              <SelectTrigger class="w-full sm:w-[280px] bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-600">
-                <SelectValue placeholder="Filtrar por cliente" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectItem :value="null">
-                    Todos os Clientes
-                  </SelectItem>
-                  <SelectItem v-for="client in props.clients" :key="client.id" :value="String(client.id)">
-                    {{ client.name }}
-                  </SelectItem>
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-          </div>
+            <Popover v-model:open="openClientCombobox">
+              <PopoverTrigger as-child>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  :aria-expanded="openClientCombobox"
+                  class="w-full sm:w-[280px] justify-between bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-600"
+                >
+                  {{ selectedClient ? currentClientLabel : "Filtrar por cliente..." }}
+                  <ChevronsUpDown class="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent class="w-full sm:w-[280px] p-0">
+                <Command>
+                  <CommandInput class="h-4 my-2" placeholder="Buscar cliente..." />
+                  <CommandList>
+                    <CommandEmpty>Nenhum cliente encontrado.</CommandEmpty>
+                    <CommandGroup>
+                      <CommandItem
+                        :value="null"
+                        @select="() => {
+                          selectedClient = null;
+                          openClientCombobox = false;
+                        }"
+                      >
+                        <Check
+                          :class="cn(
+                            'mr-2 h-4 w-4',
+                            selectedClient === null ? 'opacity-100' : 'opacity-0',
+                          )"
+                        />
+                        Todos os Clientes
+                      </CommandItem>
+                      <CommandItem
+                        v-for="client in props.clients"
+                        :key="client.id"
+                        :value="client.name" @select="() => {
+                          selectedClient = String(client.id); // Valor que você quer no v-model
+                          openClientCombobox = false;
+                        }"
+                      >
+                        <Check
+                          :class="cn(
+                            'mr-2 h-4 w-4',
+                            selectedClient === String(client.id) ? 'opacity-100' : 'opacity-0',
+                          )"
+                        />
+                        {{ client.name }}
+                      </CommandItem>
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
+            </div>
         </div>
 
         <Link :href="route('collaborators.create')" class="w-full md:w-auto">
