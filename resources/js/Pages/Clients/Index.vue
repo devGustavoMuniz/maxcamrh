@@ -23,8 +23,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 // --- NOVO: Importações para o Combobox ---
 import { Check, ChevronsUpDown } from 'lucide-vue-next';
 import { cn } from '@/lib/utils'; // Função utilitária para classes condicionais, se você a tiver
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/Components/ui/command';
+import { Popover, PopoverContent, PopoverTrigger } from '@/Components/ui/popover';
 
 
 // Ícones
