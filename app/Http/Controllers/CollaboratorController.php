@@ -102,8 +102,9 @@ class CollaboratorController extends Controller
       $searchTerm = $request->input('search');
       $query->where(function ($q) use ($searchTerm) {
         $q->whereHas('user', function ($uq) use ($searchTerm) {
-          $uq->where('name', 'like', "%{$searchTerm}%")
-            ->orWhere('email', 'like', "%{$searchTerm}%");
+          $lowerSearchTerm = strtolower($searchTerm);
+          $uq->where('name', 'like', "%{$lowerSearchTerm}%")
+            ->orWhere('email', 'like', "%{$lowerSearchTerm}%");
         });
       });
     }
