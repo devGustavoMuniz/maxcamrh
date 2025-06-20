@@ -1,11 +1,11 @@
 <script setup>
-import { Head, Link, useForm } from '@inertiajs/vue3';
-import GuestLayout from '@/Layouts/GuestLayout.vue';
-import InputError from '@/Components/InputError.vue';
+import { Head, Link, useForm } from "@inertiajs/vue3";
+import GuestLayout from "@/Layouts/GuestLayout.vue";
+import InputError from "@/Components/InputError.vue";
 
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Button } from "@/Components/ui/button";
+import { Input } from "@/Components/ui/input";
+import { Label } from "@/Components/ui/label";
 import {
   Card,
   CardContent,
@@ -13,27 +13,27 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
+} from "@/Components/ui/card";
 
-import { Loader2 } from 'lucide-vue-next';
+import { Loader2 } from "lucide-vue-next";
 
 const form = useForm({
-  name: '',
-  email: '',
-  password: '',
-  password_confirmation: '',
+  name: "",
+  email: "",
+  password: "",
+  password_confirmation: "",
 });
 
 const submit = () => {
-  form.post(route('register'), {
-    onFinish: () => form.reset('password', 'password_confirmation'),
+  form.post(route("register"), {
+    onFinish: () => form.reset("password", "password_confirmation"),
   });
 };
 </script>
 
 <template>
   <GuestLayout>
-    <Head title="Cadastrar"/>
+    <Head title="Cadastrar" />
 
     <Card class="w-full max-w-md mx-auto">
       <CardHeader class="text-center">
@@ -56,7 +56,7 @@ const submit = () => {
               autocomplete="name"
               placeholder="Seu nome completo"
             />
-            <InputError class="mt-2" :message="form.errors.name"/>
+            <InputError class="mt-2" :message="form.errors.name" />
           </div>
 
           <div>
@@ -70,7 +70,7 @@ const submit = () => {
               autocomplete="username"
               placeholder="seuemail@exemplo.com"
             />
-            <InputError class="mt-2" :message="form.errors.email"/>
+            <InputError class="mt-2" :message="form.errors.email" />
           </div>
 
           <div>
@@ -84,7 +84,7 @@ const submit = () => {
               autocomplete="new-password"
               placeholder="Mínimo 8 caracteres"
             />
-            <InputError class="mt-2" :message="form.errors.password"/>
+            <InputError class="mt-2" :message="form.errors.password" />
           </div>
 
           <div>
@@ -98,7 +98,10 @@ const submit = () => {
               autocomplete="new-password"
               placeholder="Repita a senha"
             />
-            <InputError class="mt-2" :message="form.errors.password_confirmation"/>
+            <InputError
+              class="mt-2"
+              :message="form.errors.password_confirmation"
+            />
           </div>
 
           <Button
@@ -107,7 +110,7 @@ const submit = () => {
             :class="{ 'opacity-25': form.processing }"
             :disabled="form.processing"
           >
-            <Loader2 v-if="form.processing" class="mr-2 h-4 w-4 animate-spin"/>
+            <Loader2 v-if="form.processing" class="mr-2 h-4 w-4 animate-spin" />
             Cadastrar
           </Button>
         </form>

@@ -1,12 +1,12 @@
 <script setup>
-import { Head, Link, useForm } from '@inertiajs/vue3';
-import GuestLayout from '@/Layouts/GuestLayout.vue';
-import InputError from '@/Components/InputError.vue';
+import { Head, Link, useForm } from "@inertiajs/vue3";
+import GuestLayout from "@/Layouts/GuestLayout.vue";
+import InputError from "@/Components/InputError.vue";
 
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Button } from "@/Components/ui/button";
+import { Checkbox } from "@/Components/ui/checkbox";
+import { Input } from "@/Components/ui/input";
+import { Label } from "@/Components/ui/label";
 import {
   Card,
   CardContent,
@@ -14,9 +14,9 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
+} from "@/Components/ui/card";
 
-import { Loader2 } from 'lucide-vue-next';
+import { Loader2 } from "lucide-vue-next";
 
 defineProps({
   canResetPassword: {
@@ -28,21 +28,21 @@ defineProps({
 });
 
 const form = useForm({
-  email: '',
-  password: '',
+  email: "",
+  password: "",
   remember: false,
 });
 
 const submit = () => {
-  form.post(route('login'), {
-    onFinish: () => form.reset('password'),
+  form.post(route("login"), {
+    onFinish: () => form.reset("password"),
   });
 };
 </script>
 
 <template>
   <GuestLayout>
-    <Head title="Entrar"/>
+    <Head title="Entrar" />
 
     <Card class="w-full max-w-md mx-auto">
       <CardHeader class="text-center">
@@ -51,7 +51,10 @@ const submit = () => {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div v-if="status" class="mb-4 text-sm font-medium text-green-600 dark:text-green-400">
+        <div
+          v-if="status"
+          class="mb-4 text-sm font-medium text-green-600 dark:text-green-400"
+        >
           {{ status }}
         </div>
 
@@ -68,7 +71,7 @@ const submit = () => {
               autocomplete="username"
               placeholder="seuemail@exemplo.com"
             />
-            <InputError class="mt-2" :message="form.errors.email"/>
+            <InputError class="mt-2" :message="form.errors.email" />
           </div>
 
           <div>
@@ -91,11 +94,11 @@ const submit = () => {
               autocomplete="current-password"
               placeholder="********"
             />
-            <InputError class="mt-2" :message="form.errors.password"/>
+            <InputError class="mt-2" :message="form.errors.password" />
           </div>
 
           <div class="flex items-center space-x-2">
-            <Checkbox id="remember" v-model:checked="form.remember"/>
+            <Checkbox id="remember" v-model:checked="form.remember" />
             <Label
               for="remember"
               class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
@@ -104,8 +107,12 @@ const submit = () => {
             </Label>
           </div>
 
-          <Button type="submit" class="w-full bg-gray-800 text-white hover:bg-gray-700 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600" :disabled="form.processing">
-            <Loader2 v-if="form.processing" class="mr-2 h-4 w-4 animate-spin"/>
+          <Button
+            type="submit"
+            class="w-full bg-gray-800 text-white hover:bg-gray-700 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600"
+            :disabled="form.processing"
+          >
+            <Loader2 v-if="form.processing" class="mr-2 h-4 w-4 animate-spin" />
             Entrar
           </Button>
         </form>
@@ -113,7 +120,10 @@ const submit = () => {
       <CardFooter class="flex flex-col items-center space-y-2 pt-4">
         <p class="text-sm text-muted-foreground">
           Não tem uma conta?
-          <Link :href="route('register')" class="font-semibold text-primary hover:underline">
+          <Link
+            :href="route('register')"
+            class="font-semibold text-primary hover:underline"
+          >
             Cadastre-se
           </Link>
         </p>

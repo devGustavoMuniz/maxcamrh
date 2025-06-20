@@ -1,11 +1,11 @@
 <script setup>
-import { Head, useForm } from '@inertiajs/vue3';
-import GuestLayout from '@/Layouts/GuestLayout.vue';
-import InputError from '@/Components/InputError.vue';
+import { Head, useForm } from "@inertiajs/vue3";
+import GuestLayout from "@/Layouts/GuestLayout.vue";
+import InputError from "@/Components/InputError.vue";
 
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Button } from "@/Components/ui/button";
+import { Input } from "@/Components/ui/input";
+import { Label } from "@/Components/ui/label";
 import {
   Card,
   CardContent,
@@ -13,9 +13,9 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
+} from "@/Components/ui/card";
 
-import { Loader2 } from 'lucide-vue-next';
+import { Loader2 } from "lucide-vue-next";
 
 defineProps({
   status: {
@@ -24,11 +24,11 @@ defineProps({
 });
 
 const form = useForm({
-  email: '',
+  email: "",
 });
 
 const submit = () => {
-  form.post(route('password.email'));
+  form.post(route("password.email"));
 };
 </script>
 
@@ -40,13 +40,16 @@ const submit = () => {
       <CardHeader class="text-center">
         <CardTitle class="text-2xl">Redefinir Senha</CardTitle>
         <CardDescription>
-          Esqueceu sua senha? Sem problemas. Informe seu endereço de e-mail
-          e enviaremos um link para redefinir sua senha, permitindo que você
+          Esqueceu sua senha? Sem problemas. Informe seu endereço de e-mail e
+          enviaremos um link para redefinir sua senha, permitindo que você
           escolha uma nova.
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div v-if="status" class="mb-4 text-sm font-medium text-green-600 dark:text-green-400">
+        <div
+          v-if="status"
+          class="mb-4 text-sm font-medium text-green-600 dark:text-green-400"
+        >
           {{ status }}
         </div>
 
