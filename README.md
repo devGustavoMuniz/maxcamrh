@@ -1,61 +1,82 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# MaxCam RH
+Este é o repositório oficial do sistema de gerenciamento de Recursos Humanos da MaxCam. O projeto é construído com Laravel 12 no backend e Vue.js com Inertia no frontend, e todo o ambiente de desenvolvimento é gerenciado via Laravel Sail (Docker).
+## Pré-requisitos
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Para rodar este projeto, você precisa **obrigatoriamente** ter apenas o **Docker Desktop** instalado e rodando na sua máquina.
 
-## About Laravel
+* [Docker Desktop para Mac, Windows ou Linux](https://www.docker.com/products/docker-desktop/)
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+> **Atenção usuários Windows:** É fundamental que você tenha o **WSL 2 (Windows Subsystem for Linux)** instalado e ativado, pois o Docker Desktop depende dele. Siga [este guia da Microsoft](https://docs.microsoft.com/pt-br/windows/wsl/install) para a instalação.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Guia de Instalação Passo a Passo
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Siga estas instruções na ordem exata. Todos os comandos devem ser executados no seu terminal (como PowerShell, Terminal do Mac/Linux ou o terminal do seu VS Code).
+1. **Clone o Repositório:**
+    ```bash
+    git clone git@github.com:devGustavoMuniz/maxcamrh.git
+    cd maxcamrh
+    ```
 
-## Learning Laravel
+2.  **Copie o Arquivo de Ambiente:**
+    ```bash
+    cp .env.example .env
+    ```
+    *(Opcional: Revise o `.env` para configurações como `APP_PORT`)*
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+3.  **Instale as Dependências do Composer usando Docker:**
+    (Isso instala o Laravel Sail e outras dependências PHP sem precisar de PHP/Composer no seu sistema host.)
+    ```bash
+    docker run --rm \
+        -u "$(id -u):$(id -g)" \
+        -v "$(pwd):/var/www/html" \
+        -w /var/www/html \
+        laravelsail/php84-composer:latest \
+        composer install --ignore-platform-reqs --no-interaction --no-plugins --no-scripts --prefer-dist
+    ```
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+    Dica: Daqui para frente, você pode criar um alias para não ter que digitar ./vendor/bin/sail toda vez. Adicione alias sail="./vendor/bin/sail" ao seu arquivo de configuração do terminal (.zshrc, .bashrc, etc.). Se não quiser fazer isso, apenas continue usando o caminho completo.
 
-## Laravel Sponsors
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+4.  **Construa e Inicie os Contêineres do Sail:**
+    ```bash
+    sail up -d --build
+    ```
+    *Aguarde alguns instantes para os serviços iniciarem.*
 
-### Premium Partners
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+5. **Instale o composer completamente:**
+    ```bash
+    sail composer install
+    ```
 
-## Contributing
+6. **Gere a Chave da Aplicação e link simbólico para storage:**
+    ```bash
+    sail artisan key:generate
+    
+    sail artisan storage:link
+    ```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+7. **Execute as Migrations e Seeders:**
+    ```bash
+    sail artisan migrate:fresh --seed
+    ```
 
-## Code of Conduct
+8. **Instale as Dependências NPM:**
+    ```bash
+    sail npm i
+    ```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+9. **Construa os Assets NPM :**
+    ```bash
+    sail npm run dev
+    ```
 
-## Security Vulnerabilities
+10. **Acesse a Aplicação:**
+    Abra seu navegador e acesse `http://localhost` (ou a porta configurada em `APP_PORT` no seu `.env`).
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
 
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+11. **Para Parar os Contêineres:**
+    ```bash
+    ./vendor/bin/sail down
+    ```
