@@ -14,7 +14,7 @@ class UpdateAdminRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return $this->user()->can('update', $this->admin);
+        return $this->user()->can('update', $this->route('admin'));
     }
 
     /**
@@ -24,9 +24,10 @@ class UpdateAdminRequest extends FormRequest
      */
     public function rules(): array
     {
+        $adminId = $this->route('admin')->id;
         return [
             'name' => 'required|string|max:255',
-            'email' => ['required', 'string', 'email', 'max:255', Rule::unique(User::class)->ignore($this->admin->id)],
+            'email' => ['required', 'string', 'email', 'max:255', Rule::unique(User::class)->ignore($adminId)],
             'password' => ['nullable', 'confirmed', Rules\Password::defaults()],
         ];
     }

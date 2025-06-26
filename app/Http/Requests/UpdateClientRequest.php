@@ -16,7 +16,7 @@ class UpdateClientRequest extends FormRequest
    */
   public function authorize(): bool
   {
-    return $this->user()->can('update', $this->client);
+      return $this->user()->can('update', $this->route('client'));
   }
 
   /**
@@ -26,19 +26,22 @@ class UpdateClientRequest extends FormRequest
    */
   public function rules(): array
   {
-    $clientUser = $this->client->user;
+      /** @var Client $client */
+      $client = $this->route('client');
+      /** @var User $clientUser */
+      $clientUser = $client->user;
 
-    $rules = [
-      'name' => 'required|string|max:255',
-      'email' => ['required', 'string', 'email', 'max:255', Rule::unique(User::class)->ignore($clientUser->id)],
-      'password' => ['nullable', 'confirmed', Rules\Password::defaults()],
-      'cnpj' => ['required', 'string', 'max:255', Rule::unique(Client::class)->ignore($this->client->id)],
-      'test_number' => 'nullable|string|max:255',
-      'contract_end_date' => 'nullable|date',
-      'is_monthly_contract' => 'required|boolean',
-      'phone' => 'nullable|string|max:255',
-      'logo_file' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-    ];
+      $rules = [
+          'name' => 'required|string|max:255',
+          'email' => ['required', 'string', 'email', 'max:255', Rule::unique(User::class)->ignore($clientUser->id)],
+          'password' => ['nullable', 'confirmed', Rules\Password::defaults()],
+          'cnpj' => ['required', 'string', 'max:255', Rule::unique(Client::class)->ignore($client->id)],
+          'test_number' => 'nullable|string|max:255',
+          'contract_end_date' => 'nullable|date',
+          'is_monthly_contract' => 'required|boolean',
+          'phone' => 'nullable|string|max:255',
+          'logo_file' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+      ];
 
     if ($this->user()->role === UserRole::ADMIN) {
       $rules['franchise_id'] = 'nullable|exists:franchises,id';
