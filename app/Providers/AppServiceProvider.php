@@ -2,13 +2,10 @@
 
 namespace App\Providers;
 
-use App\Models\Client;
-use App\Models\Collaborator;
 use App\Models\Franchise;
-use App\Models\User;
+use App\Observers\FranchiseObserver;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Facades\Gate;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -20,5 +17,6 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Vite::prefetch(concurrency: 3);
+        Franchise::observe(FranchiseObserver::class);
     }
 }

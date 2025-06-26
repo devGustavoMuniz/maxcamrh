@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
@@ -37,4 +38,26 @@ class Franchise extends Model
   {
     return $this->hasMany(Client::class);
   }
+
+    /**
+     * Aplica filtros de busca à query de franqueados.
+     *
+     * @param Builder $query
+     * @param array $filters
+     * @return void
+     */
+    public function scopeWithFilters(Builder $query, array $filters): void
+    {
+        $query->when($filters['search'] ?? null, function (Builder $q, $search) {
+            $q->where(function (Builder $innerQuery) use ($search) {
+                $innerQuery->where('cnpj', 'like', "%{$search}%")
+                    ->orWhere('maxcam_email', 'like', "%{$search}%")
+                    ->orWhere('actuation_region', 'like', "%{$search}%")
+                    ->orWhereHas('user', function (Builder $userQuery) use ($search) {
+                        $userQuery->where('name', 'like', "%{$search}%")
+                            ->orWhere('email', 'like', "%{$search}%");
+                    });
+            });
+        });
+    }
 }
