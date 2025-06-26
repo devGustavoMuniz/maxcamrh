@@ -237,7 +237,7 @@ class CollaboratorController extends Controller
       'address.city' => 'required_with:address.cep,address.street,address.state|nullable|string|max:255',
     ];
     if ($loggedInUser->role === UserRole::ADMIN || $loggedInUser->role === UserRole::FRANCHISE) {
-      $validationRules['collaborator.client_id'] = 'required|exists:clients,id';
+      $validationRules['collaborator.client_id'] = 'nullable|exists:clients,id';
     }
     $validated = $request->validate($validationRules);
 
@@ -371,7 +371,7 @@ class CollaboratorController extends Controller
       'address.city' => 'required_with:address.cep,address.street,address.state|nullable|string|max:255',
     ];
     if ($loggedInUser->role === UserRole::ADMIN || $loggedInUser->role === UserRole::FRANCHISE) {
-      $validationRules['collaborator.client_id'] = 'required|exists:clients,id';
+      $validationRules['collaborator.client_id'] = 'nullable|exists:clients,id';
     }
     $validated = $request->validate($validationRules);
 
@@ -396,7 +396,7 @@ class CollaboratorController extends Controller
       }
       $collaboratorUser->update($userData);
 
-      if (($loggedInUser->role === UserRole::ADMIN || $loggedInUser->role === UserRole::FRANCHISE) && isset($collaboratorData['client_id'])) {
+      if (($loggedInUser->role === UserRole::ADMIN || $loggedInUser->role === UserRole::FRANCHISE)) {
         $clientIdFromRequest = $collaboratorData['client_id'];
         if ($loggedInUser->role === UserRole::FRANCHISE) {
           if(!$loggedInUser->franchise) abort(403, 'Usuário franqueado não associado a uma franquia.');

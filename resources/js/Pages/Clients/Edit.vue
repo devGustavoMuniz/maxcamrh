@@ -105,13 +105,19 @@ const submit = () => {
                     <SelectValue placeholder="Selecione um franqueado" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem
-                      v-for="franchise in props.franchises"
-                      :key="franchise.id"
-                      :value="franchise.id"
-                      class="cursor-pointer"
-                      >{{ franchise.name }}
-                    </SelectItem>
+                    <SelectGroup>
+                      <SelectItem :value="null" class="cursor-pointer">
+                        Nenhum
+                      </SelectItem>
+                      <SelectItem
+                        v-for="franchise in props.franchises"
+                        :key="franchise.id"
+                        :value="franchise.id"
+                        class="cursor-pointer"
+                      >
+                        {{ franchise.name }}
+                      </SelectItem>
+                    </SelectGroup>
                   </SelectContent>
                 </Select>
                 <InputError class="mt-2" :message="form.errors.franchise_id" />

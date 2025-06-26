@@ -14,6 +14,7 @@ import {
 } from "@/Components/ui/select";
 import InputError from "@/Components/InputError.vue";
 import { ref, computed } from "vue";
+import SelectGroup from "@/Components/ui/select/SelectGroup.vue";
 
 const props = defineProps({
   franchises: Array,
@@ -102,14 +103,19 @@ const submit = () => {
                   <SelectValue placeholder="Selecione um franqueado" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem
-                    v-for="franchise in props.franchises"
-                    :key="franchise.id"
-                    :value="franchise.id"
-                    class="cursor-pointer"
-                  >
-                    {{ franchise.name }}
-                  </SelectItem>
+                  <SelectGroup>
+                    <SelectItem :value="null">
+                        Nenhum
+                      </SelectItem>
+                    <SelectItem
+                      v-for="franchise in props.franchises"
+                      :key="franchise.id"
+                      :value="franchise.id"
+                      class="cursor-pointer"
+                    >
+                      {{ franchise.name }}
+                    </SelectItem>
+                  </SelectGroup>
                 </SelectContent>
               </Select>
               <InputError class="mt-2" :message="form.errors.franchise_id" />

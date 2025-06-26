@@ -148,7 +148,7 @@ class ClientController extends Controller
     ];
 
     if ($loggedInUser->role === UserRole::ADMIN) {
-      $validationRules['franchise_id'] = 'required|exists:franchises,id';
+      $validationRules['franchise_id'] = 'nullable|exists:franchises,id';
     }
 
     $validatedData = $request->validate($validationRules);
@@ -242,7 +242,7 @@ class ClientController extends Controller
     ];
 
     if ($loggedInUser->role === UserRole::ADMIN) {
-      $validationRules['franchise_id'] = 'required|exists:franchises,id';
+      $validationRules['franchise_id'] = 'nullable|exists:franchises,id';
     }
 
     $validatedData = $request->validate($validationRules);
@@ -274,7 +274,7 @@ class ClientController extends Controller
         'logo_url' => $logoPath,
       ];
 
-      if ($loggedInUser->role === UserRole::ADMIN && isset($validatedData['franchise_id'])) {
+      if ($loggedInUser->role === UserRole::ADMIN) {
         $clientDataToUpdate['franchise_id'] = $validatedData['franchise_id'];
       }
 

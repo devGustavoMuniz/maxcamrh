@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from "@/Components/ui/select";
 import InputError from "@/Components/InputError.vue";
+import SelectGroup from "@/Components/ui/select/SelectGroup.vue";
 
 const props = defineProps({
   clients: Array,
@@ -205,13 +206,18 @@ async function fetchAddressByCep() {
                     <SelectValue placeholder="Selecione um cliente" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem
-                      class="cursor-pointer"
-                      v-for="client in props.clients"
-                      :key="client.id"
-                      :value="client.id"
-                      >{{ client.name }}
-                    </SelectItem>
+                    <SelectGroup>
+                      <SelectItem :value="null" class="cursor-pointer">
+                        Nenhum
+                      </SelectItem>
+                      <SelectItem
+                        class="cursor-pointer"
+                        v-for="client in props.clients"
+                        :key="client.id"
+                        :value="client.id"
+                        >{{ client.name }}
+                      </SelectItem>
+                    </SelectGroup>
                   </SelectContent>
                 </Select>
                 <InputError
