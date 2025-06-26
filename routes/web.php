@@ -21,10 +21,22 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
-    Route::resource('admins', AdminController::class);
-    Route::resource('clients', ClientController::class);
-    Route::resource('franchises', FranchiseController::class);
-    Route::resource('collaborators', CollaboratorController::class);
+
+    Route::resource('admins', AdminController::class)->except([
+        'show'
+    ]);
+
+    Route::resource('franchises', FranchiseController::class)->except([
+        'show'
+    ]);
+
+    Route::resource('clients', ClientController::class)->except([
+        'show'
+    ]);
+
+    Route::resource('collaborators', CollaboratorController::class)->except([
+        'show'
+    ]);
 });
 
 require __DIR__.'/auth.php';
