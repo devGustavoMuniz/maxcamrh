@@ -2,18 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\UserRole;
+use App\Http\Requests\StoreCollaboratorRequest;
+use App\Http\Requests\UpdateCollaboratorRequest;
+use App\Models\Client;
 use App\Models\Collaborator;
 use App\Models\User;
-use App\Models\Address;
-use App\Models\Client; // Importar Client
-use App\Enums\UserRole;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth; // Importar Auth
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Validation\Rules;
-use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -184,84 +183,19 @@ class CollaboratorController extends Controller
     ]);
   }
 
-  public function store(Request $request)
+  public function store(StoreCollaboratorRequest $request)
   {
-    $this->authorize('create', Collaborator::class);
-    $loggedInUser = Auth::user();
-    $validationRules = [
-      'user.name' => 'required|string|max:255',
-      'user.email' => 'required|string|email|max:255|unique:users,email',
-      'user.password' => ['required', 'confirmed', Rules\Password::defaults()],
-      'collaborator.photo_file' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-      'collaborator.curriculum_file' => 'nullable|file|mimes:pdf,doc,docx|max:5120',
-      'collaborator.date_of_birth' => 'nullable|date',
-      'collaborator.gender' => 'nullable|string|max:255',
-      'collaborator.is_special_needs_person' => 'boolean',
-      'collaborator.marital_status' => 'nullable|string|max:255',
-      'collaborator.scholarity' => 'nullable|string|max:255',
-      'collaborator.father_name' => 'nullable|string|max:255',
-      'collaborator.mother_name' => 'nullable|string|max:255',
-      'collaborator.nationality' => 'nullable|string|max:255',
-      'collaborator.personal_email' => ['nullable', 'string', 'email', 'max:255', Rule::unique('collaborators', 'personal_email')],
-      'collaborator.business_email' => ['nullable', 'string', 'email', 'max:255', Rule::unique('collaborators', 'business_email')],
-      'collaborator.phone' => 'nullable|string|max:20',
-      'collaborator.cellphone' => 'nullable|string|max:20',
-      'collaborator.emergency_phone' => 'nullable|string|max:20',
-      'collaborator.department' => 'nullable|string|max:255',
-      'collaborator.position' => 'nullable|string|max:255',
-      'collaborator.type_of_contract' => 'nullable|string|max:255',
-      'collaborator.salary' => 'nullable|string|max:255',
-      'collaborator.admission_date' => 'nullable|date',
-      'collaborator.direct_superior_name' => 'nullable|string|max:255',
-      'collaborator.hierarchical_degree' => 'nullable|string|max:255',
-      'collaborator.observations' => 'nullable|string',
-      'collaborator.contract_start_date' => 'nullable|date',
-      'collaborator.contract_expiration' => 'nullable|date|after_or_equal:collaborator.contract_start_date',
-      'collaborator.cpf' => ['nullable', 'string', 'max:20', Rule::unique('collaborators', 'cpf')],
-      'collaborator.rg' => 'nullable|string|max:20',
-      'collaborator.cnh' => ['nullable', 'string', 'max:20', Rule::unique('collaborators', 'cnh')],
-      'collaborator.reservista' => 'nullable|string|max:30',
-      'collaborator.titulo_eleitor' => 'nullable|string|max:30',
-      'collaborator.zona_eleitoral' => 'nullable|string|max:10',
-      'collaborator.pis_ctps_numero' => 'nullable|string|max:30',
-      'collaborator.ctps_serie' => 'nullable|string|max:20',
-      'collaborator.banco' => 'nullable|string|max:255',
-      'collaborator.agencia' => 'nullable|string|max:10',
-      'collaborator.conta_corrente' => 'nullable|string|max:20',
-      'address.cep' => 'required_with:address.street,address.city,address.state|nullable|string|max:9',
-      'address.street' => 'required_with:address.cep,address.city,address.state|nullable|string|max:255',
-      'address.number' => 'nullable|string|max:20',
-      'address.complement' => 'nullable|string|max:255',
-      'address.neighborhood' => 'nullable|string|max:255',
-      'address.state' => 'required_with:address.cep,address.street,address.city|nullable|string|max:2', // UF
-      'address.city' => 'required_with:address.cep,address.street,address.state|nullable|string|max:255',
-    ];
-    if ($loggedInUser->role === UserRole::ADMIN || $loggedInUser->role === UserRole::FRANCHISE) {
-      $validationRules['collaborator.client_id'] = 'nullable|exists:clients,id';
-    }
-    $validated = $request->validate($validationRules);
+    $validated = $request->validated();
+    $loggedInUser = $request->user();
 
     $userData = $validated['user'];
     $collaboratorData = $validated['collaborator'];
     $addressData = $validated['address'] ?? null;
 
     if ($loggedInUser->role === UserRole::CLIENT) {
-      if (!$loggedInUser->client) abort(403, 'Usuário cliente não associado a um registro de cliente.');
-      $collaboratorData['client_id'] = $loggedInUser->client->id;
-    } elseif (isset($validated['collaborator']['client_id'])) {
-      $clientIdFromRequest = $validated['collaborator']['client_id'];
-      if ($loggedInUser->role === UserRole::FRANCHISE) {
-        if(!$loggedInUser->franchise) abort(403, 'Usuário franqueado não associado a uma franquia.');
-        $client = Client::where('id', $clientIdFromRequest)
-          ->where('franchise_id', $loggedInUser->franchise->id)
-          ->first();
-        if (!$client) {
-          abort(403, 'Franqueado não pode atribuir colaborador a este cliente.');
-        }
-      }
-      $collaboratorData['client_id'] = $clientIdFromRequest;
+      $collaboratorData['client_id'] = $loggedInUser->client_id;
     } else {
-      abort(403, 'Client ID é obrigatório e não foi fornecido ou é inválido.');
+      $collaboratorData['client_id'] = $collaboratorData['client_id'] ?? null;
     }
 
     if ($request->hasFile('collaborator.photo_file')) {
@@ -279,7 +213,9 @@ class CollaboratorController extends Controller
         'role' => UserRole::COLLABORATOR->value,
         'email_verified_at' => now(),
       ]);
+
       $user->collaborator()->create($collaboratorData);
+
       if ($addressData && !empty(array_filter($addressData))) {
         $user->addresses()->create($addressData);
       }
@@ -314,70 +250,17 @@ class CollaboratorController extends Controller
     ]);
   }
 
-  public function update(Request $request, Collaborator $collaborator)
+  public function update(UpdateCollaboratorRequest $request, Collaborator $collaborator)
   {
-    $this->authorize('update', $collaborator);
-
-    $collaboratorUser = $collaborator->user;
-    $mainAddress = $collaboratorUser->addresses->first();
-    $loggedInUser = Auth::user();
-
-    $validationRules = [
-      'user.name' => 'required|string|max:255',
-      'user.email' => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->ignore($collaboratorUser->id)],
-      'user.password' => ['nullable', 'confirmed', Rules\Password::defaults()],
-      'collaborator.photo_file' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-      'collaborator.curriculum_file' => 'nullable|file|mimes:pdf,doc,docx|max:5120',
-      'collaborator.date_of_birth' => 'nullable|date',
-      'collaborator.gender' => 'nullable|string|max:255',
-      'collaborator.is_special_needs_person' => 'boolean',
-      'collaborator.marital_status' => 'nullable|string|max:255',
-      'collaborator.scholarity' => 'nullable|string|max:255',
-      'collaborator.father_name' => 'nullable|string|max:255',
-      'collaborator.mother_name' => 'nullable|string|max:255',
-      'collaborator.nationality' => 'nullable|string|max:255',
-      'collaborator.personal_email' => ['nullable', 'string', 'email', 'max:255', Rule::unique('collaborators', 'personal_email')->ignore($collaborator->id)],
-      'collaborator.business_email' => ['nullable', 'string', 'email', 'max:255', Rule::unique('collaborators', 'business_email')->ignore($collaborator->id)],
-      'collaborator.phone' => 'nullable|string|max:20',
-      'collaborator.cellphone' => 'nullable|string|max:20',
-      'collaborator.emergency_phone' => 'nullable|string|max:20',
-      'collaborator.department' => 'nullable|string|max:255',
-      'collaborator.position' => 'nullable|string|max:255',
-      'collaborator.type_of_contract' => 'nullable|string|max:255',
-      'collaborator.salary' => 'nullable|numeric|min:0',
-      'collaborator.admission_date' => 'nullable|date',
-      'collaborator.direct_superior_name' => 'nullable|string|max:255',
-      'collaborator.hierarchical_degree' => 'nullable|string|max:255',
-      'collaborator.observations' => 'nullable|string',
-      'collaborator.contract_start_date' => 'nullable|date',
-      'collaborator.contract_expiration' => 'nullable|date|after_or_equal:collaborator.contract_start_date',
-      'collaborator.cpf' => ['nullable', 'string', 'max:20', Rule::unique('collaborators', 'cpf')->ignore($collaborator->id)],
-      'collaborator.rg' => 'nullable|string|max:20',
-      'collaborator.cnh' => ['nullable', 'string', 'max:20', Rule::unique('collaborators', 'cnh')->ignore($collaborator->id)],
-      'collaborator.reservista' => 'nullable|string|max:30',
-      'collaborator.titulo_eleitor' => 'nullable|string|max:30',
-      'collaborator.zona_eleitoral' => 'nullable|string|max:10',
-      'collaborator.pis_ctps_numero' => 'nullable|string|max:30',
-      'collaborator.ctps_serie' => 'nullable|string|max:20',
-      'collaborator.banco' => 'nullable|string|max:255',
-      'collaborator.agencia' => 'nullable|string|max:10',
-      'collaborator.conta_corrente' => 'nullable|string|max:20',
-      'address.cep' => 'required_with:address.street,address.city,address.state|nullable|string|max:9',
-      'address.street' => 'required_with:address.cep,address.city,address.state|nullable|string|max:255',
-      'address.number' => 'nullable|string|max:20',
-      'address.complement' => 'nullable|string|max:255',
-      'address.neighborhood' => 'nullable|string|max:255',
-      'address.state' => 'required_with:address.cep,address.street,address.city|nullable|string|max:2',
-      'address.city' => 'required_with:address.cep,address.street,address.state|nullable|string|max:255',
-    ];
-    if ($loggedInUser->role === UserRole::ADMIN || $loggedInUser->role === UserRole::FRANCHISE) {
-      $validationRules['collaborator.client_id'] = 'nullable|exists:clients,id';
-    }
-    $validated = $request->validate($validationRules);
+    $validated = $request->validated();
+    $loggedInUser = $request->user();
 
     $userData = $validated['user'];
     $collaboratorData = $validated['collaborator'];
     $addressData = $validated['address'] ?? null;
+
+    $collaboratorUser = $collaborator->user;
+    $mainAddress = $collaboratorUser->addresses->first();
 
     if ($request->hasFile('collaborator.photo_file')) {
       if ($collaborator->photo_url) { Storage::disk('public')->delete($collaborator->photo_url); }
@@ -396,18 +279,7 @@ class CollaboratorController extends Controller
       }
       $collaboratorUser->update($userData);
 
-      if (($loggedInUser->role === UserRole::ADMIN || $loggedInUser->role === UserRole::FRANCHISE)) {
-        $clientIdFromRequest = $collaboratorData['client_id'];
-        if ($loggedInUser->role === UserRole::FRANCHISE) {
-          if(!$loggedInUser->franchise) abort(403, 'Usuário franqueado não associado a uma franquia.');
-          $client = Client::where('id', $clientIdFromRequest)
-            ->where('franchise_id', $loggedInUser->franchise->id)
-            ->first();
-          if (!$client) {
-            abort(403, 'Franqueado não pode atribuir colaborador a este cliente.');
-          }
-        }
-      } else {
+      if ($loggedInUser->role !== UserRole::ADMIN && $loggedInUser->role !== UserRole::FRANCHISE) {
         unset($collaboratorData['client_id']);
       }
       $collaborator->update($collaboratorData);
@@ -418,7 +290,6 @@ class CollaboratorController extends Controller
         } else {
           $collaboratorUser->addresses()->create($addressData);
         }
-      } elseif ($mainAddress && (empty($addressData) || empty(array_filter($addressData)))) {
       }
     });
 
