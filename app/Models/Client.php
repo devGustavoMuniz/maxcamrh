@@ -10,6 +10,42 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * 
+ *
+ * @property string $id
+ * @property string $user_id
+ * @property string|null $franchise_id
+ * @property string $cnpj
+ * @property string $test_number
+ * @property \Illuminate\Support\Carbon $contract_end_date
+ * @property bool $is_monthly_contract
+ * @property string $phone
+ * @property string $logo_url
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Collaborator> $collaborators
+ * @property-read int|null $collaborators_count
+ * @property-read \App\Models\Franchise|null $franchise
+ * @property-read \App\Models\User $user
+ * @method static \Database\Factories\ClientFactory factory($count = null, $state = [])
+ * @method static Builder<static>|Client newModelQuery()
+ * @method static Builder<static>|Client newQuery()
+ * @method static Builder<static>|Client query()
+ * @method static Builder<static>|Client whereCnpj($value)
+ * @method static Builder<static>|Client whereContractEndDate($value)
+ * @method static Builder<static>|Client whereCreatedAt($value)
+ * @method static Builder<static>|Client whereFranchiseId($value)
+ * @method static Builder<static>|Client whereId($value)
+ * @method static Builder<static>|Client whereIsMonthlyContract($value)
+ * @method static Builder<static>|Client whereLogoUrl($value)
+ * @method static Builder<static>|Client wherePhone($value)
+ * @method static Builder<static>|Client whereTestNumber($value)
+ * @method static Builder<static>|Client whereUpdatedAt($value)
+ * @method static Builder<static>|Client whereUserId($value)
+ * @method static Builder<static>|Client withFilters(array $filters)
+ * @mixin \Eloquent
+ */
 class Client extends Model
 {
   use HasFactory, HasUuids;

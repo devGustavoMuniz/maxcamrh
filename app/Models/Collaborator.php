@@ -10,6 +10,100 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * 
+ *
+ * @property string $id
+ * @property string $user_id
+ * @property string|null $client_id
+ * @property string|null $photo_url
+ * @property string|null $curriculum_url
+ * @property \Illuminate\Support\Carbon|null $date_of_birth
+ * @property string|null $gender
+ * @property bool $is_special_needs_person
+ * @property string|null $marital_status
+ * @property string|null $scholarity
+ * @property string|null $father_name
+ * @property string|null $mother_name
+ * @property string|null $nationality
+ * @property string|null $personal_email
+ * @property string|null $business_email
+ * @property string|null $phone
+ * @property string|null $cellphone
+ * @property string|null $emergency_phone
+ * @property string|null $department
+ * @property string|null $position
+ * @property string|null $type_of_contract
+ * @property numeric|null $salary
+ * @property \Illuminate\Support\Carbon|null $admission_date
+ * @property string|null $direct_superior_name
+ * @property string|null $hierarchical_degree
+ * @property string|null $observations
+ * @property \Illuminate\Support\Carbon|null $contract_start_date
+ * @property \Illuminate\Support\Carbon|null $contract_expiration
+ * @property string|null $cpf
+ * @property string|null $rg
+ * @property string|null $cnh
+ * @property string|null $reservista
+ * @property string|null $titulo_eleitor
+ * @property string|null $zona_eleitoral
+ * @property string|null $pis_ctps_numero
+ * @property string|null $ctps_serie
+ * @property string|null $banco
+ * @property string|null $agencia
+ * @property string|null $conta_corrente
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\Models\Client|null $client
+ * @property-read User $user
+ * @method static \Database\Factories\CollaboratorFactory factory($count = null, $state = [])
+ * @method static Builder<static>|Collaborator newModelQuery()
+ * @method static Builder<static>|Collaborator newQuery()
+ * @method static Builder<static>|Collaborator query()
+ * @method static Builder<static>|Collaborator whereAdmissionDate($value)
+ * @method static Builder<static>|Collaborator whereAgencia($value)
+ * @method static Builder<static>|Collaborator whereBanco($value)
+ * @method static Builder<static>|Collaborator whereBusinessEmail($value)
+ * @method static Builder<static>|Collaborator whereCellphone($value)
+ * @method static Builder<static>|Collaborator whereClientId($value)
+ * @method static Builder<static>|Collaborator whereCnh($value)
+ * @method static Builder<static>|Collaborator whereContaCorrente($value)
+ * @method static Builder<static>|Collaborator whereContractExpiration($value)
+ * @method static Builder<static>|Collaborator whereContractStartDate($value)
+ * @method static Builder<static>|Collaborator whereCpf($value)
+ * @method static Builder<static>|Collaborator whereCreatedAt($value)
+ * @method static Builder<static>|Collaborator whereCtpsSerie($value)
+ * @method static Builder<static>|Collaborator whereCurriculumUrl($value)
+ * @method static Builder<static>|Collaborator whereDateOfBirth($value)
+ * @method static Builder<static>|Collaborator whereDepartment($value)
+ * @method static Builder<static>|Collaborator whereDirectSuperiorName($value)
+ * @method static Builder<static>|Collaborator whereEmergencyPhone($value)
+ * @method static Builder<static>|Collaborator whereFatherName($value)
+ * @method static Builder<static>|Collaborator whereGender($value)
+ * @method static Builder<static>|Collaborator whereHierarchicalDegree($value)
+ * @method static Builder<static>|Collaborator whereId($value)
+ * @method static Builder<static>|Collaborator whereIsSpecialNeedsPerson($value)
+ * @method static Builder<static>|Collaborator whereMaritalStatus($value)
+ * @method static Builder<static>|Collaborator whereMotherName($value)
+ * @method static Builder<static>|Collaborator whereNationality($value)
+ * @method static Builder<static>|Collaborator whereObservations($value)
+ * @method static Builder<static>|Collaborator wherePersonalEmail($value)
+ * @method static Builder<static>|Collaborator wherePhone($value)
+ * @method static Builder<static>|Collaborator wherePhotoUrl($value)
+ * @method static Builder<static>|Collaborator wherePisCtpsNumero($value)
+ * @method static Builder<static>|Collaborator wherePosition($value)
+ * @method static Builder<static>|Collaborator whereReservista($value)
+ * @method static Builder<static>|Collaborator whereRg($value)
+ * @method static Builder<static>|Collaborator whereSalary($value)
+ * @method static Builder<static>|Collaborator whereScholarity($value)
+ * @method static Builder<static>|Collaborator whereTituloEleitor($value)
+ * @method static Builder<static>|Collaborator whereTypeOfContract($value)
+ * @method static Builder<static>|Collaborator whereUpdatedAt($value)
+ * @method static Builder<static>|Collaborator whereUserId($value)
+ * @method static Builder<static>|Collaborator whereZonaEleitoral($value)
+ * @method static Builder<static>|Collaborator withFilters(array $filters)
+ * @mixin \Eloquent
+ */
 class Collaborator extends Model
 {
   use HasFactory, HasUuids;
