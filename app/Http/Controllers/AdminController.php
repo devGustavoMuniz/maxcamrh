@@ -7,6 +7,7 @@ use App\Actions\Admins\UpdateAdminAction;
 use App\Enums\UserRole;
 use App\Http\Requests\StoreAdminRequest;
 use App\Http\Requests\UpdateAdminRequest;
+use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -22,16 +23,10 @@ class AdminController extends Controller
             ->withFilters($request->only('search'))
             ->orderBy('name')
             ->paginate(10)
-            ->withQueryString()
-            ->through(fn ($user) => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
-                'created_at' => $user->created_at->toFormattedDateString(),
-            ]);
+            ->withQueryString();
 
         return Inertia::render('Admins/Index', [
-            'admins' => $admins,
+            'admins' => UserResource::collection($admins),
             'filters' => $request->only(['search']),
         ]);
     }
@@ -49,26 +44,6 @@ class AdminController extends Controller
         return redirect()->route('admins.index')->with('success', 'Administrador criado com sucesso.');
     }
 
-    public function show(User $admin): Response
-    {
-        $this->authorize('view', $admin);
-
-        if ($admin->role !== UserRole::ADMIN) {
-            abort(404);
-        }
-
-        return Inertia::render('Admins/Show', [
-            'admin_user' => [
-                'id' => $admin->id,
-                'name' => $admin->name,
-                'email' => $admin->email,
-                'role' => $admin->role->value,
-                'created_at' => $admin->created_at->format('d/m/Y H:i:s'),
-                'email_verified_at' => $admin->email_verified_at ? $admin->email_verified_at->format('d/m/Y H:i:s') : 'Não verificado',
-            ],
-        ]);
-    }
-
     public function edit(User $admin)
     {
         $this->authorize('update', $admin);
@@ -78,11 +53,7 @@ class AdminController extends Controller
         }
 
         return Inertia::render('Admins/Edit', [
-            'admin_user' => [
-                'id' => $admin->id,
-                'name' => $admin->name,
-                'email' => $admin->email,
-            ],
+            'admin_user' => new UserResource($admin),
         ]);
     }
 
