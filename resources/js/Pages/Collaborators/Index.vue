@@ -354,7 +354,7 @@ const deleteCollaborator = (collaboratorId) => {
                                 <strong class="font-medium text-gray-800 dark:text-gray-200"
                                 >Cliente:</strong
                                 >
-                                {{ collab.client_name ?? "N/A" }}
+                                {{ collab.client_name }}
                             </p>
                             <p>
                                 <strong class="font-medium text-gray-800 dark:text-gray-200"
