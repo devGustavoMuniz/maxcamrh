@@ -2,15 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\UserRole;
+use App\Http\Requests\StoreFranchiseRequest;
+use App\Http\Requests\UpdateFranchiseRequest;
 use App\Models\Franchise;
 use App\Models\User;
-use App\Enums\UserRole;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Validation\Rules;
-use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -62,7 +62,7 @@ class FranchiseController extends Controller
     }
 
     $franchises = $query->orderByDesc('created_at')
-    ->paginate(10)
+      ->paginate(10)
       ->withQueryString()
       ->through(fn ($franchise) => [
         'id' => $franchise->id,
@@ -86,45 +86,32 @@ class FranchiseController extends Controller
     return Inertia::render('Franchises/Create');
   }
 
-  public function store(Request $request)
+  public function store(StoreFranchiseRequest $request)
   {
-    $this->authorize('create', Franchise::class);
-
-    $request->validate([
-      'name' => 'required|string|max:255',
-      'email' => 'required|string|email|max:255|unique:users,email',
-      'password' => ['required', 'confirmed', Rules\Password::defaults()],
-      'maxcam_email' => 'required|string|email|max:255|unique:franchises,maxcam_email',
-      'cnpj' => 'required|string|max:18|unique:franchises,cnpj',
-      'max_client' => 'required|integer|min:0',
-      'contract_start_date' => 'required|date',
-      'actuation_region' => 'required|string|max:255',
-      'document_file' => 'nullable|file|mimes:pdf,doc,docx,jpg,png|max:5120',
-      'observations' => 'nullable|string',
-    ]);
+    $validatedData = $request->validated();
 
     $documentPath = null;
     if ($request->hasFile('document_file')) {
       $documentPath = $request->file('document_file')->store('franchise_documents', 'public');
     }
 
-    DB::transaction(function () use ($request, $documentPath) {
+    DB::transaction(function () use ($validatedData, $documentPath) {
       $user = User::create([
-        'name' => $request->input('name'),
-        'email' => $request->input('email'),
-        'password' => Hash::make($request->input('password')),
+        'name' => $validatedData['name'],
+        'email' => $validatedData['email'],
+        'password' => Hash::make($validatedData['password']),
         'role' => UserRole::FRANCHISE->value,
         'email_verified_at' => now(),
       ]);
 
       $user->franchise()->create([
-        'maxcam_email' => $request->input('maxcam_email'),
-        'cnpj' => $request->input('cnpj'),
-        'max_client' => $request->input('max_client'),
-        'contract_start_date' => $request->input('contract_start_date'),
-        'actuation_region' => $request->input('actuation_region'),
+        'maxcam_email' => $validatedData['maxcam_email'],
+        'cnpj' => $validatedData['cnpj'],
+        'max_client' => $validatedData['max_client'],
+        'contract_start_date' => $validatedData['contract_start_date'],
+        'actuation_region' => $validatedData['actuation_region'],
         'document_url' => $documentPath,
-        'observations' => $request->input('observations'),
+        'observations' => $validatedData['observations'],
       ]);
     });
 
@@ -149,24 +136,10 @@ class FranchiseController extends Controller
     ]);
   }
 
-  public function update(Request $request, Franchise $franchise)
+  public function update(UpdateFranchiseRequest $request, Franchise $franchise)
   {
-    $this->authorize('update', $franchise);
-
+    $validatedData = $request->validated();
     $user = $franchise->user;
-
-    $request->validate([
-      'name' => 'required|string|max:255',
-      'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
-      'password' => ['nullable', 'confirmed', Rules\Password::defaults()],
-      'maxcam_email' => ['required', 'string', 'email', 'max:255', Rule::unique('franchises', 'maxcam_email')->ignore($franchise->id)],
-      'cnpj' => ['required', 'string', 'max:14', Rule::unique('franchises', 'cnpj')->ignore($franchise->id)],
-      'max_client' => 'required|integer|min:0',
-      'contract_start_date' => 'required|date',
-      'actuation_region' => 'required|string|max:255',
-      'document_file' => 'nullable|file|mimes:pdf,doc,docx,jpg,png|max:5120',
-      'observations' => 'nullable|string',
-    ]);
 
     $documentPath = $franchise->document_url;
     if ($request->hasFile('document_file')) {
@@ -176,21 +149,25 @@ class FranchiseController extends Controller
       $documentPath = $request->file('document_file')->store('franchise_documents', 'public');
     }
 
-    DB::transaction(function () use ($request, $user, $franchise, $documentPath) {
+    DB::transaction(function () use ($validatedData, $user, $franchise, $documentPath) {
       $userData = [
-        'name' => $request->input('name'),
-        'email' => $request->input('email'),
+        'name' => $validatedData['name'],
+        'email' => $validatedData['email'],
       ];
-      if ($request->filled('password')) {
-        $userData['password'] = Hash::make($request->input('password'));
+      if (!empty($validatedData['password'])) {
+        $userData['password'] = Hash::make($validatedData['password']);
       }
       $user->update($userData);
 
-      $franchiseData = $request->only([
-        'maxcam_email', 'cnpj', 'max_client', 'contract_start_date',
-        'actuation_region', 'observations'
-      ]);
-      $franchiseData['document_url'] = $documentPath;
+      $franchiseData = [
+        'maxcam_email' => $validatedData['maxcam_email'],
+        'cnpj' => $validatedData['cnpj'],
+        'max_client' => $validatedData['max_client'],
+        'contract_start_date' => $validatedData['contract_start_date'],
+        'actuation_region' => $validatedData['actuation_region'],
+        'observations' => $validatedData['observations'],
+        'document_url' => $documentPath,
+      ];
       $franchise->update($franchiseData);
     });
 
@@ -205,11 +182,11 @@ class FranchiseController extends Controller
       if ($franchise->document_url) {
         Storage::disk('public')->delete($franchise->document_url);
       }
+
       $user = $franchise->user;
       $franchise->delete();
-      if ($user) {
-        $user->delete();
-      }
+
+      $user?->delete();
     });
 
     return redirect()->route('franchises.index')->with('success', 'Franqueado e usuário associado excluídos com sucesso.');
