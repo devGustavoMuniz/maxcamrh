@@ -133,7 +133,7 @@ const deleteCollaborator = (collaboratorId) => {
             <Input
               type="text"
               v-model="search"
-              placeholder="Buscar por nome, email..."
+              placeholder="Buscar por nome ou email"
               class="pl-10 w-full bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-600"
             />
             <div
