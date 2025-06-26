@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -53,4 +54,21 @@ class User extends Authenticatable
   {
     return $this->hasOne(Collaborator::class);
   }
+
+    /**
+     * Aplica filtros de busca à query de usuários.
+     *
+     * @param Builder $query
+     * @param array $filters
+     * @return void
+     */
+    public function scopeWithFilters(Builder $query, array $filters): void
+    {
+        $query->when($filters['search'] ?? null, function (Builder $q, $search) {
+            $q->where(function (Builder $innerQuery) use ($search) {
+                $innerQuery->where('name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%");
+            });
+        });
+    }
 }

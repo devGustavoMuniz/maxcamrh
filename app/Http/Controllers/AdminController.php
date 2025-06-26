@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\Admins\StoreAdminAction;
+use App\Actions\Admins\UpdateAdminAction;
 use App\Enums\UserRole;
 use App\Http\Requests\StoreAdminRequest;
 use App\Http\Requests\UpdateAdminRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -17,18 +18,9 @@ class AdminController extends Controller
     {
         $this->authorize('viewAny', User::class);
 
-        $searchTerm = $request->input('search');
-
-        $query = User::where('role', UserRole::ADMIN);
-
-        if ($searchTerm) {
-            $query->where(function ($q) use ($searchTerm) {
-                $q->where('name', 'like', "%{$searchTerm}%")
-                    ->orWhere('email', 'like', "%{$searchTerm}%");
-            });
-        }
-
-        $admins = $query->orderBy('name')
+        $admins = User::where('role', UserRole::ADMIN)
+            ->withFilters($request->only('search'))
+            ->orderBy('name')
             ->paginate(10)
             ->withQueryString()
             ->through(fn ($user) => [
@@ -50,15 +42,9 @@ class AdminController extends Controller
         return Inertia::render('Admins/Create');
     }
 
-    public function store(StoreAdminRequest $request)
+    public function store(StoreAdminRequest $request, StoreAdminAction $storeAdmin)
     {
-        User::create([
-            'name' => $request->validated('name'),
-            'email' => $request->validated('email'),
-            'password' => Hash::make($request->validated('password')),
-            'role' => UserRole::ADMIN,
-            'email_verified_at' => now(),
-        ]);
+        $storeAdmin->execute($request->validated());
 
         return redirect()->route('admins.index')->with('success', 'Administrador criado com sucesso.');
     }
@@ -100,18 +86,9 @@ class AdminController extends Controller
         ]);
     }
 
-    public function update(UpdateAdminRequest $request, User $admin)
+    public function update(UpdateAdminRequest $request, User $admin, UpdateAdminAction $updateAdmin)
     {
-        $validatedData = $request->validated();
-
-        $admin->name = $validatedData['name'];
-        $admin->email = $validatedData['email'];
-
-        if (!empty($validatedData['password'])) {
-            $admin->password = Hash::make($validatedData['password']);
-        }
-
-        $admin->save();
+        $updateAdmin->execute($admin, $request->validated());
 
         return redirect()->route('admins.index')->with('success', 'Administrador atualizado com sucesso.');
     }
