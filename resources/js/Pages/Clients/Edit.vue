@@ -4,7 +4,7 @@ import { Head, useForm, Link, usePage } from "@inertiajs/vue3";
 import { Button } from "@/Components/ui/button";
 import { Input } from "@/Components/ui/input";
 import { Label } from "@/Components/ui/label";
-import { Checkbox } from "@/Components/ui/checkbox";
+// O componente Checkbox não é mais necessário aqui
 import {
     Select,
     SelectTrigger,
@@ -94,10 +94,10 @@ const submit = () => {
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div
                                 v-if="
-                  userRole === 'admin' &&
-                  props.franchises &&
-                  props.franchises.length > 0
-                "
+                                    userRole === 'admin' &&
+                                    props.franchises &&
+                                    props.franchises.length > 0
+                                "
                                 class="md:col-span-2"
                             >
                                 <Label for="franchise_id">Franqueado Associado</Label>
@@ -221,12 +221,16 @@ const submit = () => {
                                 <InputError class="mt-2" :message="form.errors.logo_file" />
                             </div>
                             <div class="flex items-center space-x-2 self-end pb-1">
-                                <Checkbox
+                                <input
+                                    type="checkbox"
                                     id="client_is_monthly_contract"
-                                    :checked="form.is_monthly_contract"
-                                    @update:checked="form.is_monthly_contract = $event"
+                                    v-model="form.is_monthly_contract"
+                                    class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                                 />
-                                <Label for="client_is_monthly_contract">Contrato Mensal?</Label>
+                                <label
+                                    for="client_is_monthly_contract"
+                                    class="text-sm font-medium text-gray-700 dark:text-gray-300"
+                                >Contrato Mensal?</label>
                                 <InputError
                                     class="mt-2"
                                     :message="form.errors.is_monthly_contract"
