@@ -15,7 +15,7 @@ class CollaboratorResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $mainAddress = $this->whenLoaded('user', fn() => $this->user->addresses?->latest()->first());
+        $mainAddress = $this->whenLoaded('user', fn() => $this->user->address);
 
         return [
             'id' => $this->id,

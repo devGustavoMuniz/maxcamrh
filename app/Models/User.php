@@ -27,7 +27,7 @@ use Illuminate\Support\Carbon;
  * @property string|null $remember_token
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
- * @property-read Address|null $addresses
+ * @property-read Address|null $address
  * @property-read Client|null $client
  * @property-read Collaborator|null $collaborator
  * @property-read Franchise|null $franchise
@@ -74,7 +74,7 @@ class User extends Authenticatable
     ];
   }
 
-  public function addresses(): HasOne
+  public function address(): HasOne
   {
     return $this->hasOne(Address::class);
   }

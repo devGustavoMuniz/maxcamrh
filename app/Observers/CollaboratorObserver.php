@@ -23,7 +23,7 @@ class CollaboratorObserver
         $user = $collaborator->user;
 
         if ($user) {
-            $user->addresses()->delete();
+            $user->address?->delete();
             $user->delete();
         }
     }

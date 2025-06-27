@@ -29,7 +29,7 @@ class CollaboratorController extends Controller
         $this->authorize('viewAny', Collaborator::class);
         $user = $request->user();
 
-        $collaborators = Collaborator::with(['user.addresses', 'client.user'])
+        $collaborators = Collaborator::with(['user.address', 'client.user'])
             ->withFilters($request->only(['search', 'client_id']))
             ->orderByDesc('created_at')
             ->paginate(10)
@@ -104,7 +104,7 @@ class CollaboratorController extends Controller
         }
 
         return Inertia::render('Collaborators/Edit', [
-            'collaborator_data' => new CollaboratorResource($collaborator->loadMissing(['user.addresses', 'client.user'])),
+            'collaborator_data' => new CollaboratorResource($collaborator->loadMissing(['user.address', 'client.user'])),
             'clients' => $clients,
         ]);
     }

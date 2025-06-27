@@ -25,7 +25,6 @@ class UpdateCollaboratorAction
         $addressData = $validated['address'] ?? null;
 
         $collaboratorUser = $collaborator->user;
-        $mainAddress = $collaboratorUser->addresses->first();
 
         if ($request->hasFile('collaborator.photo_file')) {
             if ($collaborator->photo_url) { Storage::disk('public')->delete($collaborator->photo_url); }
@@ -36,7 +35,7 @@ class UpdateCollaboratorAction
             $collaboratorData['curriculum_url'] = $request->file('collaborator.curriculum_file')->store('collaborator_curriculums', 'public');
         }
 
-        return DB::transaction(function () use ($userData, $collaboratorData, $addressData, $collaboratorUser, $collaborator, $mainAddress, $loggedInUser) {
+        return DB::transaction(function () use ($userData, $collaboratorData, $addressData, $collaboratorUser, $collaborator, $loggedInUser) {
             if (!empty($userData['password'])) {
                 $userData['password'] = Hash::make($userData['password']);
             } else {
@@ -50,11 +49,7 @@ class UpdateCollaboratorAction
             $collaborator->update($collaboratorData);
 
             if ($addressData && !empty(array_filter($addressData))) {
-                if ($mainAddress) {
-                    $mainAddress->update($addressData);
-                } else {
-                    $collaboratorUser->addresses()->create($addressData);
-                }
+                $collaboratorUser->address()->updateOrCreate([], $addressData);
             }
 
             return true;

@@ -48,7 +48,7 @@ class StoreCollaboratorAction
             $user->collaborator()->create($collaboratorData);
 
             if ($addressData && !empty(array_filter($addressData))) {
-                $user->addresses()->create($addressData);
+                $user->address()->create($addressData);
             }
 
             return $user;
