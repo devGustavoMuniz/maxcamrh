@@ -10,30 +10,30 @@ class ClientPolicy
 {
     public function viewAny(User $user): bool
     {
-      return $user->role === 'admin' || $user->role === 'franchise';
+      return $user->role->value === 'admin' || $user->role->value === 'franchise';
     }
 
     public function view(User $user, Client $client): bool
     {
-      if ($user->role === 'admin') return true;
-      return $user->role === 'franchise' && $client->franchise_id === $user->franchise->id;
+      if ($user->role->value === 'admin') return true;
+      return $user->role->value === 'franchise' && $client->franchise_id === $user->franchise->id;
     }
 
     public function create(User $user): bool
     {
-      return $user->role === 'admin' || $user->role === 'franchise';
+      return $user->role->value === 'admin' || $user->role->value === 'franchise';
     }
 
     public function update(User $user, Client $client): bool
     {
-      if ($user->role === 'admin') return true;
-      return $user->role === 'franchise' && $client->franchise_id === $user->franchise->id;
+      if ($user->rol->valuee === 'admin') return true;
+      return $user->role->value === 'franchise' && $client->franchise_id === $user->franchise->id;
     }
 
     public function delete(User $user, Client $client): bool
     {
-      if ($user->role === 'admin') return true;
-      return $user->role === 'franchise' && $client->franchise_id === $user->franchise->id;
+      if ($user->role->value === 'admin') return true;
+      return $user->role->value === 'franchise' && $client->franchise_id === $user->franchise->id;
     }
 
     public function restore(User $user, Client $client): bool

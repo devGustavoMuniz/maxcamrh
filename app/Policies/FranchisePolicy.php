@@ -15,7 +15,7 @@ class FranchisePolicy
 
   public function view(User $user, Franchise $franchise): bool
   {
-    if ($user->role === 'franchise') {
+    if ($user->role->value === 'franchise') {
       return $user->franchise && $franchise->id === $user->franchise->id;
     }
     return false;
@@ -28,7 +28,7 @@ class FranchisePolicy
 
   public function update(User $user, Franchise $franchise): bool
   {
-    if ($user->role === 'franchise') {
+    if ($user->role->value === 'franchise') {
       return $user->franchise && $franchise->id === $user->franchise->id;
     }
     return false;
