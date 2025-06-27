@@ -4,66 +4,91 @@ namespace App\Policies;
 
 use App\Models\Collaborator;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
+use App\Enums\UserRole;
 
 class CollaboratorPolicy
 {
-  public function viewAny(User $user): bool
-  {
-    return $user->role === 'franchise' || $user->role === 'client';
-  }
-
-  public function view(User $user, Collaborator $collaborator): bool
-  {
-    if ($user->role === 'franchise') {
-      return $collaborator->client && $user->franchise && $collaborator->client->franchise_id === $user->franchise->id;
+    /**
+     * Determine whether the user can view any models.
+     * Todos os perfis podem, em teoria, acessar a listagem (a query no controller fará o filtro correto).
+     */
+    public function viewAny(User $user): bool
+    {
+        return in_array($user->role, [
+            UserRole::ADMIN,
+            UserRole::FRANCHISE,
+            UserRole::CLIENT,
+        ]);
     }
 
-    if ($user->role === 'client') {
-      return $user->client && $collaborator->client_id === $user->client->id;
+    /**
+     * Determine whether the user can view the model.
+     * Admin: pode ver qualquer um.
+     * Franqueado: pode ver colaboradores de clientes da sua franquia.
+     * Cliente: pode ver seus próprios colaboradores.
+     */
+    public function view(User $user, Collaborator $collaborator): bool
+    {
+        if ($user->role === UserRole::ADMIN) {
+            return true;
+        }
+
+        if ($user->role === UserRole::FRANCHISE) {
+            // Verifica se o colaborador tem um cliente e se esse cliente pertence à franquia do usuário.
+            return $collaborator->client?->franchise_id === $user->franchise?->id;
+        }
+
+        if ($user->role === UserRole::CLIENT) {
+            return $collaborator->client_id === $user->client?->id;
+        }
+
+        return false;
     }
 
-    return false;
-  }
-
-  public function create(User $user): bool
-  {
-    return $user->role === 'franchise' || $user->role === 'client';
-  }
-
-  public function update(User $user, Collaborator $collaborator): bool
-  {
-    if ($user->role === 'franchise') {
-      return $collaborator->client && $user->franchise && $collaborator->client->franchise_id === $user->franchise->id;
+    /**
+     * Determine whether the user can create models.
+     * Admins, Franqueados e Clientes podem criar colaboradores.
+     */
+    public function create(User $user): bool
+    {
+        return in_array($user->role, [
+            UserRole::ADMIN,
+            UserRole::FRANCHISE,
+            UserRole::CLIENT,
+        ]);
     }
 
-    if ($user->role === 'client') {
-      return $user->client && $collaborator->client_id === $user->client->id;
+    /**
+     * Determine whether the user can update the model.
+     * Mesmas regras da visualização (view).
+     */
+    public function update(User $user, Collaborator $collaborator): bool
+    {
+        return $this->view($user, $collaborator);
     }
 
-    return false;
-  }
-
-  public function delete(User $user, Collaborator $collaborator): bool
-  {
-    if ($user->role === 'franchise') {
-      return $collaborator->client && $user->franchise && $collaborator->client->franchise_id === $user->franchise->id;
+    /**
+     * Determine whether the user can delete the model.
+     * Mesmas regras da visualização (view).
+     */
+    public function delete(User $user, Collaborator $collaborator): bool
+    {
+        return $this->view($user, $collaborator);
     }
 
-    if ($user->role === 'client') {
-      return $user->client && $collaborator->client_id === $user->client->id;
+    /**
+     * Determine whether the user can restore the model.
+     */
+    public function restore(User $user, Collaborator $collaborator): bool
+    {
+        return $this->view($user, $collaborator);
     }
 
-    return false;
-  }
-
-  public function restore(User $user, Collaborator $collaborator): bool
-  {
-    return $this->update($user, $collaborator);
-  }
-
-  public function forceDelete(User $user, Collaborator $collaborator): bool
-  {
-    return $this->delete($user, $collaborator);
-  }
+    /**
+     * Determine whether the user can permanently delete the model.
+     */
+    public function forceDelete(User $user, Collaborator $collaborator): bool
+    {
+        return $this->view($user, $collaborator);
+    }
 }

@@ -16,36 +16,37 @@ use Illuminate\Support\Facades\Gate;
 
 class AuthServiceProvider extends ServiceProvider
 {
-  protected $policies = [
-    Client::class => ClientPolicy::class,
-    Collaborator::class => CollaboratorPolicy::class,
-    Franchise::class => FranchisePolicy::class,
-    User::class => UserPolicy::class,
-  ];
+    protected $policies = [
+        Client::class => ClientPolicy::class,
+        Collaborator::class => CollaboratorPolicy::class,
+        Franchise::class => FranchisePolicy::class,
+        User::class => UserPolicy::class,
+    ];
 
-  public function boot(): void
-  {
-    $this->registerPolicies();
+    public function boot(): void
+    {
+        Gate::before(function (User $user, string $ability) {
+            if ($user->role === UserRole::ADMIN) {
+                return true;
+            }
 
-    Gate::before(function (User $user, string $ability) {
-      $userRoleValue = ($user->role instanceof UserRole) ? $user->role->value : $user->role;
-      return ($userRoleValue === UserRole::ADMIN->value);
-    });
+            return null;
+        });
 
-    Gate::define('access-clients-module', function (User $user) {
-       return $user->role === 'admin' || $user->role === 'franchise';
-    });
+        Gate::define('access-clients-module', function (User $user) {
+            return $user->role === UserRole::ADMIN || $user->role === UserRole::FRANCHISE;
+        });
 
-    Gate::define('access-collaborators-module', function (User $user) {
-       return $user->role === 'admin' || $user->role === 'franchise' || $user->role === 'client';
-    });
+        Gate::define('access-collaborators-module', function (User $user) {
+            return in_array($user->role, [UserRole::ADMIN, UserRole::FRANCHISE, UserRole::CLIENT]);
+        });
 
-    Gate::define('access-franchises-module', function (User $user) {
-       return $user->role === 'admin';
-    });
+        Gate::define('access-franchises-module', function (User $user) {
+            return $user->role === UserRole::ADMIN;
+        });
 
-    Gate::define('access-admins-module', function (User $user) {
-       return $user->role === 'admin';
-    });
-  }
+        Gate::define('access-admins-module', function (User $user) {
+            return $user->role === UserRole::ADMIN;
+        });
+    }
 }
