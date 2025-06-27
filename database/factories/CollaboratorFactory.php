@@ -2,9 +2,6 @@
 
 namespace Database\Factories;
 
-use App\Models\Collaborator;
-use App\Models\User;
-use App\Models\Client;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class CollaboratorFactory extends Factory

@@ -9,9 +9,13 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Throwable;
 
 class UpdateClientAction
 {
+    /**
+     * @throws Throwable
+     */
     public function execute(Client $client, array $data, ?UploadedFile $logoFile, User $loggedInUser): bool
     {
         $logoPath = $client->logo_url;
@@ -23,7 +27,6 @@ class UpdateClientAction
         }
 
         return DB::transaction(function () use ($client, $data, $logoPath, $loggedInUser) {
-            /** @var User $clientUser */
             $clientUser = $client->user;
 
             $clientUser->update([

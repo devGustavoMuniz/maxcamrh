@@ -7,15 +7,16 @@ use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Throwable;
 
 class StoreClientAction
 {
+    /**
+     * @throws Throwable
+     */
     public function execute(array $data, ?UploadedFile $logoFile, User $loggedInUser): User
     {
-        $logoPath = null;
-        if ($logoFile) {
-            $logoPath = $logoFile->store('client_logos', 'public');
-        }
+        $logoPath = $logoFile?->store('client_logos', 'public');
 
         return DB::transaction(function () use ($data, $logoPath, $loggedInUser) {
             $clientUser = User::create([
@@ -38,7 +39,9 @@ class StoreClientAction
 
             if ($loggedInUser->role === UserRole::ADMIN) {
                 $clientData['franchise_id'] = $data['franchise_id'] ?? null;
-            } elseif ($loggedInUser->role === UserRole::FRANCHISE) {
+            }
+
+            if ($loggedInUser->role === UserRole::FRANCHISE) {
                 $clientData['franchise_id'] = $loggedInUser->franchise_id;
             }
 

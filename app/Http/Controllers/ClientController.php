@@ -10,7 +10,8 @@ use App\Http\Requests\UpdateClientRequest;
 use App\Http\Resources\ClientResource;
 use App\Models\Client;
 use App\Models\Franchise;
-use App\Models\User;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
@@ -18,10 +19,12 @@ use Inertia\Response;
 
 class ClientController extends Controller
 {
+    /**
+     * @throws AuthorizationException
+     */
     public function index(Request $request): Response
     {
         $this->authorize('viewAny', Client::class);
-        /** @var User $user */
         $user = $request->user();
 
         $clients = Client::with(['user', 'franchise.user'])
@@ -45,6 +48,9 @@ class ClientController extends Controller
         ]);
     }
 
+    /**
+     * @throws AuthorizationException
+     */
     public function create(): Response
     {
         $this->authorize('create', Client::class);
@@ -64,7 +70,10 @@ class ClientController extends Controller
         ]);
     }
 
-    public function store(StoreClientRequest $request, StoreClientAction $storeClient)
+    /**
+     * @throws \Throwable
+     */
+    public function store(StoreClientRequest $request, StoreClientAction $storeClient): RedirectResponse
     {
         $storeClient->execute(
             $request->validated(),
@@ -75,6 +84,9 @@ class ClientController extends Controller
         return redirect()->route('clients.index')->with('success', 'Cliente criado com sucesso.');
     }
 
+    /**
+     * @throws AuthorizationException
+     */
     public function edit(Client $client): Response
     {
         $this->authorize('update', $client);
@@ -107,7 +119,10 @@ class ClientController extends Controller
         return redirect()->route('clients.index')->with('success', 'Cliente atualizado com sucesso.');
     }
 
-    public function destroy(Client $client)
+    /**
+     * @throws AuthorizationException
+     */
+    public function destroy(Client $client): RedirectResponse
     {
         $this->authorize('delete', $client);
 

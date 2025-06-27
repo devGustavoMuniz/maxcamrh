@@ -3,7 +3,6 @@
 namespace Database\Factories;
 
 use App\Models\Franchise;
-use App\Models\User; // Necessário se for criar um User aqui
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class FranchiseFactory extends Factory
@@ -24,8 +23,6 @@ class FranchiseFactory extends Factory
   public function configure(): static
   {
     return $this->afterCreating(function (Franchise $franchise) {
-      if (!$franchise->user_id) {
-      }
     });
   }
 }

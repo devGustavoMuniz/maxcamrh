@@ -3,22 +3,24 @@
 namespace App\Models;
 
 use App\Enums\UserRole;
-use App\Models\User;
+use Database\Factories\CollaboratorFactory;
+use Eloquent;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 
 /**
- * 
+ *
  *
  * @property string $id
  * @property string $user_id
  * @property string|null $client_id
  * @property string|null $photo_url
  * @property string|null $curriculum_url
- * @property \Illuminate\Support\Carbon|null $date_of_birth
+ * @property Carbon|null $date_of_birth
  * @property string|null $gender
  * @property bool $is_special_needs_person
  * @property string|null $marital_status
@@ -35,12 +37,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string|null $position
  * @property string|null $type_of_contract
  * @property numeric|null $salary
- * @property \Illuminate\Support\Carbon|null $admission_date
+ * @property Carbon|null $admission_date
  * @property string|null $direct_superior_name
  * @property string|null $hierarchical_degree
  * @property string|null $observations
- * @property \Illuminate\Support\Carbon|null $contract_start_date
- * @property \Illuminate\Support\Carbon|null $contract_expiration
+ * @property Carbon|null $contract_start_date
+ * @property Carbon|null $contract_expiration
  * @property string|null $cpf
  * @property string|null $rg
  * @property string|null $cnh
@@ -52,11 +54,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string|null $banco
  * @property string|null $agencia
  * @property string|null $conta_corrente
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \App\Models\Client|null $client
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property-read Client|null $client
  * @property-read User $user
- * @method static \Database\Factories\CollaboratorFactory factory($count = null, $state = [])
+ * @method static CollaboratorFactory factory($count = null, $state = [])
  * @method static Builder<static>|Collaborator newModelQuery()
  * @method static Builder<static>|Collaborator newQuery()
  * @method static Builder<static>|Collaborator query()
@@ -102,7 +104,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @method static Builder<static>|Collaborator whereUserId($value)
  * @method static Builder<static>|Collaborator whereZonaEleitoral($value)
  * @method static Builder<static>|Collaborator withFilters(array $filters)
- * @mixin \Eloquent
+ * @mixin Eloquent
  */
 class Collaborator extends Model
 {
@@ -189,7 +191,6 @@ class Collaborator extends Model
             $q->where('client_id', $clientId);
         });
 
-        /** @var User|null $user */
         $user = auth()->user();
         if (!$user) return;
 
@@ -201,7 +202,8 @@ class Collaborator extends Model
             } else {
                 $query->whereRaw('1 = 0');
             }
-        } elseif ($user->role === UserRole::CLIENT) {
+        }
+        if ($user->role === UserRole::CLIENT) {
             if ($user->client) {
                 $query->where('client_id', $user->client->id);
             } else {

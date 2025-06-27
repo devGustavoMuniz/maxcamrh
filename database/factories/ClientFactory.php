@@ -2,9 +2,6 @@
 
 namespace Database\Factories;
 
-use App\Models\Client;
-use App\Models\User;
-use App\Models\Franchise;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class ClientFactory extends Factory

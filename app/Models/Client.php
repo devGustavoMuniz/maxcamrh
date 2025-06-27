@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Enums\UserRole;
+use Database\Factories\ClientFactory;
+use Eloquent;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -11,7 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
- * 
+ *
  *
  * @property string $id
  * @property string $user_id
@@ -28,7 +30,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read int|null $collaborators_count
  * @property-read \App\Models\Franchise|null $franchise
  * @property-read \App\Models\User $user
- * @method static \Database\Factories\ClientFactory factory($count = null, $state = [])
+ * @method static ClientFactory factory($count = null, $state = [])
  * @method static Builder<static>|Client newModelQuery()
  * @method static Builder<static>|Client newQuery()
  * @method static Builder<static>|Client query()
@@ -44,7 +46,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @method static Builder<static>|Client whereUpdatedAt($value)
  * @method static Builder<static>|Client whereUserId($value)
  * @method static Builder<static>|Client withFilters(array $filters)
- * @mixin \Eloquent
+ * @mixin Eloquent
  */
 class Client extends Model
 {

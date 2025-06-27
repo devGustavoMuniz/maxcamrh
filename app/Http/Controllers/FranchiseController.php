@@ -8,12 +8,18 @@ use App\Http\Requests\StoreFranchiseRequest;
 use App\Http\Requests\UpdateFranchiseRequest;
 use App\Http\Resources\FranchiseResource;
 use App\Models\Franchise;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
+use Throwable;
 
 class FranchiseController extends Controller
 {
+    /**
+     * @throws AuthorizationException
+     */
     public function index(Request $request): Response
     {
         $this->authorize('viewAny', Franchise::class);
@@ -30,13 +36,19 @@ class FranchiseController extends Controller
         ]);
     }
 
+    /**
+     * @throws AuthorizationException
+     */
     public function create(): Response
     {
         $this->authorize('create', Franchise::class);
         return Inertia::render('Franchises/Create');
     }
 
-    public function store(StoreFranchiseRequest $request, StoreFranchiseAction $storeFranchise)
+    /**
+     * @throws Throwable
+     */
+    public function store(StoreFranchiseRequest $request, StoreFranchiseAction $storeFranchise): RedirectResponse
     {
         $storeFranchise->execute(
             $request->validated(),
@@ -46,6 +58,9 @@ class FranchiseController extends Controller
         return redirect()->route('franchises.index')->with('success', 'Franqueado e usuário associado criados com sucesso.');
     }
 
+    /**
+     * @throws AuthorizationException
+     */
     public function edit(Franchise $franchise): Response
     {
         $this->authorize('update', $franchise);
@@ -54,7 +69,7 @@ class FranchiseController extends Controller
         ]);
     }
 
-    public function update(UpdateFranchiseRequest $request, Franchise $franchise, UpdateFranchiseAction $updateFranchise)
+    public function update(UpdateFranchiseRequest $request, Franchise $franchise, UpdateFranchiseAction $updateFranchise): RedirectResponse
     {
         $updateFranchise->execute(
             $franchise,
@@ -65,7 +80,10 @@ class FranchiseController extends Controller
         return redirect()->route('franchises.index')->with('success', 'Franqueado atualizado com sucesso.');
     }
 
-    public function destroy(Franchise $franchise)
+    /**
+     * @throws AuthorizationException
+     */
+    public function destroy(Franchise $franchise): RedirectResponse
     {
         $this->authorize('delete', $franchise);
 

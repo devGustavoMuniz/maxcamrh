@@ -7,9 +7,13 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Throwable;
 
 class StoreCollaboratorAction
 {
+    /**
+     * @throws Throwable
+     */
     public function execute(Request $request): User
     {
         $validated = $request->validated();

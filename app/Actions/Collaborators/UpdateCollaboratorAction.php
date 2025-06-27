@@ -3,15 +3,18 @@
 namespace App\Actions\Collaborators;
 
 use App\Models\Collaborator;
-use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use App\Enums\UserRole;
+use Throwable;
 
 class UpdateCollaboratorAction
 {
+    /**
+     * @throws Throwable
+     */
     public function execute(Collaborator $collaborator, Request $request): bool
     {
         $validated = $request->validated();
@@ -21,7 +24,6 @@ class UpdateCollaboratorAction
         $collaboratorData = $validated['collaborator'];
         $addressData = $validated['address'] ?? null;
 
-        /** @var User $collaboratorUser */
         $collaboratorUser = $collaborator->user;
         $mainAddress = $collaboratorUser->addresses->first();
 

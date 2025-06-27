@@ -22,7 +22,6 @@ class UpdateFranchiseAction
         }
 
         return DB::transaction(function () use ($franchise, $data, $documentPath) {
-            /** @var User $user */
             $user = $franchise->user;
 
             $userData = [

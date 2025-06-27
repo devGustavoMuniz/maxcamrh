@@ -7,9 +7,13 @@ use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Throwable;
 
 class StoreFranchiseAction
 {
+    /**
+     * @throws Throwable
+     */
     public function execute(array $data, ?UploadedFile $documentFile): User
     {
         $documentPath = $documentFile?->store('franchise_documents', 'public');

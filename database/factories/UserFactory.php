@@ -7,7 +7,7 @@ use App\Models\Franchise;
 use App\Models\Client;
 use App\Models\Collaborator;
 use App\Models\Address;
-use App\Enums\UserRole; // Importe seu Enum UserRole
+use App\Enums\UserRole;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;

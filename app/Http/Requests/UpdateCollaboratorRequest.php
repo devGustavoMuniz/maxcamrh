@@ -4,8 +4,6 @@ namespace App\Http\Requests;
 
 use App\Enums\UserRole;
 use App\Models\Client;
-use App\Models\Collaborator;
-use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules;
@@ -19,9 +17,7 @@ class UpdateCollaboratorRequest extends FormRequest
 
     public function rules(): array
     {
-        /** @var Collaborator $collaborator */
         $collaborator = $this->route('collaborator');
-        /** @var User $collaboratorUser */
         $collaboratorUser = $collaborator->user;
 
         $rules = [

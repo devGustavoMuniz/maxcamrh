@@ -9,12 +9,17 @@ use App\Http\Requests\StoreAdminRequest;
 use App\Http\Requests\UpdateAdminRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class AdminController extends Controller
 {
+    /**
+     * @throws AuthorizationException
+     */
     public function index(Request $request): Response
     {
         $this->authorize('viewAny', User::class);
@@ -31,20 +36,23 @@ class AdminController extends Controller
         ]);
     }
 
+    /**
+     * @throws AuthorizationException
+     */
     public function create(): Response
     {
         $this->authorize('create', User::class);
         return Inertia::render('Admins/Create');
     }
 
-    public function store(StoreAdminRequest $request, StoreAdminAction $storeAdmin)
+    public function store(StoreAdminRequest $request, StoreAdminAction $storeAdmin): RedirectResponse
     {
         $storeAdmin->execute($request->validated());
 
         return redirect()->route('admins.index')->with('success', 'Administrador criado com sucesso.');
     }
 
-    public function edit(User $admin)
+    public function edit(User $admin): Response
     {
         $this->authorize('update', $admin);
 
@@ -57,14 +65,17 @@ class AdminController extends Controller
         ]);
     }
 
-    public function update(UpdateAdminRequest $request, User $admin, UpdateAdminAction $updateAdmin)
+    public function update(UpdateAdminRequest $request, User $admin, UpdateAdminAction $updateAdmin): RedirectResponse
     {
         $updateAdmin->execute($admin, $request->validated());
 
         return redirect()->route('admins.index')->with('success', 'Administrador atualizado com sucesso.');
     }
 
-    public function destroy(User $admin)
+    /**
+     * @throws AuthorizationException
+     */
+    public function destroy(User $admin): RedirectResponse
     {
         $this->authorize('delete', $admin);
 

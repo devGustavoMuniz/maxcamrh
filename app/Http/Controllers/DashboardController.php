@@ -20,25 +20,29 @@ class DashboardController extends Controller
     $stats = [];
 
     if ($user->role === UserRole::ADMIN) {
-      $stats['totalAdmins'] = User::where('role', UserRole::ADMIN)->count();
-      $stats['totalFranchises'] = Franchise::count();
-      $stats['totalClients'] = Client::count();
-      $stats['totalCollaborators'] = Collaborator::count();
-    } elseif ($user->role === UserRole::FRANCHISE) {
-      if ($user->franchise) {
-        $clientIds = $user->franchise->clients()->pluck('id');
-        $stats['myTotalClients'] = $clientIds->count();
-        $stats['myTotalCollaborators'] = Collaborator::whereIn('client_id', $clientIds)->count();
-      } else {
-        $stats['myTotalClients'] = 0;
-        $stats['myTotalCollaborators'] = 0;
-      }
-    } elseif ($user->role === UserRole::CLIENT) {
-      if ($user->client) {
-        $stats['myCompanyCollaborators'] = $user->client->collaborators()->count();
-      } else {
-        $stats['myCompanyCollaborators'] = 0;
-      }
+        $stats['totalAdmins'] = User::where('role', UserRole::ADMIN)->count();
+        $stats['totalFranchises'] = Franchise::count();
+        $stats['totalClients'] = Client::count();
+        $stats['totalCollaborators'] = Collaborator::count();
+    }
+
+    if ($user->role === UserRole::FRANCHISE) {
+        if ($user->franchise) {
+            $clientIds = $user->franchise->clients()->pluck('id');
+            $stats['myTotalClients'] = $clientIds->count();
+            $stats['myTotalCollaborators'] = Collaborator::whereIn('client_id', $clientIds)->count();
+        } else {
+            $stats['myTotalClients'] = 0;
+            $stats['myTotalCollaborators'] = 0;
+        }
+    }
+
+    if ($user->role === UserRole::CLIENT) {
+        if ($user->client) {
+            $stats['myCompanyCollaborators'] = $user->client->collaborators()->count();
+        } else {
+            $stats['myCompanyCollaborators'] = 0;
+        }
     }
 
     return Inertia::render('Dashboard', [
