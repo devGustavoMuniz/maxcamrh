@@ -27,7 +27,7 @@ use Illuminate\Support\Carbon;
  * @property string $observations
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
- * @property-read Collection<int, \App\Models\Client> $clients
+ * @property-read Collection<int, Client> $clients
  * @property-read int|null $clients_count
  * @property-read User $user
  * @method static FranchiseFactory factory($count = null, $state = [])
@@ -89,12 +89,12 @@ class Franchise extends Model
     {
         $query->when($filters['search'] ?? null, function (Builder $q, $search) {
             $q->where(function (Builder $innerQuery) use ($search) {
-                $innerQuery->where('cnpj', 'like', "%{$search}%")
-                    ->orWhere('maxcam_email', 'like', "%{$search}%")
-                    ->orWhere('actuation_region', 'like', "%{$search}%")
+                $innerQuery->where('cnpj', 'like', "%$search%")
+                    ->orWhere('maxcam_email', 'like', "%$search%")
+                    ->orWhere('actuation_region', 'like', "%$search%")
                     ->orWhereHas('user', function (Builder $userQuery) use ($search) {
-                        $userQuery->where('name', 'like', "%{$search}%")
-                            ->orWhere('email', 'like', "%{$search}%");
+                        $userQuery->where('name', 'like', "%$search%")
+                            ->orWhere('email', 'like', "%$search%");
                     });
             });
         });

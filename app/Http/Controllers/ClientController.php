@@ -16,6 +16,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
+use Throwable;
 
 class ClientController extends Controller
 {
@@ -71,7 +72,7 @@ class ClientController extends Controller
     }
 
     /**
-     * @throws \Throwable
+     * @throws Throwable
      */
     public function store(StoreClientRequest $request, StoreClientAction $storeClient): RedirectResponse
     {

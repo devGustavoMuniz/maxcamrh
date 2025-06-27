@@ -6,11 +6,13 @@ use App\Enums\UserRole;
 use Database\Factories\ClientFactory;
 use Eloquent;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 
 /**
  *
@@ -20,16 +22,16 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string|null $franchise_id
  * @property string $cnpj
  * @property string $test_number
- * @property \Illuminate\Support\Carbon $contract_end_date
+ * @property Carbon $contract_end_date
  * @property bool $is_monthly_contract
  * @property string $phone
  * @property string $logo_url
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Collaborator> $collaborators
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property-read Collection<int, Collaborator> $collaborators
  * @property-read int|null $collaborators_count
- * @property-read \App\Models\Franchise|null $franchise
- * @property-read \App\Models\User $user
+ * @property-read Franchise|null $franchise
+ * @property-read User $user
  * @method static ClientFactory factory($count = null, $state = [])
  * @method static Builder<static>|Client newModelQuery()
  * @method static Builder<static>|Client newQuery()
@@ -95,8 +97,8 @@ class Client extends Model
         $query->when($filters['search'] ?? null, function (Builder $q, $search) {
             $q->whereHas('user', function (Builder $userQuery) use ($search) {
                 $lowerSearchTerm = strtolower($search);
-                $userQuery->whereRaw('LOWER(name) LIKE ?', ["%{$lowerSearchTerm}%"])
-                    ->orWhereRaw('LOWER(email) LIKE ?', ["%{$lowerSearchTerm}%"]);
+                $userQuery->whereRaw('LOWER(name) LIKE ?', ["%$lowerSearchTerm%"])
+                    ->orWhereRaw('LOWER(email) LIKE ?', ["%$lowerSearchTerm%"]);
             });
         });
 
