@@ -97,8 +97,8 @@ class Client extends Model
         $query->when($filters['search'] ?? null, function (Builder $q, $search) {
             $q->whereHas('user', function (Builder $userQuery) use ($search) {
                 $lowerSearchTerm = strtolower($search);
-                $userQuery->whereRaw('LOWER(name) LIKE ?', ["%$lowerSearchTerm%"])
-                    ->orWhereRaw('LOWER(email) LIKE ?', ["%$lowerSearchTerm%"]);
+                $userQuery->whereRaw('LOWER(name) LIKE ?', ["%{$lowerSearchTerm}%"])
+                    ->orWhereRaw('LOWER(email) LIKE ?', ["%{$lowerSearchTerm}%"]);
             });
         });
 
@@ -106,8 +106,15 @@ class Client extends Model
             $q->where('franchise_id', $franchiseId);
         });
 
+        /** @var User|null $user */
         $user = auth()->user();
-        if (!$user) return;
+        if (!$user) {
+            return;
+        }
+
+        if ($user->role === UserRole::FRANCHISE) {
+            $query->where('franchise_id', $user->franchise?->id);
+        }
 
         if ($user->role === UserRole::CLIENT) {
             $query->where('id', $user->client_id);
