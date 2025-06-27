@@ -74,7 +74,7 @@ const userRole = computed(() => currentUser.value?.role);
             </CardHeader>
             <CardContent>
               <div class="text-2xl font-bold">
-                {{ props.stats?.totalAdmins || "N/A" }}
+                {{ props.stats?.totalAdmins }}
               </div>
               <p class="text-xs text-muted-foreground">
                 Usuários com perfil de admin
@@ -99,7 +99,7 @@ const userRole = computed(() => currentUser.value?.role);
             </CardHeader>
             <CardContent>
               <div class="text-2xl font-bold">
-                {{ props.stats?.totalFranchises || "N/A" }}
+                {{ props.stats?.totalFranchises }}
               </div>
               <p class="text-xs text-muted-foreground">
                 Total de unidades franqueadas
@@ -124,7 +124,7 @@ const userRole = computed(() => currentUser.value?.role);
             </CardHeader>
             <CardContent>
               <div class="text-2xl font-bold">
-                {{ props.stats?.totalClients || "N/A" }}
+                {{ props.stats?.totalClients }}
               </div>
               <p class="text-xs text-muted-foreground">
                 Total de clientes ativos
@@ -149,7 +149,7 @@ const userRole = computed(() => currentUser.value?.role);
             </CardHeader>
             <CardContent>
               <div class="text-2xl font-bold">
-                {{ props.stats?.totalCollaborators || "N/A" }}
+                {{ props.stats?.totalCollaborators }}
               </div>
               <p class="text-xs text-muted-foreground">
                 Total de colaboradores registrados
@@ -177,7 +177,7 @@ const userRole = computed(() => currentUser.value?.role);
             </CardHeader>
             <CardContent>
               <div class="text-2xl font-bold">
-                {{ props.stats?.myTotalClients || "N/A" }}
+                {{ props.stats?.myTotalClients }}
               </div>
               <p class="text-xs text-muted-foreground">
                 Clientes vinculados à sua franquia
@@ -204,7 +204,7 @@ const userRole = computed(() => currentUser.value?.role);
             </CardHeader>
             <CardContent>
               <div class="text-2xl font-bold">
-                {{ props.stats?.myTotalCollaborators || "N/A" }}
+                {{ props.stats?.myTotalCollaborators }}
               </div>
               <p class="text-xs text-muted-foreground">
                 Colaboradores dos seus clientes
