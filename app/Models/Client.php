@@ -97,8 +97,8 @@ class Client extends Model
         $query->when($filters['search'] ?? null, function (Builder $q, $search) {
             $q->whereHas('user', function (Builder $userQuery) use ($search) {
                 $lowerSearchTerm = strtolower($search);
-                $userQuery->whereRaw('LOWER(name) LIKE ?', ["%{$lowerSearchTerm}%"])
-                    ->orWhereRaw('LOWER(email) LIKE ?', ["%{$lowerSearchTerm}%"]);
+                $userQuery->whereRaw('LOWER(name) LIKE ?', ["%$lowerSearchTerm%"])
+                    ->orWhereRaw('LOWER(email) LIKE ?', ["%$lowerSearchTerm%"]);
             });
         });
 
