@@ -78,5 +78,5 @@ Siga estas instruções na ordem exata. Todos os comandos devem ser executados n
 
 11. **Para Parar os Contêineres:**
     ```bash
-    ./vendor/bin/sail down
+    sail down
     ```
