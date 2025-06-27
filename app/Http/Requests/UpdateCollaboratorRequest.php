@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Enums\UserRole;
+use App\Http\Requests\Traits\FormatMoney;
 use App\Models\Client;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -10,9 +11,22 @@ use Illuminate\Validation\Rules;
 
 class UpdateCollaboratorRequest extends FormRequest
 {
+    use FormatMoney;
+
     public function authorize(): bool
     {
         return $this->user()->can('update', $this->route('collaborator'));
+    }
+
+    protected function prepareForValidation(): void
+    {
+        if ($this->has('collaborator.salary')) {
+            $this->merge([
+                'collaborator' => array_merge($this->collaborator, [
+                    'salary' => $this->cleanMoneyValue($this->input('collaborator.salary'))
+                ]),
+            ]);
+        }
     }
 
     public function rules(): array

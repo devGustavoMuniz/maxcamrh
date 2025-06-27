@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Enums\UserRole;
+use App\Http\Requests\Traits\FormatMoney;
 use App\Models\Client;
 use App\Models\Collaborator;
 use Illuminate\Contracts\Validation\ValidationRule;
@@ -12,19 +13,24 @@ use Illuminate\Validation\Rules;
 
 class StoreCollaboratorRequest extends FormRequest
 {
-  /**
-   * Determine if the user is authorized to make this request.
-   */
+    use FormatMoney;
+
   public function authorize(): bool
   {
     return $this->user()->can('create', Collaborator::class);
   }
 
-  /**
-   * Get the validation rules that apply to the request.
-   *
-   * @return array<string, ValidationRule|array|string>
-   */
+    protected function prepareForValidation(): void
+    {
+        if ($this->has('collaborator.salary')) {
+            $this->merge([
+                'collaborator' => array_merge($this->collaborator, [
+                    'salary' => $this->cleanMoneyValue($this->input('collaborator.salary'))
+                ]),
+            ]);
+        }
+    }
+
   public function rules(): array
   {
     $rules = [

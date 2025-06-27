@@ -39,7 +39,7 @@ class CollaboratorResource extends JsonResource
             'department' => $this->department,
             'position' => $this->position,
             'type_of_contract' => $this->type_of_contract,
-            'salary' => $this->salary,
+            'salary' => $this->salary ? number_format($this->salary, 2, ',', '') : null,
             'admission_date' => $this->admission_date?->format('Y-m-d'),
             'direct_superior_name' => $this->direct_superior_name,
             'hierarchical_degree' => $this->hierarchical_degree,

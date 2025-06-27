@@ -6,16 +6,15 @@ import { Button } from "@/Components/ui/button";
 import { Input } from "@/Components/ui/input";
 import { Label } from "@/Components/ui/label";
 import { Textarea } from "@/Components/ui/textarea";
-import { Checkbox } from "@/Components/ui/checkbox";
 import {
     Select,
     SelectContent,
     SelectItem,
     SelectTrigger,
     SelectValue,
+    SelectGroup,
 } from "@/Components/ui/select";
 import InputError from "@/Components/InputError.vue";
-import SelectGroup from "@/Components/ui/select/SelectGroup.vue";
 
 const props = defineProps({
     collaborator_data: Object,
@@ -354,16 +353,16 @@ async function fetchAddressByCep() {
                                 />
                             </div>
                             <div class="flex items-center space-x-2 self-end pb-1">
-                                <Checkbox
+                                <input
+                                    type="checkbox"
                                     id="collaborator_is_special_needs_person_edit"
-                                    :checked="form.collaborator.is_special_needs_person"
-                                    @update:checked="
-                    form.collaborator.is_special_needs_person = $event
-                  "
+                                    v-model="form.collaborator.is_special_needs_person"
+                                    class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                                 />
-                                <Label for="collaborator_is_special_needs_person_edit"
-                                >PCD?</Label
-                                >
+                                <label
+                                    for="collaborator_is_special_needs_person_edit"
+                                    class="text-sm font-medium text-gray-700 dark:text-gray-300"
+                                >PCD?</label>
                             </div>
                             <div class="md:col-span-2 pt-4 border-t dark:border-gray-700">
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
