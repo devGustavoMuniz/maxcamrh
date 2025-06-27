@@ -45,7 +45,7 @@ class ClientController extends Controller
         return Inertia::render('Clients/Index', [
             'clients' => ClientResource::collection($clients),
             'filters' => $request->only(['search', 'franchise_id']),
-            'franchisees' => $franchisesForDropdown,
+            'franchises' => $franchisesForDropdown,
         ]);
     }
 

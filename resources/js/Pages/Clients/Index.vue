@@ -47,31 +47,31 @@ import Pagination from "@/Components/Pagination.vue";
 const props = defineProps({
     clients: Object,
     filters: Object,
-    franchisees: Array,
+    franchises: Array,
 });
 
 const flash = computed(() => usePage().props.flash);
 const user = computed(() => usePage().props.auth.user);
 
 const search = ref(props.filters?.search || "");
-const selectedFranchisee = ref(props.filters.franchisee_id || "");
+const selectedFranchise = ref(props.filters.franchise_id || "");
 
-const openFranchiseeCombobox = ref(false);
-const currentFranchiseeLabel = computed(() => {
-    const franchisee = props.franchisees.find(
-        (f) => String(f.id) === selectedFranchisee.value,
+const openFranchiseCombobox = ref(false);
+const currentFranchiseLabel = computed(() => {
+    const franchise = props.franchises.find(
+        (f) => String(f.id) === selectedFranchise.value,
     );
-    return franchisee ? franchisee.name : "Filtrar por franqueado...";
+    return franchise ? franchise.name : "Filtrar por franqueado...";
 });
 
 watch(
-    [search, selectedFranchisee],
-    debounce(([searchValue, franchiseeIdValue]) => {
-        const finalFranchiseeId =
-            franchiseeIdValue === null ? "" : franchiseeIdValue;
+    [search, selectedFranchise],
+    debounce(([searchValue, franchiseIdValue]) => {
+        const finalFranchiseId =
+            franchiseIdValue === null ? "" : franchiseIdValue;
         router.get(
             route("clients.index"),
-            { search: searchValue, franchise_id: finalFranchiseeId },
+            { search: searchValue, franchise_id: finalFranchiseId },
             {
                 preserveState: true,
                 replace: true,
@@ -138,17 +138,17 @@ const deleteClient = (clientId) => {
                     </div>
 
                     <div v-if="user.role === 'admin'" class="w-full sm:w-auto">
-                        <Popover v-model:open="openFranchiseeCombobox">
+                        <Popover v-model:open="openFranchiseCombobox">
                             <PopoverTrigger as-child>
                                 <Button
                                     variant="outline"
                                     role="combobox"
-                                    :aria-expanded="openFranchiseeCombobox"
+                                    :aria-expanded="openFranchiseCombobox"
                                     class="w-full sm:w-[280px] justify-between bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-600"
                                 >
                                     {{
-                                        selectedFranchisee
-                                            ? currentFranchiseeLabel
+                                        selectedFranchise
+                                            ? currentFranchiseLabel
                                             : "Filtrar por franqueado..."
                                     }}
                                     <ChevronsUpDown class="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -167,8 +167,8 @@ const deleteClient = (clientId) => {
                                                 :value="null"
                                                 @select="
                           () => {
-                            selectedFranchisee = null;
-                            openFranchiseeCombobox = false;
+                            selectedFranchise = null;
+                            openFranchiseCombobox = false;
                           }
                         "
                                             >
@@ -176,7 +176,7 @@ const deleteClient = (clientId) => {
                                                     :class="
                             cn(
                               'mr-2 h-4 w-4',
-                              selectedFranchisee === null
+                              selectedFranchise === null
                                 ? 'opacity-100'
                                 : 'opacity-0',
                             )
@@ -185,13 +185,13 @@ const deleteClient = (clientId) => {
                                                 Todos os Franqueados
                                             </CommandItem>
                                             <CommandItem
-                                                v-for="franchisee in props.franchisees"
-                                                :key="franchisee.id"
-                                                :value="franchisee.name"
+                                                v-for="franchise in props.franchises"
+                                                :key="franchise.id"
+                                                :value="franchise.name"
                                                 @select="
                           () => {
-                            selectedFranchisee = String(franchisee.id);
-                            openFranchiseeCombobox = false;
+                            selectedFranchise = String(franchise.id);
+                            openFranchiseCombobox = false;
                           }
                         "
                                             >
@@ -199,13 +199,13 @@ const deleteClient = (clientId) => {
                                                     :class="
                             cn(
                               'mr-2 h-4 w-4',
-                              selectedFranchisee === String(franchisee.id)
+                              selectedFranchise === String(franchise.id)
                                 ? 'opacity-100'
                                 : 'opacity-0',
                             )
                           "
                                                 />
-                                                {{ franchisee.name }}
+                                                {{ franchise.name }}
                                             </CommandItem>
                                         </CommandGroup>
                                     </CommandList>
@@ -368,7 +368,7 @@ const deleteClient = (clientId) => {
                                 >
                                 {{ client.phone || "N/A" }}
                             </p>
-                            <p v-if="client.franchisee_name">
+                            <p v-if="client.franchise_name">
                                 <strong class="font-medium text-gray-800 dark:text-gray-200"
                                 >Franqueado:</strong
                                 >
