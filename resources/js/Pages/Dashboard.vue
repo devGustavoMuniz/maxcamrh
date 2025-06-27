@@ -254,7 +254,6 @@ const userRole = computed(() => currentUser.value?.role);
 
         <template v-if="userRole === 'collaborator'">
           <Card class="md:col-span-2">
-            {/* Ocupa mais espaço se for o único card */}
             <CardHeader
               class="flex flex-row items-center justify-between space-y-0 pb-2"
             >
@@ -265,12 +264,6 @@ const userRole = computed(() => currentUser.value?.role);
               <p class="text-sm text-muted-foreground">
                 Acesse e atualize suas informações pessoais e profissionais.
               </p>
-              {/* Aqui você poderia exibir alguns dados rápidos do colaborador
-              se passados via props */} {/* Ex:
-              <p>
-                Cargo: {{ currentUser.details?.position || "Não informado" }}
-              </p>
-              */}
             </CardContent>
             <CardFooter>
               <Link :href="route('profile.edit')" class="w-full">
