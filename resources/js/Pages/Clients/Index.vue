@@ -406,9 +406,9 @@ const deleteClient = (clientId) => {
             </div>
 
             <Pagination
-                v-if="clients.data.length > 0 && clients.last_page > 1"
+                v-if="clients.data.length > 0 && clients.meta.last_page > 1"
                 class="mt-6"
-                :links="clients.links"
+                :links="clients.meta.links"
             />
         </div>
     </AuthenticatedLayout>

@@ -228,9 +228,9 @@ const deleteFranchise = (franchiseId) => {
             </div>
 
             <Pagination
-                v-if="franchises.data.length > 0 && franchises.last_page > 1"
+                v-if="franchises.data.length > 0 && franchises.meta.last_page > 1"
                 class="mt-6"
-                :links="franchises.links"
+                :links="franchises.meta.links"
             />
         </div>
     </AuthenticatedLayout>

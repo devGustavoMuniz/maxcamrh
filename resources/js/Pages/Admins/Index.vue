@@ -229,9 +229,9 @@ const deleteAdmin = (adminId) => {
             </div>
 
             <Pagination
-                v-if="admins.data.length > 0 && admins.last_page > 1"
+                v-if="admins.data.length > 0 && admins.meta.last_page > 1"
                 class="mt-6"
-                :links="admins.links"
+                :links="admins.meta.links"
             />
         </div>
     </AuthenticatedLayout>

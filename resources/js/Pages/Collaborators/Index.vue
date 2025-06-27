@@ -394,9 +394,9 @@ const deleteCollaborator = (collaboratorId) => {
             </div>
 
             <Pagination
-                v-if="collaborators.data.length > 0 && collaborators.last_page > 1"
+                v-if="collaborators.data.length > 0 && collaborators.meta.last_page > 1"
                 class="mt-6"
-                :links="collaborators.links"
+                :links="collaborators.meta.links"
             />
         </div>
     </AuthenticatedLayout>
