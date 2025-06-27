@@ -4,7 +4,7 @@ namespace App\Http\Requests\Traits;
 
 trait FormatMoney
 {
-    private function cleanMoneyValue(?string $value): ?float
+    private function cleanMoneyValue(?string $value): ?string
     {
         if ($value === null || $value === '') {
             return null;
@@ -15,6 +15,6 @@ trait FormatMoney
             return null;
         }
 
-        return (float)($digits / 100);
+        return (string)($digits / 100);
     }
 }
