@@ -43,14 +43,14 @@ const submit = () => {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form @submit.prevent="submit" class="space-y-6">
+        <form class="space-y-6" @submit.prevent="submit">
           <div>
             <Label for="name">Nome</Label>
             <Input
               id="name"
+              v-model="form.name"
               type="text"
               class="mt-1 block w-full bg-white"
-              v-model="form.name"
               required
               autofocus
               autocomplete="name"
@@ -63,9 +63,9 @@ const submit = () => {
             <Label for="email">Email</Label>
             <Input
               id="email"
+              v-model="form.email"
               type="email"
               class="mt-1 block w-full bg-white"
-              v-model="form.email"
               required
               autocomplete="username"
               placeholder="seuemail@exemplo.com"
@@ -77,9 +77,9 @@ const submit = () => {
             <Label for="password">Senha</Label>
             <Input
               id="password"
+              v-model="form.password"
               type="password"
               class="mt-1 block w-full bg-white"
-              v-model="form.password"
               required
               autocomplete="new-password"
               placeholder="Mínimo 8 caracteres"
@@ -91,9 +91,9 @@ const submit = () => {
             <Label for="password_confirmation">Confirmar Senha</Label>
             <Input
               id="password_confirmation"
+              v-model="form.password_confirmation"
               type="password"
               class="mt-1 block w-full bg-white"
-              v-model="form.password_confirmation"
               required
               autocomplete="new-password"
               placeholder="Repita a senha"

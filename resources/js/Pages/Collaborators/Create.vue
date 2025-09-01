@@ -170,13 +170,13 @@ async function fetchAddressByCep() {
             <Button
                 v-for="(name, index) in stepNames"
                 :key="index + 1"
-                @click="goToStep(index + 1)"
                 :variant="currentStep === index + 1 ? 'default' : 'outline'"
                 :class="{
           'bg-gray-800 text-white hover:bg-gray-700': currentStep === index + 1,
           'bg-white dark:bg-gray-800': currentStep !== index + 1,
         }"
                 class="text-xs sm:text-sm"
+                @click="goToStep(index + 1)"
             >
                 Etapa {{ index + 1 }}: {{ name }}
             </Button>
@@ -185,16 +185,16 @@ async function fetchAddressByCep() {
             <div
                 class="bg-gray-100 dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-4 md:p-8"
             >
-                <form @submit.prevent="submit" class="space-y-6">
+                <form class="space-y-6" @submit.prevent="submit">
                     <section v-if="currentStep === 1" class="space-y-4">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div
-                                class="md:col-span-2"
                                 v-if="
                   (userRole === 'admin' || userRole === 'franchise') &&
                   props.clients &&
                   props.clients.length > 0
                 "
+                                class="md:col-span-2"
                             >
                                 <Label for="collaborator_client_id">Cliente Associado</Label>
                                 <Select v-model="form.collaborator.client_id">
@@ -210,9 +210,9 @@ async function fetchAddressByCep() {
                                                 Nenhum
                                             </SelectItem>
                                             <SelectItem
-                                                class="cursor-pointer"
                                                 v-for="client in props.clients"
                                                 :key="client.id"
+                                                class="cursor-pointer"
                                                 :value="client.id"
                                             >{{ client.name }}
                                             </SelectItem>
@@ -224,7 +224,7 @@ async function fetchAddressByCep() {
                                     :message="form.errors['collaborator.client_id']"
                                 />
                             </div>
-                            <div class="md:col-span-2" v-if="userRole === 'client'">
+                            <div v-if="userRole === 'client'" class="md:col-span-2">
                                 <p
                                     class="p-3 bg-blue-50 dark:bg-blue-900/50 border border-blue-200 dark:border-blue-700 rounded-md text-sm text-blue-700 dark:text-blue-300"
                                 >
@@ -236,9 +236,9 @@ async function fetchAddressByCep() {
                                 <Label for="user_name">Nome Completo</Label>
                                 <Input
                                     id="user_name"
+                                    v-model="form.user.name"
                                     type="text"
                                     class="mt-1 block w-full bg-white dark:bg-gray-700"
-                                    v-model="form.user.name"
                                     required
                                 />
                                 <InputError class="mt-2" :message="form.errors['user.name']" />
@@ -247,9 +247,9 @@ async function fetchAddressByCep() {
                                 <Label for="user_email">Email de Acesso</Label>
                                 <Input
                                     id="user_email"
+                                    v-model="form.user.email"
                                     type="email"
                                     class="mt-1 block w-full bg-white dark:bg-gray-700"
-                                    v-model="form.user.email"
                                     required
                                 />
                                 <InputError class="mt-2" :message="form.errors['user.email']" />
@@ -258,9 +258,9 @@ async function fetchAddressByCep() {
                                 <Label for="user_password">Senha</Label>
                                 <Input
                                     id="user_password"
+                                    v-model="form.user.password"
                                     type="password"
                                     class="mt-1 block w-full bg-white dark:bg-gray-700"
-                                    v-model="form.user.password"
                                     required
                                 />
                                 <InputError
@@ -272,9 +272,9 @@ async function fetchAddressByCep() {
                                 <Label for="user_password_confirmation">Confirmar Senha</Label>
                                 <Input
                                     id="user_password_confirmation"
+                                    v-model="form.user.password_confirmation"
                                     type="password"
                                     class="mt-1 block w-full bg-white dark:bg-gray-700"
-                                    v-model="form.user.password_confirmation"
                                     required
                                 />
                             </div>
@@ -284,9 +284,9 @@ async function fetchAddressByCep() {
                                 >
                                 <Input
                                     id="collaborator_date_of_birth"
+                                    v-model="form.collaborator.date_of_birth"
                                     type="date"
                                     class="mt-1 block w-full bg-white dark:bg-gray-700"
-                                    v-model="form.collaborator.date_of_birth"
                                 />
                                 <InputError
                                     class="mt-2"
@@ -334,9 +334,9 @@ async function fetchAddressByCep() {
                                 <Label for="collaborator_scholarity">Escolaridade</Label>
                                 <Input
                                     id="collaborator_scholarity"
+                                    v-model="form.collaborator.scholarity"
                                     type="text"
                                     class="mt-1 block w-full bg-white dark:bg-gray-700"
-                                    v-model="form.collaborator.scholarity"
                                 />
                                 <InputError
                                     class="mt-2"
@@ -347,9 +347,9 @@ async function fetchAddressByCep() {
                                 <Label for="collaborator_father_name">Nome do Pai</Label>
                                 <Input
                                     id="collaborator_father_name"
+                                    v-model="form.collaborator.father_name"
                                     type="text"
                                     class="mt-1 block w-full bg-white dark:bg-gray-700"
-                                    v-model="form.collaborator.father_name"
                                 />
                                 <InputError
                                     class="mt-2"
@@ -360,9 +360,9 @@ async function fetchAddressByCep() {
                                 <Label for="collaborator_mother_name">Nome da Mãe</Label>
                                 <Input
                                     id="collaborator_mother_name"
+                                    v-model="form.collaborator.mother_name"
                                     type="text"
                                     class="mt-1 block w-full bg-white dark:bg-gray-700"
-                                    v-model="form.collaborator.mother_name"
                                 />
                                 <InputError
                                     class="mt-2"
@@ -373,9 +373,9 @@ async function fetchAddressByCep() {
                                 <Label for="collaborator_nationality">Nacionalidade</Label>
                                 <Input
                                     id="collaborator_nationality"
+                                    v-model="form.collaborator.nationality"
                                     type="text"
                                     class="mt-1 block w-full bg-white dark:bg-gray-700"
-                                    v-model="form.collaborator.nationality"
                                 />
                                 <InputError
                                     class="mt-2"
@@ -384,9 +384,9 @@ async function fetchAddressByCep() {
                             </div>
                             <div class="flex items-center space-x-2 self-end pb-1">
                                 <input
-                                    type="checkbox"
                                     id="collaborator_is_special_needs_person"
                                     v-model="form.collaborator.is_special_needs_person"
+                                    type="checkbox"
                                     class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                                 />
                                 <label
@@ -410,9 +410,9 @@ async function fetchAddressByCep() {
                                 <Label for="collaborator_personal_email">Email Pessoal</Label>
                                 <Input
                                     id="collaborator_personal_email"
+                                    v-model="form.collaborator.personal_email"
                                     type="email"
                                     class="mt-1 block w-full bg-white dark:bg-gray-700"
-                                    v-model="form.collaborator.personal_email"
                                 />
                                 <InputError
                                     class="mt-2"
@@ -423,9 +423,9 @@ async function fetchAddressByCep() {
                                 <Label for="collaborator_business_email">Email Comercial</Label>
                                 <Input
                                     id="collaborator_business_email"
+                                    v-model="form.collaborator.business_email"
                                     type="email"
                                     class="mt-1 block w-full bg-white dark:bg-gray-700"
-                                    v-model="form.collaborator.business_email"
                                 />
                                 <InputError
                                     class="mt-2"
@@ -436,10 +436,10 @@ async function fetchAddressByCep() {
                                 <Label for="collaborator_phone">Telefone Fixo</Label>
                                 <Input
                                     id="collaborator_phone"
-                                    type="tel"
-                                    class="mt-1 block w-full bg-white dark:bg-gray-700"
                                     v-model="form.collaborator.phone"
                                     v-mask="['(##) ####-####', '(##) #####-####']"
+                                    type="tel"
+                                    class="mt-1 block w-full bg-white dark:bg-gray-700"
                                 />
                                 <InputError
                                     class="mt-2"
@@ -450,10 +450,10 @@ async function fetchAddressByCep() {
                                 <Label for="collaborator_cellphone">Celular</Label>
                                 <Input
                                     id="collaborator_cellphone"
-                                    type="tel"
-                                    class="mt-1 block w-full bg-white dark:bg-gray-700"
                                     v-model="form.collaborator.cellphone"
                                     v-mask="['(##) ####-####', '(##) #####-####']"
+                                    type="tel"
+                                    class="mt-1 block w-full bg-white dark:bg-gray-700"
                                 />
                                 <InputError
                                     class="mt-2"
@@ -466,10 +466,10 @@ async function fetchAddressByCep() {
                                 >
                                 <Input
                                     id="collaborator_emergency_phone"
-                                    type="tel"
-                                    class="mt-1 block w-full bg-white dark:bg-gray-700"
                                     v-model="form.collaborator.emergency_phone"
                                     v-mask="['(##) ####-####', '(##) #####-####']"
+                                    type="tel"
+                                    class="mt-1 block w-full bg-white dark:bg-gray-700"
                                 />
                                 <InputError
                                     class="mt-2"
@@ -480,11 +480,11 @@ async function fetchAddressByCep() {
                                 <Label for="address_cep">CEP</Label>
                                 <Input
                                     id="address_cep"
+                                    v-model="form.address.cep"
+                                    v-mask="'#####-###'"
                                     type="text"
                                     class="mt-1 block w-full bg-white dark:bg-gray-700"
-                                    v-model="form.address.cep"
                                     @blur="fetchAddressByCep"
-                                    v-mask="'#####-###'"
                                 />
                                 <InputError
                                     class="mt-2"
@@ -495,9 +495,9 @@ async function fetchAddressByCep() {
                                 <Label for="address_street">Logradouro (Rua, Av.)</Label>
                                 <Input
                                     id="address_street"
+                                    v-model="form.address.street"
                                     type="text"
                                     class="mt-1 block w-full bg-white dark:bg-gray-700"
-                                    v-model="form.address.street"
                                 />
                                 <InputError
                                     class="mt-2"
@@ -508,9 +508,9 @@ async function fetchAddressByCep() {
                                 <Label for="address_number">Número</Label>
                                 <Input
                                     id="address_number"
+                                    v-model="form.address.number"
                                     type="text"
                                     class="mt-1 block w-full bg-white dark:bg-gray-700"
-                                    v-model="form.address.number"
                                 />
                                 <InputError
                                     class="mt-2"
@@ -521,9 +521,9 @@ async function fetchAddressByCep() {
                                 <Label for="address_complement">Complemento</Label>
                                 <Input
                                     id="address_complement"
+                                    v-model="form.address.complement"
                                     type="text"
                                     class="mt-1 block w-full bg-white dark:bg-gray-700"
-                                    v-model="form.address.complement"
                                 />
                                 <InputError
                                     class="mt-2"
@@ -534,9 +534,9 @@ async function fetchAddressByCep() {
                                 <Label for="address_neighborhood">Bairro</Label>
                                 <Input
                                     id="address_neighborhood"
+                                    v-model="form.address.neighborhood"
                                     type="text"
                                     class="mt-1 block w-full bg-white dark:bg-gray-700"
-                                    v-model="form.address.neighborhood"
                                 />
                                 <InputError
                                     class="mt-2"
@@ -547,9 +547,9 @@ async function fetchAddressByCep() {
                                 <Label for="address_city">Cidade</Label>
                                 <Input
                                     id="address_city"
+                                    v-model="form.address.city"
                                     type="text"
                                     class="mt-1 block w-full bg-white dark:bg-gray-700"
-                                    v-model="form.address.city"
                                 />
                                 <InputError
                                     class="mt-2"
@@ -560,9 +560,9 @@ async function fetchAddressByCep() {
                                 <Label for="address_state">Estado (UF)</Label>
                                 <Input
                                     id="address_state"
+                                    v-model="form.address.state"
                                     type="text"
                                     class="mt-1 block w-full bg-white dark:bg-gray-700"
-                                    v-model="form.address.state"
                                     maxlength="2"
                                 />
                                 <InputError
@@ -578,9 +578,9 @@ async function fetchAddressByCep() {
                                 <Label for="collaborator_department">Departamento</Label>
                                 <Input
                                     id="collaborator_department"
+                                    v-model="form.collaborator.department"
                                     type="text"
                                     class="mt-1 block w-full bg-white dark:bg-gray-700"
-                                    v-model="form.collaborator.department"
                                 />
                                 <InputError
                                     class="mt-2"
@@ -591,9 +591,9 @@ async function fetchAddressByCep() {
                                 <Label for="collaborator_position">Cargo</Label>
                                 <Input
                                     id="collaborator_position"
+                                    v-model="form.collaborator.position"
                                     type="text"
                                     class="mt-1 block w-full bg-white dark:bg-gray-700"
-                                    v-model="form.collaborator.position"
                                 />
                                 <InputError
                                     class="mt-2"
@@ -624,10 +624,10 @@ async function fetchAddressByCep() {
                                 <Label for="collaborator_salary">Salário (R$)</Label>
                                 <Input
                                     id="collaborator_salary"
-                                    type="text"
-                                    class="mt-1 block w-full bg-white dark:bg-gray-700"
                                     v-model="form.collaborator.salary"
                                     v-money3="moneyConfig"
+                                    type="text"
+                                    class="mt-1 block w-full bg-white dark:bg-gray-700"
                                 />
                                 <InputError
                                     class="mt-2"
@@ -640,9 +640,9 @@ async function fetchAddressByCep() {
                                 >
                                 <Input
                                     id="collaborator_admission_date"
+                                    v-model="form.collaborator.admission_date"
                                     type="date"
                                     class="mt-1 block w-full bg-white dark:bg-gray-700"
-                                    v-model="form.collaborator.admission_date"
                                 />
                                 <InputError
                                     class="mt-2"
@@ -655,9 +655,9 @@ async function fetchAddressByCep() {
                                 >
                                 <Input
                                     id="collaborator_contract_start_date"
+                                    v-model="form.collaborator.contract_start_date"
                                     type="date"
                                     class="mt-1 block w-full bg-white dark:bg-gray-700"
-                                    v-model="form.collaborator.contract_start_date"
                                 />
                                 <InputError
                                     class="mt-2"
@@ -670,9 +670,9 @@ async function fetchAddressByCep() {
                                 >
                                 <Input
                                     id="collaborator_contract_expiration"
+                                    v-model="form.collaborator.contract_expiration"
                                     type="date"
                                     class="mt-1 block w-full bg-white dark:bg-gray-700"
-                                    v-model="form.collaborator.contract_expiration"
                                 />
                                 <InputError
                                     class="mt-2"
@@ -685,9 +685,9 @@ async function fetchAddressByCep() {
                                 >
                                 <Input
                                     id="collaborator_direct_superior_name"
+                                    v-model="form.collaborator.direct_superior_name"
                                     type="text"
                                     class="mt-1 block w-full bg-white dark:bg-gray-700"
-                                    v-model="form.collaborator.direct_superior_name"
                                 />
                                 <InputError
                                     class="mt-2"
@@ -700,9 +700,9 @@ async function fetchAddressByCep() {
                                 >
                                 <Input
                                     id="collaborator_hierarchical_degree"
+                                    v-model="form.collaborator.hierarchical_degree"
                                     type="text"
                                     class="mt-1 block w-full bg-white dark:bg-gray-700"
-                                    v-model="form.collaborator.hierarchical_degree"
                                 />
                                 <InputError
                                     class="mt-2"
@@ -715,8 +715,8 @@ async function fetchAddressByCep() {
                                 >
                                 <Textarea
                                     id="collaborator_observations"
-                                    class="mt-1 block w-full bg-white dark:bg-gray-700"
                                     v-model="form.collaborator.observations"
+                                    class="mt-1 block w-full bg-white dark:bg-gray-700"
                                     rows="3"
                                 />
                                 <InputError
@@ -733,10 +733,10 @@ async function fetchAddressByCep() {
                                 <Label for="collaborator_cpf">CPF</Label>
                                 <Input
                                     id="collaborator_cpf"
-                                    type="text"
-                                    class="mt-1 block w-full bg-white dark:bg-gray-700"
                                     v-model="form.collaborator.cpf"
                                     v-mask="'###.###.###-##'"
+                                    type="text"
+                                    class="mt-1 block w-full bg-white dark:bg-gray-700"
                                 />
                                 <InputError
                                     class="mt-2"
@@ -748,10 +748,10 @@ async function fetchAddressByCep() {
                                 <Label for="collaborator_rg">RG</Label>
                                 <Input
                                     id="collaborator_rg"
-                                    type="text"
-                                    class="mt-1 block w-full bg-white dark:bg-gray-700"
                                     v-model="form.collaborator.rg"
                                     v-mask="'##.###-###'"
+                                    type="text"
+                                    class="mt-1 block w-full bg-white dark:bg-gray-700"
                                 />
                                 <InputError
                                     class="mt-2"
@@ -763,10 +763,10 @@ async function fetchAddressByCep() {
                                 <Label for="collaborator_cnh">CNH (Número)</Label>
                                 <Input
                                     id="collaborator_cnh"
-                                    type="text"
-                                    class="mt-1 block w-full bg-white dark:bg-gray-700"
                                     v-model="form.collaborator.cnh"
                                     v-mask="'###########'"
+                                    type="text"
+                                    class="mt-1 block w-full bg-white dark:bg-gray-700"
                                 />
                                 <InputError
                                     class="mt-2"
@@ -780,9 +780,9 @@ async function fetchAddressByCep() {
                                 >
                                 <Input
                                     id="collaborator_reservista"
+                                    v-model="form.collaborator.reservista"
                                     type="text"
                                     class="mt-1 block w-full bg-white dark:bg-gray-700"
-                                    v-model="form.collaborator.reservista"
                                 />
                                 <InputError
                                     class="mt-2"
@@ -795,9 +795,9 @@ async function fetchAddressByCep() {
                                 >
                                 <Input
                                     id="collaborator_titulo_eleitor"
+                                    v-model="form.collaborator.titulo_eleitor"
                                     type="text"
                                     class="mt-1 block w-full bg-white dark:bg-gray-700"
-                                    v-model="form.collaborator.titulo_eleitor"
                                 />
                                 <InputError
                                     class="mt-2"
@@ -808,9 +808,9 @@ async function fetchAddressByCep() {
                                 <Label for="collaborator_zona_eleitoral">Zona Eleitoral</Label>
                                 <Input
                                     id="collaborator_zona_eleitoral"
+                                    v-model="form.collaborator.zona_eleitoral"
                                     type="text"
                                     class="mt-1 block w-full bg-white dark:bg-gray-700"
-                                    v-model="form.collaborator.zona_eleitoral"
                                 />
                                 <InputError
                                     class="mt-2"
@@ -823,9 +823,9 @@ async function fetchAddressByCep() {
                                 >
                                 <Input
                                     id="collaborator_pis_ctps_numero"
+                                    v-model="form.collaborator.pis_ctps_numero"
                                     type="text"
                                     class="mt-1 block w-full bg-white dark:bg-gray-700"
-                                    v-model="form.collaborator.pis_ctps_numero"
                                 />
                                 <InputError
                                     class="mt-2"
@@ -836,9 +836,9 @@ async function fetchAddressByCep() {
                                 <Label for="collaborator_ctps_serie">Série CTPS</Label>
                                 <Input
                                     id="collaborator_ctps_serie"
+                                    v-model="form.collaborator.ctps_serie"
                                     type="text"
                                     class="mt-1 block w-full bg-white dark:bg-gray-700"
-                                    v-model="form.collaborator.ctps_serie"
                                 />
                                 <InputError
                                     class="mt-2"
@@ -854,6 +854,7 @@ async function fetchAddressByCep() {
                                             ref="photoFileInput"
                                             type="file"
                                             class="hidden"
+                                            accept="image/*"
                                             @change="
                         (event) =>
                           handleFileUpload(
@@ -863,13 +864,12 @@ async function fetchAddressByCep() {
                             true,
                           )
                       "
-                                            accept="image/*"
                                         />
                                         <Button
                                             type="button"
                                             variant="outline"
-                                            @click="photoFileInput?.click()"
                                             class="w-full bg-white dark:bg-gray-700 justify-center"
+                                            @click="photoFileInput?.click()"
                                         >Foto (3x4)
                                         </Button>
                                         <img
@@ -885,6 +885,7 @@ async function fetchAddressByCep() {
                                             ref="curriculumFileInput"
                                             type="file"
                                             class="hidden"
+                                            accept=".pdf,.doc,.docx"
                                             @change="
                         (event) =>
                           handleFileUpload(
@@ -894,13 +895,12 @@ async function fetchAddressByCep() {
                             false,
                           )
                       "
-                                            accept=".pdf,.doc,.docx"
                                         />
                                         <Button
                                             type="button"
                                             variant="outline"
-                                            @click="curriculumFileInput?.click()"
                                             class="w-full bg-white dark:bg-gray-700 justify-center"
+                                            @click="curriculumFileInput?.click()"
                                         >Currículo
                                         </Button>
                                         <p
@@ -923,9 +923,9 @@ async function fetchAddressByCep() {
                                 <Label for="collaborator_banco">Banco</Label>
                                 <Input
                                     id="collaborator_banco"
+                                    v-model="form.collaborator.banco"
                                     type="text"
                                     class="mt-1 block w-full bg-white dark:bg-gray-700"
-                                    v-model="form.collaborator.banco"
                                 />
                                 <InputError
                                     class="mt-2"
@@ -936,9 +936,9 @@ async function fetchAddressByCep() {
                                 <Label for="collaborator_agencia">Agência</Label>
                                 <Input
                                     id="collaborator_agencia"
+                                    v-model="form.collaborator.agencia"
                                     type="text"
                                     class="mt-1 block w-full bg-white dark:bg-gray-700"
-                                    v-model="form.collaborator.agencia"
                                 />
                                 <InputError
                                     class="mt-2"
@@ -951,9 +951,9 @@ async function fetchAddressByCep() {
                                 >
                                 <Input
                                     id="collaborator_conta_corrente"
+                                    v-model="form.collaborator.conta_corrente"
                                     type="text"
                                     class="mt-1 block w-full bg-white dark:bg-gray-700"
-                                    v-model="form.collaborator.conta_corrente"
                                 />
                                 <InputError
                                     class="mt-2"
@@ -968,11 +968,11 @@ async function fetchAddressByCep() {
                     >
                         <div>
                             <Button
+                                v-if="currentStep > 1"
                                 type="button"
                                 variant="outline"
                                 class="bg-white dark:bg-gray-700 w-full sm:w-auto"
                                 @click="prevStep"
-                                v-if="currentStep > 1"
                             >Anterior
                             </Button>
                         </div>
@@ -991,10 +991,10 @@ async function fetchAddressByCep() {
                                 >
                             </Link>
                             <Button
+                                v-if="currentStep < totalSteps"
                                 type="button"
                                 class="bg-gray-500 text-white hover:bg-gray-400 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-500 w-full sm:w-auto"
                                 @click="nextStep"
-                                v-if="currentStep < totalSteps"
                             >Próximo
                             </Button>
                             <Button

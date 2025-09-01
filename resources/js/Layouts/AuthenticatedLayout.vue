@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref, onMounted, onUnmounted } from "vue";
+import { computed, ref } from "vue";
 import { Link, usePage } from "@inertiajs/vue3";
 import ApplicationLogo from "@/Components/ApplicationLogo.vue";
 
@@ -12,7 +12,6 @@ import {
   LogOut,
   ChevronDown,
   Menu,
-  X,
   UsersRound,
 } from "lucide-vue-next";
 
@@ -119,8 +118,8 @@ const handleLinkClick = () => {
   <div class="min-h-screen bg-gray-100 dark:bg-gray-900 md:flex">
     <div
       v-if="isSidebarOpen"
-      @click="isSidebarOpen = false"
       class="fixed inset-0 z-20 bg-black/50 transition-opacity md:hidden"
+      @click="isSidebarOpen = false"
     ></div>
 
     <aside
@@ -134,8 +133,8 @@ const handleLinkClick = () => {
         <div class="p-4">
           <Link
             :href="route('dashboard')"
-            @click="handleLinkClick"
             class="flex items-center justify-center mb-6"
+            @click="handleLinkClick"
           >
             <ApplicationLogo class="h-9 w-auto" />
           </Link>
@@ -144,13 +143,13 @@ const handleLinkClick = () => {
             <template v-for="item in processedMainLinks" :key="item.name">
               <Link
                 :href="item.href"
-                @click="handleLinkClick"
                 class="flex items-center px-3 py-2.5 mt-1 text-sm font-medium rounded-md transition-colors duration-150"
                 :class="
                   item.current
                     ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100'
                     : 'text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100'
                 "
+                @click="handleLinkClick"
               >
                 <component :is="item.icon" class="h-5 w-5 mr-3 flex-shrink-0" />
                 <span>{{ item.name }}</span>
@@ -188,13 +187,13 @@ const handleLinkClick = () => {
                 >
                   <Link
                     :href="item.href"
-                    @click="handleLinkClick"
                     class="flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors duration-150"
                     :class="
                       item.current
                         ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100'
                         : 'text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-800 dark:hover:text-gray-200'
                     "
+                    @click="handleLinkClick"
                   >
                     <component
                       :is="item.icon"
@@ -223,13 +222,13 @@ const handleLinkClick = () => {
 
     <div class="flex-1 flex flex-col overflow-hidden">
       <header
-        class="bg-gray-100 dark:bg-gray-800 shadow"
         v-if="$page.props.auth.user"
+        class="bg-gray-100 dark:bg-gray-800 shadow"
       >
         <div class="w-full px-6 mx-auto flex justify-between items-center h-16">
           <button
-            @click="isSidebarOpen = !isSidebarOpen"
             class="md:hidden p-2 rounded-md text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700"
+            @click="isSidebarOpen = !isSidebarOpen"
           >
             <Menu class="h-6 w-6" />
           </button>
@@ -286,6 +285,18 @@ const handleLinkClick = () => {
       <main
         class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-200 dark:bg-gray-900 p-6"
       >
+        <div
+          v-if="$page.props.flash.success"
+          class="mb-4 p-4 rounded-md bg-green-100 dark:bg-green-800 text-sm font-medium text-green-700 dark:text-green-200"
+        >
+          {{ $page.props.flash.success }}
+        </div>
+        <div
+          v-if="$page.props.flash.error"
+          class="mb-4 p-4 rounded-md bg-red-100 dark:bg-red-800 text-sm font-medium text-red-700 dark:text-red-200"
+        >
+          {{ $page.props.flash.error }}
+        </div>
         <slot />
       </main>
     </div>

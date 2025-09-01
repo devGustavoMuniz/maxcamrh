@@ -122,8 +122,8 @@ const deleteCollaborator = (collaboratorId) => {
                 <div class="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
                     <div class="relative w-full sm:max-w-xs">
                         <Input
-                            type="text"
                             v-model="search"
+                            type="text"
                             placeholder="Buscar por nome ou email"
                             class="pl-10 w-full bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-600"
                         />
@@ -295,8 +295,8 @@ const deleteCollaborator = (collaboratorId) => {
                                         <Button
                                             variant="outline"
                                             size="icon"
-                                            @click="deleteCollaborator(collab.id)"
                                             class="h-8 w-8 text-red-600 hover:text-red-700 hover:border-red-400 dark:hover:border-red-600"
+                                            @click="deleteCollaborator(collab.id)"
                                         >
                                             <Trash2 class="h-4 w-4" />
                                             <span class="sr-only">Excluir</span>
@@ -375,8 +375,8 @@ const deleteCollaborator = (collaboratorId) => {
                             <Button
                                 variant="outline"
                                 size="sm"
-                                @click="deleteCollaborator(collab.id)"
                                 class="text-red-600 hover:text-red-700 hover:border-red-400 dark:hover:border-red-600"
+                                @click="deleteCollaborator(collab.id)"
                             >
                                 <Trash2 class="h-4 w-4 mr-2" />
                                 Excluir

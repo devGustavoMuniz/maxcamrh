@@ -15,7 +15,7 @@ class UpdateCollaboratorAction
     /**
      * @throws Throwable
      */
-    public function execute(Collaborator $collaborator, Request $request): bool
+    public function execute(Collaborator $collaborator, Request $request): Collaborator
     {
         $validated = $request->validated();
         $loggedInUser = $request->user();
@@ -35,7 +35,7 @@ class UpdateCollaboratorAction
             $collaboratorData['curriculum_url'] = $request->file('collaborator.curriculum_file')->store('collaborator_curriculums', 'public');
         }
 
-        return DB::transaction(function () use ($userData, $collaboratorData, $addressData, $collaboratorUser, $collaborator, $loggedInUser) {
+        DB::transaction(function () use ($userData, $collaboratorData, $addressData, $collaboratorUser, $collaborator, $loggedInUser) {
             if (!empty($userData['password'])) {
                 $userData['password'] = Hash::make($userData['password']);
             } else {
@@ -51,8 +51,8 @@ class UpdateCollaboratorAction
             if ($addressData && !empty(array_filter($addressData))) {
                 $collaboratorUser->address()->updateOrCreate([], $addressData);
             }
-
-            return true;
         });
+
+        return $collaborator->fresh();
     }
 }

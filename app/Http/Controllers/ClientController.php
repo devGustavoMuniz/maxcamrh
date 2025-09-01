@@ -76,11 +76,7 @@ class ClientController extends Controller
      */
     public function store(StoreClientRequest $request, StoreClientAction $storeClient): RedirectResponse
     {
-        $storeClient->execute(
-            $request->validated(),
-            $request->file('logo_file'),
-            $request->user()
-        );
+        $storeClient($request);
 
         return redirect()->route('clients.index')->with('success', 'Cliente criado com sucesso.');
     }
@@ -110,12 +106,7 @@ class ClientController extends Controller
 
     public function update(UpdateClientRequest $request, Client $client, UpdateClientAction $updateClient)
     {
-        $updateClient->execute(
-            $client,
-            $request->validated(),
-            $request->file('logo_file'),
-            $request->user()
-        );
+        $updateClient($client, $request);
 
         return redirect()->route('clients.index')->with('success', 'Cliente atualizado com sucesso.');
     }

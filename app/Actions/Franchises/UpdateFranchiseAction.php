@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Storage;
 
 class UpdateFranchiseAction
 {
-    public function execute(Franchise $franchise, array $data, ?UploadedFile $documentFile): bool
+    public function execute(Franchise $franchise, array $data, ?UploadedFile $documentFile): Franchise
     {
         $documentPath = $franchise->document_url;
         if ($documentFile) {
@@ -21,7 +21,7 @@ class UpdateFranchiseAction
             $documentPath = $documentFile->store('franchise_documents', 'public');
         }
 
-        return DB::transaction(function () use ($franchise, $data, $documentPath) {
+        DB::transaction(function () use ($franchise, $data, $documentPath) {
             $user = $franchise->user;
 
             $userData = [
@@ -42,7 +42,9 @@ class UpdateFranchiseAction
                 'observations' => $data['observations'],
                 'document_url' => $documentPath,
             ];
-            return $franchise->update($franchiseData);
+            $franchise->update($franchiseData);
         });
+
+        return $franchise->fresh();
     }
 }

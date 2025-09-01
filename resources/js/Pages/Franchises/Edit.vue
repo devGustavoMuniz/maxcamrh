@@ -85,7 +85,7 @@ const submit = () => {
             <div
                 class="bg-gray-100 dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-6 md:p-8"
             >
-                <form @submit.prevent="submit" class="space-y-6">
+                <form class="space-y-6" @submit.prevent="submit">
                     <div class="space-y-4">
                         <h3
                             class="text-lg font-medium text-gray-900 dark:text-gray-100 border-b dark:border-gray-700 pb-2"
@@ -97,9 +97,9 @@ const submit = () => {
                                 <Label for="user_name">Nome do Usuário</Label>
                                 <Input
                                     id="user_name"
+                                    v-model="form.name"
                                     type="text"
                                     class="mt-1 block w-full bg-white"
-                                    v-model="form.name"
                                     required
                                     autofocus
                                 />
@@ -109,9 +109,9 @@ const submit = () => {
                                 <Label for="user_email">Email do Usuário</Label>
                                 <Input
                                     id="user_email"
+                                    v-model="form.email"
                                     type="email"
                                     class="mt-1 block w-full bg-white"
-                                    v-model="form.email"
                                     required
                                 />
                                 <InputError class="mt-2" :message="form.errors.email" />
@@ -123,9 +123,9 @@ const submit = () => {
                                 >
                                 <Input
                                     id="franchise_maxcam_email"
+                                    v-model="form.maxcam_email"
                                     type="email"
                                     class="mt-1 block w-full bg-white"
-                                    v-model="form.maxcam_email"
                                     required
                                 />
                                 <InputError class="mt-2" :message="form.errors.maxcam_email" />
@@ -134,10 +134,10 @@ const submit = () => {
                                 <Label for="franchise_cnpj">CNPJ</Label>
                                 <Input
                                     id="franchise_cnpj"
-                                    type="text"
-                                    class="mt-1 block w-full bg-white"
                                     v-model="form.cnpj"
                                     v-mask="'##.###.###/####-##'"
+                                    type="text"
+                                    class="mt-1 block w-full bg-white"
                                     required
                                 />
                                 <InputError class="mt-2" :message="form.errors.cnpj" />
@@ -146,9 +146,9 @@ const submit = () => {
                                 <Label for="franchise_max_client">Máximo de Clientes</Label>
                                 <Input
                                     id="franchise_max_client"
+                                    v-model.number="form.max_client"
                                     type="number"
                                     class="mt-1 block w-full bg-white"
-                                    v-model.number="form.max_client"
                                     required
                                     min="0"
                                 />
@@ -160,9 +160,9 @@ const submit = () => {
                                 >
                                 <Input
                                     id="franchise_contract_start_date"
+                                    v-model="form.contract_start_date"
                                     type="date"
                                     class="mt-1 block w-full bg-white"
-                                    v-model="form.contract_start_date"
                                     required
                                 />
                                 <InputError
@@ -176,9 +176,9 @@ const submit = () => {
                                 >
                                 <Input
                                     id="franchise_actuation_region"
+                                    v-model="form.actuation_region"
                                     type="text"
                                     class="mt-1 block w-full bg-white"
-                                    v-model="form.actuation_region"
                                     required
                                 />
                                 <InputError
@@ -225,8 +225,8 @@ const submit = () => {
                                 <Label for="franchise_observations">Observações</Label>
                                 <Textarea
                                     id="franchise_observations"
-                                    class="mt-1 block w-full bg-white"
                                     v-model="form.observations"
+                                    class="mt-1 block w-full bg-white"
                                     rows="3"
                                 />
                                 <InputError class="mt-2" :message="form.errors.observations" />
@@ -235,9 +235,9 @@ const submit = () => {
                                 <Label for="user_password">Nova Senha</Label>
                                 <Input
                                     id="user_password"
+                                    v-model="form.password"
                                     type="password"
                                     class="mt-1 block w-full bg-white"
-                                    v-model="form.password"
                                 />
                                 <InputError class="mt-2" :message="form.errors.password" />
                             </div>
@@ -247,9 +247,9 @@ const submit = () => {
                                 >
                                 <Input
                                     id="user_password_confirmation"
+                                    v-model="form.password_confirmation"
                                     type="password"
                                     class="mt-1 block w-full bg-white"
-                                    v-model="form.password_confirmation"
                                 />
                                 <InputError
                                     class="mt-2"

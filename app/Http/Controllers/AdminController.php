@@ -47,7 +47,7 @@ class AdminController extends Controller
 
     public function store(StoreAdminRequest $request, StoreAdminAction $storeAdmin): RedirectResponse
     {
-        $storeAdmin->execute($request->validated());
+        $storeAdmin->execute($request);
 
         return redirect()->route('admins.index')->with('success', 'Administrador criado com sucesso.');
     }
@@ -67,7 +67,7 @@ class AdminController extends Controller
 
     public function update(UpdateAdminRequest $request, User $admin, UpdateAdminAction $updateAdmin): RedirectResponse
     {
-        $updateAdmin->execute($admin, $request->validated());
+        $updateAdmin->execute($admin, $request);
 
         return redirect()->route('admins.index')->with('success', 'Administrador atualizado com sucesso.');
     }

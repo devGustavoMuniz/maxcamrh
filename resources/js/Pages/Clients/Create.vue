@@ -77,7 +77,7 @@ const submit = () => {
             <div
                 class="bg-gray-100 dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-6 md:p-8"
             >
-                <form @submit.prevent="submit" class="space-y-6">
+                <form class="space-y-6" @submit.prevent="submit">
                     <div class="space-y-4">
                         <h3
                             class="text-lg font-medium text-gray-900 dark:text-gray-100 border-b dark:border-gray-700 pb-2"
@@ -120,9 +120,9 @@ const submit = () => {
                                 <Label for="user_name">Nome do Usuário</Label>
                                 <Input
                                     id="user_name"
+                                    v-model="form.name"
                                     type="text"
                                     class="mt-1 block w-full bg-white"
-                                    v-model="form.name"
                                     required
                                     autofocus
                                 />
@@ -132,9 +132,9 @@ const submit = () => {
                                 <Label for="user_email">Email do Usuário</Label>
                                 <Input
                                     id="user_email"
+                                    v-model="form.email"
                                     type="email"
                                     class="mt-1 block w-full bg-white"
-                                    v-model="form.email"
                                     required
                                 />
                                 <InputError class="mt-2" :message="form.errors.email" />
@@ -143,10 +143,10 @@ const submit = () => {
                                 <Label for="client_cnpj">CNPJ</Label>
                                 <Input
                                     id="client_cnpj"
-                                    type="text"
-                                    class="mt-1 block w-full bg-white"
                                     v-model="form.cnpj"
                                     v-mask="'##.###.###/####-##'"
+                                    type="text"
+                                    class="mt-1 block w-full bg-white"
                                     required
                                 />
                                 <InputError class="mt-2" :message="form.errors.cnpj" />
@@ -155,10 +155,10 @@ const submit = () => {
                                 <Label for="client_phone">Telefone</Label>
                                 <Input
                                     id="client_phone"
-                                    type="text"
-                                    class="mt-1 block w-full bg-white"
                                     v-model="form.phone"
                                     v-mask="['(##) ####-####', '(##) #####-####']"
+                                    type="text"
+                                    class="mt-1 block w-full bg-white"
                                 />
                                 <InputError class="mt-2" :message="form.errors.phone" />
                             </div>
@@ -166,9 +166,9 @@ const submit = () => {
                                 <Label for="client_test_number">Número de Teste</Label>
                                 <Input
                                     id="client_test_number"
+                                    v-model="form.test_number"
                                     type="text"
                                     class="mt-1 block w-full bg-white"
-                                    v-model="form.test_number"
                                 />
                                 <InputError class="mt-2" :message="form.errors.test_number" />
                             </div>
@@ -178,9 +178,9 @@ const submit = () => {
                                 >
                                 <Input
                                     id="client_contract_end_date"
+                                    v-model="form.contract_end_date"
                                     type="date"
                                     class="mt-1 block w-full bg-white"
-                                    v-model="form.contract_end_date"
                                 />
                                 <InputError
                                     class="mt-2"
@@ -194,8 +194,8 @@ const submit = () => {
                                         ref="logoFileInput"
                                         type="file"
                                         class="hidden"
-                                        @change="handleLogoUpload"
                                         accept="image/*"
+                                        @change="handleLogoUpload"
                                     />
                                     <Button
                                         type="button"
@@ -215,9 +215,9 @@ const submit = () => {
                             </div>
                             <div class="flex items-center space-x-2 self-end pb-1">
                                 <input
-                                    type="checkbox"
                                     id="is_monthly_contract"
                                     v-model="form.is_monthly_contract"
+                                    type="checkbox"
                                     class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                                 />
                                 <label
@@ -236,9 +236,9 @@ const submit = () => {
                                 <Label for="user_password">Senha</Label>
                                 <Input
                                     id="user_password"
+                                    v-model="form.password"
                                     type="password"
                                     class="mt-1 block w-full bg-white"
-                                    v-model="form.password"
                                     required
                                 />
                                 <InputError class="mt-2" :message="form.errors.password" />
@@ -249,9 +249,9 @@ const submit = () => {
                                 >
                                 <Input
                                     id="user_password_confirmation"
+                                    v-model="form.password_confirmation"
                                     type="password"
                                     class="mt-1 block w-full bg-white"
-                                    v-model="form.password_confirmation"
                                     required
                                 />
                                 <InputError

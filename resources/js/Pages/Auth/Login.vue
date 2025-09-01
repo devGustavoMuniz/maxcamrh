@@ -13,7 +13,6 @@ import {
   CardDescription,
   CardFooter,
   CardHeader,
-  CardTitle,
 } from "@/Components/ui/card";
 
 import { Loader2 } from "lucide-vue-next";
@@ -58,14 +57,14 @@ const submit = () => {
           {{ status }}
         </div>
 
-        <form @submit.prevent="submit" class="space-y-6">
+        <form class="space-y-6" @submit.prevent="submit">
           <div>
             <Label for="email">Email</Label>
             <Input
               id="email"
+              v-model="form.email"
               type="email"
               class="mt-1 block w-full bg-white"
-              v-model="form.email"
               required
               autofocus
               autocomplete="username"
@@ -87,9 +86,9 @@ const submit = () => {
             </div>
             <Input
               id="password"
+              v-model="form.password"
               type="password"
               class="mt-1 block w-full bg-white"
-              v-model="form.password"
               required
               autocomplete="current-password"
               placeholder="********"

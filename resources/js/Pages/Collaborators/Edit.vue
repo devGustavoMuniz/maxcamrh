@@ -195,13 +195,13 @@ async function fetchAddressByCep() {
             <Button
                 v-for="(name, index) in stepNames"
                 :key="index + 1"
-                @click="goToStep(index + 1)"
                 :variant="currentStep === index + 1 ? 'default' : 'outline'"
                 :class="{
           'bg-gray-800 text-white hover:bg-gray-700': currentStep === index + 1,
           'bg-white dark:bg-gray-800': currentStep !== index + 1,
         }"
                 class="text-xs sm:text-sm"
+                @click="goToStep(index + 1)"
             >
                 Etapa {{ index + 1 }}: {{ name }}
             </Button>
@@ -211,12 +211,12 @@ async function fetchAddressByCep() {
             <div
                 class="bg-gray-100 dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-4 md:p-8"
             >
-                <form @submit.prevent="submit" class="space-y-6">
+                <form class="space-y-6" @submit.prevent="submit">
                     <section v-if="currentStep === 1" class="space-y-4">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div
-                                class="md:col-span-2"
                                 v-if="userRole === 'admin' || userRole === 'franchise'"
+                                class="md:col-span-2"
                             >
                                 <Label for="collaborator_client_id_edit"
                                 >Cliente Associado</Label
@@ -234,9 +234,9 @@ async function fetchAddressByCep() {
                                                 Nenhum
                                             </SelectItem>
                                             <SelectItem
-                                                class="cursor-pointer"
                                                 v-for="client in props.clients"
                                                 :key="client.id"
+                                                class="cursor-pointer"
                                                 :value="client.id"
                                             >{{ client.name }}
                                             </SelectItem>
@@ -252,9 +252,9 @@ async function fetchAddressByCep() {
                                 <Label for="user_name_edit">Nome Completo</Label>
                                 <Input
                                     id="user_name_edit"
+                                    v-model="form.user.name"
                                     type="text"
                                     class="mt-1 block w-full bg-white dark:bg-gray-700"
-                                    v-model="form.user.name"
                                     required
                                 />
                             </div>
@@ -262,9 +262,9 @@ async function fetchAddressByCep() {
                                 <Label for="user_email_edit">Email de Acesso</Label>
                                 <Input
                                     id="user_email_edit"
+                                    v-model="form.user.email"
                                     type="email"
                                     class="mt-1 block w-full bg-white dark:bg-gray-700"
-                                    v-model="form.user.email"
                                     required
                                 />
                             </div>
@@ -274,9 +274,9 @@ async function fetchAddressByCep() {
                                 >
                                 <Input
                                     id="collaborator_date_of_birth_edit"
+                                    v-model="form.collaborator.date_of_birth"
                                     type="date"
                                     class="mt-1 block w-full bg-white dark:bg-gray-700"
-                                    v-model="form.collaborator.date_of_birth"
                                 />
                             </div>
                             <div>
@@ -320,43 +320,43 @@ async function fetchAddressByCep() {
                                 <Label for="collaborator_scholarity_edit">Escolaridade</Label>
                                 <Input
                                     id="collaborator_scholarity_edit"
+                                    v-model="form.collaborator.scholarity"
                                     type="text"
                                     class="mt-1 block w-full bg-white dark:bg-gray-700"
-                                    v-model="form.collaborator.scholarity"
                                 />
                             </div>
                             <div>
                                 <Label for="collaborator_father_name_edit">Nome do Pai</Label>
                                 <Input
                                     id="collaborator_father_name_edit"
+                                    v-model="form.collaborator.father_name"
                                     type="text"
                                     class="mt-1 block w-full bg-white dark:bg-gray-700"
-                                    v-model="form.collaborator.father_name"
                                 />
                             </div>
                             <div>
                                 <Label for="collaborator_mother_name_edit">Nome da Mãe</Label>
                                 <Input
                                     id="collaborator_mother_name_edit"
+                                    v-model="form.collaborator.mother_name"
                                     type="text"
                                     class="mt-1 block w-full bg-white dark:bg-gray-700"
-                                    v-model="form.collaborator.mother_name"
                                 />
                             </div>
                             <div>
                                 <Label for="collaborator_nationality_edit">Nacionalidade</Label>
                                 <Input
                                     id="collaborator_nationality_edit"
+                                    v-model="form.collaborator.nationality"
                                     type="text"
                                     class="mt-1 block w-full bg-white dark:bg-gray-700"
-                                    v-model="form.collaborator.nationality"
                                 />
                             </div>
                             <div class="flex items-center space-x-2 self-end pb-1">
                                 <input
-                                    type="checkbox"
                                     id="collaborator_is_special_needs_person_edit"
                                     v-model="form.collaborator.is_special_needs_person"
+                                    type="checkbox"
                                     class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                                 />
                                 <label
@@ -372,9 +372,9 @@ async function fetchAddressByCep() {
                                         >
                                         <Input
                                             id="user_password_edit"
+                                            v-model="form.user.password"
                                             type="password"
                                             class="mt-1 block w-full bg-white dark:bg-gray-700"
-                                            v-model="form.user.password"
                                         />
                                         <InputError
                                             class="mt-2"
@@ -387,9 +387,9 @@ async function fetchAddressByCep() {
                                         >
                                         <Input
                                             id="user_password_confirmation_edit"
+                                            v-model="form.user.password_confirmation"
                                             type="password"
                                             class="mt-1 block w-full bg-white dark:bg-gray-700"
-                                            v-model="form.user.password_confirmation"
                                         />
                                     </div>
                                 </div>
@@ -405,9 +405,9 @@ async function fetchAddressByCep() {
                                 >
                                 <Input
                                     id="collaborator_personal_email_edit"
+                                    v-model="form.collaborator.personal_email"
                                     type="email"
                                     class="mt-1 block w-full bg-white dark:bg-gray-700"
-                                    v-model="form.collaborator.personal_email"
                                 />
                             </div>
                             <div>
@@ -416,29 +416,29 @@ async function fetchAddressByCep() {
                                 >
                                 <Input
                                     id="collaborator_business_email_edit"
+                                    v-model="form.collaborator.business_email"
                                     type="email"
                                     class="mt-1 block w-full bg-white dark:bg-gray-700"
-                                    v-model="form.collaborator.business_email"
                                 />
                             </div>
                             <div>
                                 <Label for="collaborator_phone_edit">Telefone Fixo</Label>
                                 <Input
                                     id="collaborator_phone_edit"
-                                    type="tel"
-                                    class="mt-1 block w-full bg-white dark:bg-gray-700"
                                     v-model="form.collaborator.phone"
                                     v-mask="['(##) ####-####', '(##) #####-####']"
+                                    type="tel"
+                                    class="mt-1 block w-full bg-white dark:bg-gray-700"
                                 />
                             </div>
                             <div>
                                 <Label for="collaborator_cellphone_edit">Celular</Label>
                                 <Input
                                     id="collaborator_cellphone_edit"
-                                    type="tel"
-                                    class="mt-1 block w-full bg-white dark:bg-gray-700"
                                     v-model="form.collaborator.cellphone"
                                     v-mask="['(##) ####-####', '(##) #####-####']"
+                                    type="tel"
+                                    class="mt-1 block w-full bg-white dark:bg-gray-700"
                                 />
                             </div>
                             <div class="md:col-span-2">
@@ -447,75 +447,75 @@ async function fetchAddressByCep() {
                                 >
                                 <Input
                                     id="collaborator_emergency_phone_edit"
-                                    type="tel"
-                                    class="mt-1 block w-full bg-white dark:bg-gray-700"
                                     v-model="form.collaborator.emergency_phone"
                                     v-mask="['(##) ####-####', '(##) #####-####']"
+                                    type="tel"
+                                    class="mt-1 block w-full bg-white dark:bg-gray-700"
                                 />
                             </div>
                             <div>
                                 <Label for="address_cep_edit">CEP</Label>
                                 <Input
                                     id="address_cep_edit"
+                                    v-model="form.address.cep"
+                                    v-mask="'#####-###'"
                                     type="text"
                                     class="mt-1 block w-full bg-white dark:bg-gray-700"
-                                    v-model="form.address.cep"
                                     @blur="fetchAddressByCep"
-                                    v-mask="'#####-###'"
                                 />
                             </div>
                             <div>
                                 <Label for="address_street_edit">Logradouro (Rua, Av.)</Label>
                                 <Input
                                     id="address_street_edit"
+                                    v-model="form.address.street"
                                     type="text"
                                     class="mt-1 block w-full bg-white dark:bg-gray-700"
-                                    v-model="form.address.street"
                                 />
                             </div>
                             <div>
                                 <Label for="address_number_edit">Número</Label>
                                 <Input
                                     id="address_number_edit"
+                                    v-model="form.address.number"
                                     type="text"
                                     class="mt-1 block w-full bg-white dark:bg-gray-700"
-                                    v-model="form.address.number"
                                 />
                             </div>
                             <div>
                                 <Label for="address_complement_edit">Complemento</Label>
                                 <Input
                                     id="address_complement_edit"
+                                    v-model="form.address.complement"
                                     type="text"
                                     class="mt-1 block w-full bg-white dark:bg-gray-700"
-                                    v-model="form.address.complement"
                                 />
                             </div>
                             <div>
                                 <Label for="address_neighborhood_edit">Bairro</Label>
                                 <Input
                                     id="address_neighborhood_edit"
+                                    v-model="form.address.neighborhood"
                                     type="text"
                                     class="mt-1 block w-full bg-white dark:bg-gray-700"
-                                    v-model="form.address.neighborhood"
                                 />
                             </div>
                             <div>
                                 <Label for="address_city_edit">Cidade</Label>
                                 <Input
                                     id="address_city_edit"
+                                    v-model="form.address.city"
                                     type="text"
                                     class="mt-1 block w-full bg-white dark:bg-gray-700"
-                                    v-model="form.address.city"
                                 />
                             </div>
                             <div>
                                 <Label for="address_state_edit">Estado (UF)</Label>
                                 <Input
                                     id="address_state_edit"
+                                    v-model="form.address.state"
                                     type="text"
                                     class="mt-1 block w-full bg-white dark:bg-gray-700"
-                                    v-model="form.address.state"
                                     maxlength="2"
                                 />
                             </div>
@@ -528,18 +528,18 @@ async function fetchAddressByCep() {
                                 <Label for="collaborator_department_edit">Departamento</Label>
                                 <Input
                                     id="collaborator_department_edit"
+                                    v-model="form.collaborator.department"
                                     type="text"
                                     class="mt-1 block w-full bg-white dark:bg-gray-700"
-                                    v-model="form.collaborator.department"
                                 />
                             </div>
                             <div>
                                 <Label for="collaborator_position_edit">Cargo</Label>
                                 <Input
                                     id="collaborator_position_edit"
+                                    v-model="form.collaborator.position"
                                     type="text"
                                     class="mt-1 block w-full bg-white dark:bg-gray-700"
-                                    v-model="form.collaborator.position"
                                 />
                             </div>
                             <div>
@@ -565,10 +565,10 @@ async function fetchAddressByCep() {
                                 <Label for="collaborator_salary_edit">Salário (R$)</Label>
                                 <Input
                                     id="collaborator_salary_edit"
-                                    type="text"
-                                    class="mt-1 block w-full bg-white dark:bg-gray-700"
                                     v-model="form.collaborator.salary"
                                     v-money3="moneyConfig"
+                                    type="text"
+                                    class="mt-1 block w-full bg-white dark:bg-gray-700"
                                 />
                             </div>
                             <div>
@@ -577,9 +577,9 @@ async function fetchAddressByCep() {
                                 >
                                 <Input
                                     id="collaborator_admission_date_edit"
+                                    v-model="form.collaborator.admission_date"
                                     type="date"
                                     class="mt-1 block w-full bg-white dark:bg-gray-700"
-                                    v-model="form.collaborator.admission_date"
                                 />
                             </div>
                             <div>
@@ -588,9 +588,9 @@ async function fetchAddressByCep() {
                                 >
                                 <Input
                                     id="collaborator_contract_start_date_edit"
+                                    v-model="form.collaborator.contract_start_date"
                                     type="date"
                                     class="mt-1 block w-full bg-white dark:bg-gray-700"
-                                    v-model="form.collaborator.contract_start_date"
                                 />
                             </div>
                             <div>
@@ -599,9 +599,9 @@ async function fetchAddressByCep() {
                                 >
                                 <Input
                                     id="collaborator_contract_expiration_edit"
+                                    v-model="form.collaborator.contract_expiration"
                                     type="date"
                                     class="mt-1 block w-full bg-white dark:bg-gray-700"
-                                    v-model="form.collaborator.contract_expiration"
                                 />
                             </div>
                             <div>
@@ -610,9 +610,9 @@ async function fetchAddressByCep() {
                                 >
                                 <Input
                                     id="collaborator_direct_superior_name_edit"
+                                    v-model="form.collaborator.direct_superior_name"
                                     type="text"
                                     class="mt-1 block w-full bg-white dark:bg-gray-700"
-                                    v-model="form.collaborator.direct_superior_name"
                                 />
                             </div>
                             <div class="md:col-span-2">
@@ -621,9 +621,9 @@ async function fetchAddressByCep() {
                                 >
                                 <Input
                                     id="collaborator_hierarchical_degree_edit"
+                                    v-model="form.collaborator.hierarchical_degree"
                                     type="text"
                                     class="mt-1 block w-full bg-white dark:bg-gray-700"
-                                    v-model="form.collaborator.hierarchical_degree"
                                 />
                             </div>
                             <div class="md:col-span-2">
@@ -632,8 +632,8 @@ async function fetchAddressByCep() {
                                 >
                                 <Textarea
                                     id="collaborator_observations_edit"
-                                    class="mt-1 block w-full bg-white dark:bg-gray-700"
                                     v-model="form.collaborator.observations"
+                                    class="mt-1 block w-full bg-white dark:bg-gray-700"
                                     rows="3"
                                 />
                             </div>
@@ -646,30 +646,30 @@ async function fetchAddressByCep() {
                                 <Label for="collaborator_cpf_edit">CPF</Label>
                                 <Input
                                     id="collaborator_cpf_edit"
-                                    type="text"
-                                    class="mt-1 block w-full bg-white dark:bg-gray-700"
                                     v-model="form.collaborator.cpf"
                                     v-mask="'###.###.###-##'"
+                                    type="text"
+                                    class="mt-1 block w-full bg-white dark:bg-gray-700"
                                 />
                             </div>
                             <div>
                                 <Label for="collaborator_rg_edit">RG</Label>
                                 <Input
                                     id="collaborator_rg_edit"
-                                    type="text"
-                                    class="mt-1 block w-full bg-white dark:bg-gray-700"
                                     v-model="form.collaborator.rg"
                                     v-mask="'##.###.###-A'"
+                                    type="text"
+                                    class="mt-1 block w-full bg-white dark:bg-gray-700"
                                 />
                             </div>
                             <div>
                                 <Label for="collaborator_cnh_edit">CNH (Número)</Label>
                                 <Input
                                     id="collaborator_cnh_edit"
-                                    type="text"
-                                    class="mt-1 block w-full bg-white dark:bg-gray-700"
                                     v-model="form.collaborator.cnh"
                                     v-mask="'###########'"
+                                    type="text"
+                                    class="mt-1 block w-full bg-white dark:bg-gray-700"
                                 />
                             </div>
                             <div>
@@ -678,9 +678,9 @@ async function fetchAddressByCep() {
                                 >
                                 <Input
                                     id="collaborator_reservista_edit"
+                                    v-model="form.collaborator.reservista"
                                     type="text"
                                     class="mt-1 block w-full bg-white dark:bg-gray-700"
-                                    v-model="form.collaborator.reservista"
                                 />
                             </div>
                             <div>
@@ -689,9 +689,9 @@ async function fetchAddressByCep() {
                                 >
                                 <Input
                                     id="collaborator_titulo_eleitor_edit"
+                                    v-model="form.collaborator.titulo_eleitor"
                                     type="text"
                                     class="mt-1 block w-full bg-white dark:bg-gray-700"
-                                    v-model="form.collaborator.titulo_eleitor"
                                 />
                             </div>
                             <div>
@@ -700,9 +700,9 @@ async function fetchAddressByCep() {
                                 >
                                 <Input
                                     id="collaborator_zona_eleitoral_edit"
+                                    v-model="form.collaborator.zona_eleitoral"
                                     type="text"
                                     class="mt-1 block w-full bg-white dark:bg-gray-700"
-                                    v-model="form.collaborator.zona_eleitoral"
                                 />
                             </div>
                             <div>
@@ -711,18 +711,18 @@ async function fetchAddressByCep() {
                                 >
                                 <Input
                                     id="collaborator_pis_ctps_numero_edit"
+                                    v-model="form.collaborator.pis_ctps_numero"
                                     type="text"
                                     class="mt-1 block w-full bg-white dark:bg-gray-700"
-                                    v-model="form.collaborator.pis_ctps_numero"
                                 />
                             </div>
                             <div>
                                 <Label for="collaborator_ctps_serie_edit">Série CTPS</Label>
                                 <Input
                                     id="collaborator_ctps_serie_edit"
+                                    v-model="form.collaborator.ctps_serie"
                                     type="text"
                                     class="mt-1 block w-full bg-white dark:bg-gray-700"
-                                    v-model="form.collaborator.ctps_serie"
                                 />
                             </div>
                             <div class="md:col-span-2">
@@ -734,6 +734,7 @@ async function fetchAddressByCep() {
                                             ref="photoFileInput"
                                             type="file"
                                             class="hidden"
+                                            accept="image/*"
                                             @change="
                         (event) =>
                           handleFileUpload(
@@ -743,13 +744,12 @@ async function fetchAddressByCep() {
                             true,
                           )
                       "
-                                            accept="image/*"
                                         />
                                         <Button
                                             type="button"
                                             variant="outline"
-                                            @click="photoFileInput?.click()"
                                             class="w-full bg-white dark:bg-gray-700 justify-center"
+                                            @click="photoFileInput?.click()"
                                         >Nova Foto</Button
                                         >
                                     </div>
@@ -759,6 +759,7 @@ async function fetchAddressByCep() {
                                             ref="curriculumFileInput"
                                             type="file"
                                             class="hidden"
+                                            accept=".pdf,.doc,.docx"
                                             @change="
                         (event) =>
                           handleFileUpload(
@@ -768,13 +769,12 @@ async function fetchAddressByCep() {
                             false,
                           )
                       "
-                                            accept=".pdf,.doc,.docx"
                                         />
                                         <Button
                                             type="button"
                                             variant="outline"
-                                            @click="curriculumFileInput?.click()"
                                             class="w-full bg-white dark:bg-gray-700 justify-center"
+                                            @click="curriculumFileInput?.click()"
                                         >Novo Currículo</Button
                                         >
                                         <p
@@ -795,18 +795,18 @@ async function fetchAddressByCep() {
                                 <Label for="collaborator_banco_edit">Banco</Label>
                                 <Input
                                     id="collaborator_banco_edit"
+                                    v-model="form.collaborator.banco"
                                     type="text"
                                     class="mt-1 block w-full bg-white dark:bg-gray-700"
-                                    v-model="form.collaborator.banco"
                                 />
                             </div>
                             <div>
                                 <Label for="collaborator_agencia_edit">Agência</Label>
                                 <Input
                                     id="collaborator_agencia_edit"
+                                    v-model="form.collaborator.agencia"
                                     type="text"
                                     class="mt-1 block w-full bg-white dark:bg-gray-700"
-                                    v-model="form.collaborator.agencia"
                                 />
                             </div>
                             <div>
@@ -815,9 +815,9 @@ async function fetchAddressByCep() {
                                 >
                                 <Input
                                     id="collaborator_conta_corrente_edit"
+                                    v-model="form.collaborator.conta_corrente"
                                     type="text"
                                     class="mt-1 block w-full bg-white dark:bg-gray-700"
-                                    v-model="form.collaborator.conta_corrente"
                                 />
                             </div>
                         </div>
@@ -828,11 +828,11 @@ async function fetchAddressByCep() {
                     >
                         <div>
                             <Button
+                                v-if="currentStep > 1"
                                 type="button"
                                 variant="outline"
                                 class="bg-white dark:bg-gray-700 w-full sm:w-auto"
                                 @click="prevStep"
-                                v-if="currentStep > 1"
                             >Anterior</Button
                             >
                         </div>
@@ -851,10 +851,10 @@ async function fetchAddressByCep() {
                                 >
                             </Link>
                             <Button
+                                v-if="currentStep < totalSteps"
                                 type="button"
                                 class="bg-gray-500 text-white hover:bg-gray-400 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-500 w-full sm:w-auto"
                                 @click="nextStep"
-                                v-if="currentStep < totalSteps"
                             >Próximo</Button
                             >
                             <Button

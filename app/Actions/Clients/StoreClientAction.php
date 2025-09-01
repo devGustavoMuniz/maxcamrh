@@ -3,8 +3,8 @@
 namespace App\Actions\Clients;
 
 use App\Enums\UserRole;
+use App\Http\Requests\StoreClientRequest;
 use App\Models\User;
-use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Throwable;
@@ -14,8 +14,12 @@ class StoreClientAction
     /**
      * @throws Throwable
      */
-    public function execute(array $data, ?UploadedFile $logoFile, User $loggedInUser): User
+    public function __invoke(StoreClientRequest $request): Client
     {
+        $data = $request->validated();
+        $logoFile = $request->file('logo_file');
+        $loggedInUser = $request->user();
+
         $logoPath = $logoFile?->store('client_logos', 'public');
 
         return DB::transaction(function () use ($data, $logoPath, $loggedInUser) {
@@ -29,10 +33,10 @@ class StoreClientAction
 
             $clientData = [
                 'cnpj' => $data['cnpj'],
-                'test_number' => $data['test_number'],
-                'contract_end_date' => $data['contract_end_date'],
+                'test_number' => $data['test_number'] ?? null,
+                'contract_end_date' => $data['contract_end_date'] ?? null,
                 'is_monthly_contract' => $data['is_monthly_contract'],
-                'phone' => $data['phone'],
+                'phone' => $data['phone'] ?? null,
                 'logo_url' => $logoPath,
                 'franchise_id' => null,
             ];
@@ -45,9 +49,9 @@ class StoreClientAction
                 $clientData['franchise_id'] = $loggedInUser->franchise_id;
             }
 
-            $clientUser->client()->create($clientData);
+            $client = $clientUser->client()->create($clientData);
 
-            return $clientUser;
+            return $client;
         });
     }
 }

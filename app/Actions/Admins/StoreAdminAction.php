@@ -3,13 +3,16 @@
 namespace App\Actions\Admins;
 
 use App\Enums\UserRole;
+use App\Http\Requests\StoreAdminRequest;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 
 class StoreAdminAction
 {
-    public function execute(array $data): User
+    public function execute(StoreAdminRequest $request): User
     {
+        $data = $request->validated();
+
         return User::create([
             'name' => $data['name'],
             'email' => $data['email'],

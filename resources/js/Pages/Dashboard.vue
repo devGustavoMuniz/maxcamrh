@@ -7,7 +7,6 @@ import { Button } from "@/Components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
@@ -18,7 +17,6 @@ import {
   Store,
   Building2,
   UserCog,
-  Briefcase,
   Settings2,
   LayoutDashboard,
 } from "lucide-vue-next";

@@ -3,9 +3,8 @@
 namespace App\Actions\Clients;
 
 use App\Enums\UserRole;
+use App\Http\Requests\UpdateClientRequest;
 use App\Models\Client;
-use App\Models\User;
-use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
@@ -16,8 +15,12 @@ class UpdateClientAction
     /**
      * @throws Throwable
      */
-    public function execute(Client $client, array $data, ?UploadedFile $logoFile, User $loggedInUser): bool
+    public function __invoke(Client $client, UpdateClientRequest $request): Client
     {
+        $data = $request->validated();
+        $logoFile = $request->file('logo_file');
+        $loggedInUser = $request->user();
+
         $logoPath = $client->logo_url;
         if ($logoFile) {
             if ($client->logo_url) {
@@ -26,7 +29,7 @@ class UpdateClientAction
             $logoPath = $logoFile->store('client_logos', 'public');
         }
 
-        return DB::transaction(function () use ($client, $data, $logoPath, $loggedInUser) {
+        DB::transaction(function () use ($client, $data, $logoPath, $loggedInUser) {
             $clientUser = $client->user;
 
             $clientUser->update([
@@ -37,10 +40,10 @@ class UpdateClientAction
 
             $clientDataToUpdate = [
                 'cnpj' => $data['cnpj'],
-                'test_number' => $data['test_number'],
-                'contract_end_date' => $data['contract_end_date'],
+                'test_number' => $data['test_number'] ?? null,
+                'contract_end_date' => $data['contract_end_date'] ?? null,
                 'is_monthly_contract' => $data['is_monthly_contract'],
-                'phone' => $data['phone'],
+                'phone' => $data['phone'] ?? null,
                 'logo_url' => $logoPath,
             ];
 
@@ -50,7 +53,9 @@ class UpdateClientAction
                 }
             }
 
-            return $client->update($clientDataToUpdate);
+            $client->update($clientDataToUpdate);
         });
+
+        return $client->fresh();
     }
 }

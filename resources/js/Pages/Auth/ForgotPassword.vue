@@ -10,7 +10,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/Components/ui/card";
@@ -53,14 +52,14 @@ const submit = () => {
           {{ status }}
         </div>
 
-        <form @submit.prevent="submit" class="space-y-6">
+        <form class="space-y-6" @submit.prevent="submit">
           <div>
             <Label for="email">Email</Label>
             <Input
               id="email"
+              v-model="form.email"
               type="email"
               class="mt-1 block w-full"
-              v-model="form.email"
               required
               autofocus
               autocomplete="username"

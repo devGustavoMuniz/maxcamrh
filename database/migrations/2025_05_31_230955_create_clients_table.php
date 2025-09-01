@@ -16,11 +16,11 @@ return new class extends Migration
       $table->foreignUuid('user_id')->unique()->constrained('users')->onDelete('cascade');
       $table->foreignUuid('franchise_id')->nullable()->constrained('franchises')->onDelete('cascade');
       $table->string('cnpj')->unique();
-      $table->string('test_number');
-      $table->date('contract_end_date');
+      $table->string('test_number')->nullable();
+      $table->date('contract_end_date')->nullable();
       $table->boolean('is_monthly_contract')->default(false);
-      $table->string('phone');
-      $table->string('logo_url');
+      $table->string('phone')->nullable();
+      $table->string('logo_url')->nullable();
       $table->timestamps();
     });
   }
