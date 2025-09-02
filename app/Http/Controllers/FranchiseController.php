@@ -65,7 +65,7 @@ class FranchiseController extends Controller
     {
         $this->authorize('update', $franchise);
         return Inertia::render('Franchises/Edit', [
-            'franchise_data' => new FranchiseResource($franchise->load('user')),
+            'franchise_data' => (new FranchiseResource($franchise->load('user')))->resolve(),
         ]);
     }
 

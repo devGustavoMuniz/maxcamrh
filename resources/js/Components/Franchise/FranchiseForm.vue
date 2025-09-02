@@ -5,7 +5,8 @@ import { Label } from "@/Components/ui/label";
 import { Textarea } from "@/Components/ui/textarea";
 import InputError from "@/Components/InputError.vue";
 import { Button } from "@/Components/ui/button";
-import { useForm } from "@inertiajs/vue3";
+import { Download } from "lucide-vue-next";
+import { downloadFile } from "@/utils/fileUtils";
 
 const props = defineProps({
     franchiseForm: {
@@ -16,19 +17,7 @@ const props = defineProps({
     initialDocumentUrl: { type: String, default: null },
 });
 
-const form = useForm({
-    name: props.franchiseForm.name,
-    email: props.franchiseForm.email,
-    password: props.franchiseForm.password,
-    password_confirmation: props.franchiseForm.password_confirmation,
-    maxcam_email: props.franchiseForm.maxcam_email,
-    cnpj: props.franchiseForm.cnpj,
-    max_client: props.franchiseForm.max_client,
-    contract_start_date: props.franchiseForm.contract_start_date,
-    actuation_region: props.franchiseForm.actuation_region,
-    document_file: null,
-    observations: props.franchiseForm.observations,
-});
+const form = props.franchiseForm;
 
 const documentFileInput = ref(null);
 const documentPreview = ref(props.initialDocumentUrl);
@@ -42,6 +31,10 @@ function handleDocumentUpload(event) {
         form.document_file = null;
         documentPreview.value = props.initialDocumentUrl;
     }
+}
+
+function downloadDocument() {
+    downloadFile(props.initialDocumentUrl);
 }
 </script>
 
@@ -188,9 +181,19 @@ function handleDocumentUpload(event) {
                         @click="documentFileInput?.click()"
                         >Escolher Arquivo</Button
                     >
+                    <Button
+                        v-if="props.initialDocumentUrl"
+                        type="button"
+                        variant="outline"
+                        class="ml-2"
+                        title="Baixar documento atual"
+                        @click="downloadDocument"
+                    >
+                        <Download class="h-4 w-4" />
+                    </Button>
                     <span
-                        v-if="documentPreview"
-                        class="text-sm text-gray-500 dark:text-gray-400 truncate"
+                        v-if="documentPreview && !props.initialDocumentUrl"
+                        class="text-sm text-gray-500 dark:text-gray-400 truncate ml-2"
                         >{{ documentPreview }}</span
                     >
                 </div>
