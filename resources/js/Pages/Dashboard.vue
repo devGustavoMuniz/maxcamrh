@@ -232,7 +232,7 @@ const userRole = computed(() => currentUser.value?.role);
             </CardHeader>
             <CardContent>
               <div class="text-2xl font-bold">
-                {{ props.stats?.myCompanyCollaborators || "N/A" }}
+                {{ props.stats?.myCompanyCollaborators || "Indisponível" }}
               </div>
               <p class="text-xs text-muted-foreground">
                 Colaboradores da sua empresa

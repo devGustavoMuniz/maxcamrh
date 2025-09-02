@@ -41,7 +41,7 @@ const deleteCollaborator = (collaboratorId) => {
                         >Nome</TableHead
                     >
                     <TableHead class="px-4 py-3 text-gray-800 dark:text-gray-200"
-                        >Email</TableHead
+                        >E-mail</TableHead
                     >
                     <TableHead class="px-4 py-3 text-gray-800 dark:text-gray-200"
                         >Cliente Associado</TableHead
@@ -81,10 +81,10 @@ const deleteCollaborator = (collaboratorId) => {
                             collab.user.email
                         }}</TableCell>
                         <TableCell class="px-4 text-gray-600 dark:text-gray-400">{{
-                            collab.client_name ?? "N/A"
+                            collab.client_name ?? "Indisponível"
                         }}</TableCell>
                         <TableCell class="px-4 text-gray-600 dark:text-gray-400">{{
-                            collab.address?.city || "N/A"
+                            collab.address?.city || "Indisponível"
                         }}</TableCell>
                         <TableCell class="text-right px-4">
                             <div class="flex items-center justify-end gap-2">

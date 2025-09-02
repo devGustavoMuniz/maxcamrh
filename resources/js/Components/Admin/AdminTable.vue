@@ -48,7 +48,7 @@ const emptyStateMessage = computed(() => {
                         >Nome</TableHead
                     >
                     <TableHead class="px-4 py-3 text-gray-800 dark:text-gray-200"
-                        >Email</TableHead
+                        >E-mail</TableHead
                     >
                     <TableHead
                         class="text-right px-4 py-3 text-gray-800 dark:text-gray-200"

@@ -44,7 +44,7 @@ const handleSubmit = () => {
             </div>
 
             <div>
-                <Label for="email">Email</Label>
+                <Label for="email">E-mail</Label>
                 <Input
                     id="email"
                     v-model="form.email"

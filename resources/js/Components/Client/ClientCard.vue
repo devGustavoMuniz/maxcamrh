@@ -38,7 +38,7 @@ const handleDelete = () => {
             </p>
             <p>
                 <strong class="font-medium text-gray-800 dark:text-gray-200">Telefone:</strong>
-                {{ client.phone || "N/A" }}
+                {{ client.phone || "Indisponível" }}
             </p>
             <p v-if="client.franchise_name">
                 <strong class="font-medium text-gray-800 dark:text-gray-200">Franqueado:</strong>

@@ -66,7 +66,7 @@ const deleteCollaborator = (collaboratorId) => {
                         <strong class="font-medium text-gray-800 dark:text-gray-200"
                             >Cidade:</strong
                         >
-                        {{ collab.address?.city || "N/A" }}
+                        {{ collab.address?.city || "Indisponível" }}
                     </p>
                 </CardContent>
                 <CardFooter

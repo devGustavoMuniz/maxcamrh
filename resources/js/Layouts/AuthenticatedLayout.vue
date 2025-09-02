@@ -276,13 +276,13 @@ isAdmPessoasOpen.value = isAdmPessoasGroupActive.value;
             as="button"
             class="w-full flex items-center text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100 rounded-md"
             :class="uiStore.isSidebarCollapsed ? 'justify-center px-2 py-2' : 'px-3 py-2.5'"
-            :title="uiStore.isSidebarCollapsed ? 'Logout' : ''"
+            :title="uiStore.isSidebarCollapsed ? 'Sair' : ''"
           >
             <LogOut :class="uiStore.isSidebarCollapsed ? 'h-5 w-5' : 'h-5 w-5 mr-3 flex-shrink-0'" />
             <span 
               v-if="!uiStore.isSidebarCollapsed && uiStore.isTextVisible" 
               class="whitespace-nowrap"
-            >Logout</span>
+            >Sair</span>
           </Link>
         </div>
       </div>
@@ -338,7 +338,7 @@ isAdmPessoasOpen.value = isAdmPessoasGroupActive.value;
                     class="flex items-center w-full text-left"
                   >
                     <LogOut class="h-4 w-4 mr-2" />
-                    Logout
+                    Sair
                   </DropdownLink>
                 </template>
               </Dropdown>

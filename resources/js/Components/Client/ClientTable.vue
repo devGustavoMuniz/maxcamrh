@@ -53,7 +53,7 @@ const emptyStateMessage = computed(() => {
                         >Nome</TableHead
                     >
                     <TableHead class="px-4 py-3 text-gray-800 dark:text-gray-200"
-                        >Email</TableHead
+                        >E-mail</TableHead
                     >
                     <TableHead class="px-4 py-3 text-gray-800 dark:text-gray-200"
                         >CNPJ</TableHead
@@ -86,8 +86,8 @@ const emptyStateMessage = computed(() => {
                         <TableCell class="font-medium px-4 text-gray-800 dark:text-gray-200">{{ client.user.name }}</TableCell>
                         <TableCell class="px-4 text-gray-600 dark:text-gray-400">{{ client.user.email }}</TableCell>
                         <TableCell class="px-4 text-gray-600 dark:text-gray-400">{{ client.cnpj }}</TableCell>
-                        <TableCell class="px-4 text-gray-600 dark:text-gray-400">{{ client.phone || "N/A" }}</TableCell>
-                        <TableCell class="px-4 text-gray-600 dark:text-gray-400">{{ client.franchise_name || "N/A" }}</TableCell>
+                        <TableCell class="px-4 text-gray-600 dark:text-gray-400">{{ client.phone || "Indisponível" }}</TableCell>
+                        <TableCell class="px-4 text-gray-600 dark:text-gray-400">{{ client.franchise_name || "Indisponível" }}</TableCell>
                         <TableCell class="text-right px-4">
                             <div class="flex items-center justify-end gap-2">
                                 <Link :href="route('clients.edit', client.id)">
