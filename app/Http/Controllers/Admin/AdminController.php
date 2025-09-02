@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use App\Actions\Admins\StoreAdminAction;
 use App\Actions\Admins\UpdateAdminAction;
 use App\Enums\UserRole;

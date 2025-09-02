@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Client;
 
+use App\Http\Controllers\Controller;
 use App\Actions\Clients\StoreClientAction;
 use App\Actions\Clients\UpdateClientAction;
 use App\Enums\UserRole;

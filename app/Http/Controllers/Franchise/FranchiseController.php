@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Franchise;
 
+use App\Http\Controllers\Controller;
 use App\Actions\Franchises\StoreFranchiseAction;
 use App\Actions\Franchises\UpdateFranchiseAction;
 use App\Http\Requests\StoreFranchiseRequest;

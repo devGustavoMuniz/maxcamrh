@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Collaborator;
 
+use App\Http\Controllers\Controller;
 use App\Actions\Collaborators\StoreCollaboratorAction;
 use App\Actions\Collaborators\UpdateCollaboratorAction;
 use App\Enums\UserRole;
