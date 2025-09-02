@@ -1,5 +1,5 @@
 <script setup>
-import { Link, useForm } from "@inertiajs/vue3";
+import { Link } from "@inertiajs/vue3";
 import { Button } from "@/Components/ui/button";
 import { Input } from "@/Components/ui/input";
 import { Label } from "@/Components/ui/label";
@@ -13,17 +13,12 @@ const props = defineProps({
     isEdit: { type: Boolean, default: false },
 });
 
-const form = useForm({
-    name: props.adminForm.name,
-    email: props.adminForm.email,
-    password: props.adminForm.password,
-    password_confirmation: props.adminForm.password_confirmation,
-});
+const form = props.adminForm;
 
 const emit = defineEmits(["submit"]);
 
 const handleSubmit = () => {
-    emit("submit", form);
+    emit("submit");
 };
 </script>
 

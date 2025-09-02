@@ -61,7 +61,7 @@ class AdminController extends Controller
         }
 
         return Inertia::render('Admins/Edit', [
-            'admin_user' => new UserResource($admin),
+            'admin_user' => (new UserResource($admin))->resolve(),
         ]);
     }
 

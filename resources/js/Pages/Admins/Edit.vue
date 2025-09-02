@@ -4,36 +4,37 @@ import { Head, useForm } from "@inertiajs/vue3";
 import AdminForm from "@/Components/Admin/AdminForm.vue";
 
 const props = defineProps({
-    adminUser: {
+    admin_user: {
         type: Object,
         default: () => ({}),
     },
 });
 
+
 const form = useForm({
     _method: "PUT",
-    name: props.adminUser.data.name,
-    email: props.adminUser.data.email,
+    name: props.admin_user?.name || "",
+    email: props.admin_user?.email || "",
     password: "",
     password_confirmation: "",
 });
 
 const submit = () => {
-    form.post(route("admins.update", props.adminUser.data.id), {
+    form.post(route("admins.update", props.admin_user?.id), {
         onFinish: () => form.reset("password", "password_confirmation"),
     });
 };
 </script>
 
 <template>
-    <Head :title="'Editar Administrador: ' + adminUser.data.name" />
+    <Head :title="'Editar Administrador: ' + (admin_user?.name || '')" />
 
     <AuthenticatedLayout>
         <template #header>
             <h2
                 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight"
             >
-                Editar Administrador: {{ adminUser.data.name }}
+                Editar Administrador: {{ admin_user?.name || 'Carregando...' }}
             </h2>
         </template>
 
