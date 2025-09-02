@@ -1,6 +1,6 @@
 <script setup>
 import { computed } from "vue";
-import { usePage, useForm } from "@inertiajs/vue3";
+import { usePage } from "@inertiajs/vue3";
 import { Input } from "@/Components/ui/input";
 import { Label } from "@/Components/ui/label";
 import {
@@ -16,7 +16,7 @@ import InputError from "@/Components/InputError.vue";
 const props = defineProps({
     collaboratorForm: {
         type: Object,
-        default: () => ({}),
+        required: true,
     },
     clients: {
         type: Array,
@@ -24,25 +24,7 @@ const props = defineProps({
     },
 });
 
-const form = useForm({
-    user: {
-        name: props.collaboratorForm.user.name,
-        email: props.collaboratorForm.user.email,
-        password: props.collaboratorForm.user.password,
-        password_confirmation: props.collaboratorForm.user.password_confirmation,
-    },
-    collaborator: {
-        client_id: props.collaboratorForm.collaborator.client_id,
-        date_of_birth: props.collaboratorForm.collaborator.date_of_birth,
-        gender: props.collaboratorForm.collaborator.gender,
-        marital_status: props.collaboratorForm.collaborator.marital_status,
-        scholarity: props.collaboratorForm.collaborator.scholarity,
-        father_name: props.collaboratorForm.collaborator.father_name,
-        mother_name: props.collaboratorForm.collaborator.mother_name,
-        nationality: props.collaboratorForm.collaborator.nationality,
-        is_special_needs_person: props.collaboratorForm.collaborator.is_special_needs_person,
-    },
-});
+const form = props.collaboratorForm;
 
 const page = usePage();
 const userRole = computed(() => page.props.auth.user?.role);
@@ -102,7 +84,6 @@ const userRole = computed(() => page.props.auth.user?.role);
                     v-model="form.user.name"
                     type="text"
                     class="mt-1 block w-full bg-white dark:bg-gray-700"
-                    required
                 />
                 <InputError class="mt-2" :message="form.errors['user.name']" />
             </div>
@@ -113,7 +94,6 @@ const userRole = computed(() => page.props.auth.user?.role);
                     v-model="form.user.email"
                     type="email"
                     class="mt-1 block w-full bg-white dark:bg-gray-700"
-                    required
                 />
                 <InputError class="mt-2" :message="form.errors['user.email']" />
             </div>
@@ -124,7 +104,6 @@ const userRole = computed(() => page.props.auth.user?.role);
                     v-model="form.user.password"
                     type="password"
                     class="mt-1 block w-full bg-white dark:bg-gray-700"
-                    required
                 />
                 <InputError
                     class="mt-2"
@@ -138,7 +117,6 @@ const userRole = computed(() => page.props.auth.user?.role);
                     v-model="form.user.password_confirmation"
                     type="password"
                     class="mt-1 block w-full bg-white dark:bg-gray-700"
-                    required
                 />
             </div>
             <div>

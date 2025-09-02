@@ -17,7 +17,7 @@ class FranchiseFactory extends Factory
       'max_client' => fake()->numberBetween(10, 1000),
       'contract_start_date' => fake()->dateTimeBetween('-1 year', 'now'),
       'actuation_region' => fake()->city(),
-      'document_url' => fake()->url(),
+      'document_url' => null,
       'observations' => fake()->sentence(),
     ];
   }

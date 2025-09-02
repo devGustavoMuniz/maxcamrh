@@ -1,5 +1,5 @@
 <script setup>
- 
+
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head, useForm, Link } from "@inertiajs/vue3";
 import { Button } from "@/Components/ui/button";
@@ -27,8 +27,6 @@ const form = useForm({
 });
 
 const submit = () => {
-    console.log("Dados a serem enviados:", form.data());
-
     form
         .transform((data) => ({
             ...data,

@@ -104,7 +104,7 @@ class CollaboratorController extends Controller
         }
 
         return Inertia::render('Collaborators/Edit', [
-            'collaborator_data' => new CollaboratorResource($collaborator->loadMissing(['user.address', 'client.user'])),
+            'collaborator_data' => (new CollaboratorResource($collaborator->loadMissing(['user.address', 'client.user'])))->resolve(),
             'clients' => $clients,
         ]);
     }

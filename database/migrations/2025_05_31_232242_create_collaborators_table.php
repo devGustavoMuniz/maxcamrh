@@ -15,10 +15,11 @@ return new class extends Migration
           $table->uuid('id')->primary();
           $table->foreignUuid('user_id')->unique()->constrained('users')->onDelete('cascade');
           $table->foreignUuid('client_id')->nullable()->constrained('clients')->onDelete('cascade');
+          $table->foreignUuid('address_id')->nullable()->constrained()->onDelete('set null');
 
           $table->string('photo_url')->nullable();
           $table->string('curriculum_url')->nullable();
-          $table->date('date_of_birth')->nullable();
+          $table->date('date_of_birth'); // REQUIRED
           $table->string('gender')->nullable();
           $table->boolean('is_special_needs_person')->default(false);
           $table->string('marital_status')->nullable();
@@ -31,11 +32,11 @@ return new class extends Migration
           $table->string('business_email')->nullable()->unique();
 
           $table->string('phone')->nullable();
-          $table->string('cellphone')->nullable();
+          $table->string('cellphone'); // REQUIRED
           $table->string('emergency_phone')->nullable();
 
-          $table->string('department')->nullable();
-          $table->string('position')->nullable();
+          $table->string('department'); // REQUIRED
+          $table->string('position'); // REQUIRED
           $table->string('type_of_contract')->nullable();
           $table->string('salary')->nullable();
           $table->date('admission_date')->nullable();
@@ -46,7 +47,7 @@ return new class extends Migration
           $table->date('contract_start_date')->nullable();
           $table->date('contract_expiration')->nullable();
 
-          $table->string('cpf')->nullable()->unique();
+          $table->string('cpf')->unique(); // REQUIRED
           $table->string('rg')->nullable();
           $table->string('cnh')->nullable()->unique();
           $table->string('reservista')->nullable();

@@ -10,29 +10,15 @@ import {
     SelectValue,
 } from "@/Components/ui/select";
 import InputError from "@/Components/InputError.vue";
-import { useForm } from "@inertiajs/vue3";
 
 const props = defineProps({
     collaboratorForm: {
         type: Object,
-        default: () => ({}),
+        required: true,
     },
 });
 
-const form = useForm({
-    collaborator: {
-        department: props.collaboratorForm.collaborator.department,
-        position: props.collaboratorForm.collaborator.position,
-        type_of_contract: props.collaboratorForm.collaborator.type_of_contract,
-        salary: props.collaboratorForm.collaborator.salary,
-        admission_date: props.collaboratorForm.collaborator.admission_date,
-        contract_start_date: props.collaboratorForm.collaborator.contract_start_date,
-        contract_expiration: props.collaboratorForm.collaborator.contract_expiration,
-        direct_superior_name: props.collaboratorForm.collaborator.direct_superior_name,
-        hierarchical_degree: props.collaboratorForm.collaborator.hierarchical_degree,
-        observations: props.collaboratorForm.collaborator.observations,
-    },
-});
+const form = props.collaboratorForm;
 
 const moneyConfig = {
     decimal: ",",
@@ -51,10 +37,6 @@ const moneyConfig = {
                 <Input
                     id="collaborator_department"
                     v-model="form.collaborator.department"
-                    type="text"
-                    class="mt-1 block w-full bg-white dark:bg-gray-700"
-                />
-                v-model="form.collaborator.department"
                     type="text"
                     class="mt-1 block w-full bg-white dark:bg-gray-700"
                 />

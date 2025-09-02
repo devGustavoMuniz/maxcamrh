@@ -19,7 +19,7 @@ return new class extends Migration
       $table->integer('max_client');
       $table->date('contract_start_date');
       $table->string('actuation_region');
-      $table->string('document_url');
+      $table->string('document_url')->nullable();
       $table->text('observations');
       $table->timestamps();
     });

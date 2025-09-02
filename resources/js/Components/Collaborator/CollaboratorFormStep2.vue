@@ -2,33 +2,15 @@
 import { Input } from "@/Components/ui/input";
 import { Label } from "@/Components/ui/label";
 import InputError from "@/Components/InputError.vue";
-import { useForm } from "@inertiajs/vue3";
 
 const props = defineProps({
     collaboratorForm: {
         type: Object,
-        default: () => ({}),
+        required: true,
     },
 });
 
-const form = useForm({
-    collaborator: {
-        personal_email: props.collaboratorForm.collaborator.personal_email,
-        business_email: props.collaboratorForm.collaborator.business_email,
-        phone: props.collaboratorForm.collaborator.phone,
-        cellphone: props.collaboratorForm.collaborator.cellphone,
-        emergency_phone: props.collaboratorForm.collaborator.emergency_phone,
-    },
-    address: {
-        cep: props.collaboratorForm.address.cep,
-        street: props.collaboratorForm.address.street,
-        number: props.collaboratorForm.address.number,
-        complement: props.collaboratorForm.address.complement,
-        neighborhood: props.collaboratorForm.address.neighborhood,
-        city: props.collaboratorForm.address.city,
-        state: props.collaboratorForm.address.state,
-    },
-});
+const form = props.collaboratorForm;
 
 async function fetchAddressByCep() {
     if (form.address.cep && form.address.cep.replace(/\D/g, "").length === 8) {

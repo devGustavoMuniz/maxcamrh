@@ -4,12 +4,11 @@ import { Input } from "@/Components/ui/input";
 import { Label } from "@/Components/ui/label";
 import { Button } from "@/Components/ui/button";
 import InputError from "@/Components/InputError.vue";
-import { useForm } from "@inertiajs/vue3";
 
 const props = defineProps({
     collaboratorForm: {
         type: Object,
-        default: () => ({}),
+        required: true,
     },
     initialPhotoUrl: {
         type: String,
@@ -21,23 +20,7 @@ const props = defineProps({
     },
 });
 
-const form = useForm({
-    collaborator: {
-        cpf: props.collaboratorForm.collaborator.cpf,
-        rg: props.collaboratorForm.collaborator.rg,
-        cnh: props.collaboratorForm.collaborator.cnh,
-        reservista: props.collaboratorForm.collaborator.reservista,
-        titulo_eleitor: props.collaboratorForm.collaborator.titulo_eleitor,
-        zona_eleitoral: props.collaboratorForm.collaborator.zona_eleitoral,
-        pis_ctps_numero: props.collaboratorForm.collaborator.pis_ctps_numero,
-        ctps_serie: props.collaboratorForm.collaborator.ctps_serie,
-        photo_file: null,
-        curriculum_file: null,
-        banco: props.collaboratorForm.collaborator.banco,
-        agencia: props.collaboratorForm.collaborator.agencia,
-        conta_corrente: props.collaboratorForm.collaborator.conta_corrente,
-    },
-});
+const form = props.collaboratorForm;
 
 const photoFileInput = ref(null);
 const curriculumFileInput = ref(null);

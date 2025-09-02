@@ -15,8 +15,8 @@ class CollaboratorFactory extends Factory
       'user_id' => User::factory(),
       'client_id' => Client::factory(), // Collaborators can be associated with a client
       'address_id' => Address::factory(), // Collaborators have an address
-      'photo_url' => fake()->imageUrl(100,100,'people'),
-      'curriculum_url' => fake()->url(),
+      'photo_url' => null,
+      'curriculum_url' => null,
       'date_of_birth' => fake()->dateTimeBetween('-50 years', '-18 years'),
       'gender' => fake()->randomElement(['Masculino', 'Feminino', 'Outro']),
       'is_special_needs_person' => fake()->boolean(10),
