@@ -14,7 +14,7 @@ class StoreClientAction
     /**
      * @throws Throwable
      */
-    public function __invoke(StoreClientRequest $request): Client
+    public function __invoke(StoreClientRequest $request): \App\Models\Client
     {
         $data = $request->validated();
         $logoFile = $request->file('logo_file');

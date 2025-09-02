@@ -11,12 +11,12 @@ import {
 import { cn } from "@/lib/utils";
 
 const props = defineProps({
-  forceMount: { type: Boolean, required: false },
-  trapFocus: { type: Boolean, required: false },
-  disableOutsidePointerEvents: { type: Boolean, required: false },
-  asChild: { type: Boolean, required: false },
-  as: { type: [String, Object, Function], required: false },
-  class: { type: null, required: false },
+  forceMount: { type: Boolean, required: false, default: false },
+  trapFocus: { type: Boolean, required: false, default: true },
+  disableOutsidePointerEvents: { type: Boolean, required: false, default: false },
+  asChild: { type: Boolean, required: false, default: false },
+  as: { type: [String, Object, Function], required: false, default: undefined },
+  class: { type: null, required: false, default: "" },
 });
 const emits = defineEmits([
   "escapeKeyDown",

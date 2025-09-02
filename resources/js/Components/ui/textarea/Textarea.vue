@@ -3,9 +3,9 @@ import { useVModel } from "@vueuse/core";
 import { cn } from "@/lib/utils";
 
 const props = defineProps({
-  class: { type: null, required: false },
-  defaultValue: { type: [String, Number], required: false },
-  modelValue: { type: [String, Number], required: false },
+  class: { type: null, required: false, default: "" },
+  defaultValue: { type: [String, Number], required: false, default: undefined },
+  modelValue: { type: [String, Number], required: false, default: undefined },
 });
 
 const emits = defineEmits(["update:modelValue"]);

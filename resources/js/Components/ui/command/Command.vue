@@ -7,19 +7,19 @@ import { provideCommandContext } from ".";
 
 const props = defineProps({
   modelValue: { type: null, required: false, default: "" },
-  defaultValue: { type: null, required: false },
-  multiple: { type: Boolean, required: false },
-  orientation: { type: String, required: false },
-  dir: { type: String, required: false },
-  disabled: { type: Boolean, required: false },
-  selectionBehavior: { type: String, required: false },
-  highlightOnHover: { type: Boolean, required: false },
-  by: { type: [String, Function], required: false },
-  asChild: { type: Boolean, required: false },
-  as: { type: [String, Object, Function], required: false },
-  name: { type: String, required: false },
-  required: { type: Boolean, required: false },
-  class: { type: null, required: false },
+  defaultValue: { type: null, required: false, default: undefined },
+  multiple: { type: Boolean, required: false, default: false },
+  orientation: { type: String, required: false, default: undefined },
+  dir: { type: String, required: false, default: undefined },
+  disabled: { type: Boolean, required: false, default: false },
+  selectionBehavior: { type: String, required: false, default: undefined },
+  highlightOnHover: { type: Boolean, required: false, default: false },
+  by: { type: [String, Function], required: false, default: undefined },
+  asChild: { type: Boolean, required: false, default: false },
+  as: { type: [String, Object, Function], required: false, default: undefined },
+  name: { type: String, required: false, default: undefined },
+  required: { type: Boolean, required: false, default: false },
+  class: { type: null, required: false, default: "" },
 });
 
 const emits = defineEmits([

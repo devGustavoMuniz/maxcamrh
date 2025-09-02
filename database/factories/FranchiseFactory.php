@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Franchise;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class FranchiseFactory extends Factory
@@ -10,6 +11,7 @@ class FranchiseFactory extends Factory
   public function definition(): array
   {
     return [
+      'user_id' => User::factory(),
       'maxcam_email' => fake()->unique()->companyEmail(),
       'cnpj' => fake()->unique()->numerify('##############'),
       'max_client' => fake()->numberBetween(10, 1000),

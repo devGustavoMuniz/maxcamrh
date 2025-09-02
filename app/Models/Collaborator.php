@@ -148,7 +148,8 @@ class Collaborator extends Model
     'banco',
     'agencia',
     'conta_corrente',
-    'client_id'
+    'client_id',
+    'address_id'
   ];
 
   protected $casts = [
@@ -168,6 +169,11 @@ class Collaborator extends Model
   public function client(): BelongsTo
   {
     return $this->belongsTo(Client::class);
+  }
+
+  public function address(): BelongsTo
+  {
+    return $this->belongsTo(Address::class);
   }
 
     /**

@@ -2,9 +2,9 @@
 import { AvatarFallback } from "reka-ui";
 
 const props = defineProps({
-  delayMs: { type: Number, required: false },
+  delayMs: { type: Number, required: false, default: undefined },
   asChild: { type: Boolean, required: false },
-  as: { type: [String, Object, Function], required: false },
+  as: { type: [String, Object, Function], required: false, default: undefined },
 });
 </script>
 

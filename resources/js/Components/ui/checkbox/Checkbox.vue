@@ -5,16 +5,16 @@ import { CheckboxIndicator, CheckboxRoot, useForwardPropsEmits } from "reka-ui";
 import { cn } from "@/lib/utils";
 
 const props = defineProps({
-  defaultValue: { type: [Boolean, String], required: false },
-  modelValue: { type: [Boolean, String, null], required: false },
-  disabled: { type: Boolean, required: false },
-  value: { type: null, required: false },
-  id: { type: String, required: false },
-  asChild: { type: Boolean, required: false },
-  as: { type: [String, Object, Function], required: false },
-  name: { type: String, required: false },
-  required: { type: Boolean, required: false },
-  class: { type: null, required: false },
+  defaultValue: { type: [Boolean, String], required: false, default: undefined },
+  modelValue: { type: [Boolean, String, null], required: false, default: undefined },
+  disabled: { type: Boolean, required: false, default: false },
+  value: { type: null, required: false, default: undefined },
+  id: { type: String, required: false, default: undefined },
+  asChild: { type: Boolean, required: false, default: false },
+  as: { type: [String, Object, Function], required: false, default: undefined },
+  name: { type: String, required: false, default: undefined },
+  required: { type: Boolean, required: false, default: false },
+  class: { type: null, required: false, default: "" },
 });
 const emits = defineEmits(["update:modelValue"]);
 

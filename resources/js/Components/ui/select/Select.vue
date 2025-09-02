@@ -2,17 +2,17 @@
 import { SelectRoot, useForwardPropsEmits } from "reka-ui";
 
 const props = defineProps({
-  open: { type: Boolean, required: false },
-  defaultOpen: { type: Boolean, required: false },
-  defaultValue: { type: null, required: false },
-  modelValue: { type: null, required: false },
-  by: { type: [String, Function], required: false },
-  dir: { type: String, required: false },
-  multiple: { type: Boolean, required: false },
-  autocomplete: { type: String, required: false },
-  disabled: { type: Boolean, required: false },
-  name: { type: String, required: false },
-  required: { type: Boolean, required: false },
+  open: { type: Boolean, required: false, default: undefined },
+  defaultOpen: { type: Boolean, required: false, default: undefined },
+  defaultValue: { type: null, required: false, default: undefined },
+  modelValue: { type: null, required: false, default: undefined },
+  by: { type: [String, Function], required: false, default: undefined },
+  dir: { type: String, required: false, default: undefined },
+  multiple: { type: Boolean, required: false, default: false },
+  autocomplete: { type: String, required: false, default: undefined },
+  disabled: { type: Boolean, required: false, default: false },
+  name: { type: String, required: false, default: undefined },
+  required: { type: Boolean, required: false, default: false },
 });
 const emits = defineEmits(["update:modelValue", "update:open"]);
 

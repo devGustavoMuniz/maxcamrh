@@ -4,13 +4,13 @@ import { ComboboxInput, useForwardPropsEmits } from "reka-ui";
 import { cn } from "@/lib/utils";
 
 const props = defineProps({
-  displayValue: { type: Function, required: false },
-  modelValue: { type: String, required: false },
-  autoFocus: { type: Boolean, required: false },
-  disabled: { type: Boolean, required: false },
-  asChild: { type: Boolean, required: false },
-  as: { type: [String, Object, Function], required: false },
-  class: { type: null, required: false },
+  displayValue: { type: Function, required: false, default: undefined },
+  modelValue: { type: String, required: false, default: undefined },
+  autoFocus: { type: Boolean, required: false, default: false },
+  disabled: { type: Boolean, required: false, default: false },
+  asChild: { type: Boolean, required: false, default: false },
+  as: { type: [String, Object, Function], required: false, default: undefined },
+  class: { type: null, required: false, default: "" },
 });
 
 const emits = defineEmits(["update:modelValue"]);

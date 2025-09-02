@@ -9,12 +9,12 @@ import {
 import { cn } from "@/lib/utils";
 
 const props = defineProps({
-  modelValue: { type: [Boolean, String], required: false },
-  disabled: { type: Boolean, required: false },
-  textValue: { type: String, required: false },
-  asChild: { type: Boolean, required: false },
-  as: { type: [String, Object, Function], required: false },
-  class: { type: null, required: false },
+  modelValue: { type: [Boolean, String], required: false, default: undefined },
+  disabled: { type: Boolean, required: false, default: false },
+  textValue: { type: String, required: false, default: undefined },
+  asChild: { type: Boolean, required: false, default: false },
+  as: { type: [String, Object, Function], required: false, default: undefined },
+  class: { type: null, required: false, default: "" },
 });
 const emits = defineEmits(["select", "update:modelValue"]);
 

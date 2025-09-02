@@ -5,11 +5,11 @@ import { SelectIcon, SelectTrigger, useForwardProps } from "reka-ui";
 import { cn } from "@/lib/utils";
 
 const props = defineProps({
-  disabled: { type: Boolean, required: false },
-  reference: { type: null, required: false },
-  asChild: { type: Boolean, required: false },
-  as: { type: [String, Object, Function], required: false },
-  class: { type: null, required: false },
+  disabled: { type: Boolean, required: false, default: false },
+  reference: { type: null, required: false, default: undefined },
+  asChild: { type: Boolean, required: false, default: false },
+  as: { type: [String, Object, Function], required: false, default: undefined },
+  class: { type: null, required: false, default: "" },
 });
 
 const delegatedProps = reactiveOmit(props, "class");

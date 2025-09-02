@@ -2,9 +2,9 @@
 import { DropdownMenuRadioGroup, useForwardPropsEmits } from "reka-ui";
 
 const props = defineProps({
-  modelValue: { type: String, required: false },
-  asChild: { type: Boolean, required: false },
-  as: { type: [String, Object, Function], required: false },
+  modelValue: { type: String, required: false, default: undefined },
+  asChild: { type: Boolean, required: false, default: false },
+  as: { type: [String, Object, Function], required: false, default: undefined },
 });
 const emits = defineEmits(["update:modelValue"]);
 

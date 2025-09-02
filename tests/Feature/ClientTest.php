@@ -26,6 +26,71 @@ test('authenticated franchise user can see clients list', function () {
     $response->assertStatus(200);
 });
 
+test('authenticated collaborator user cannot see clients list', function () {
+    $user = User::factory()->create(['role' => UserRole::COLLABORATOR]);
+
+    $response = $this->actingAs($user)->get('/clients');
+
+    $response->assertStatus(403);
+});
+
+test('authenticated client user cannot see clients list', function () {
+    $user = User::factory()->create(['role' => UserRole::CLIENT]);
+
+    $response = $this->actingAs($user)->get('/clients');
+
+    $response->assertStatus(403);
+});
+
+test('non-admin/non-franchise users cannot create clients', function () {
+    $user = User::factory()->create(['role' => UserRole::COLLABORATOR]); // Or CLIENT
+    $this->actingAs($user);
+
+    $clientData = [
+        'name' => 'Unauthorized Client',
+        'email' => 'unauth@example.com',
+        'password' => 'password',
+        'password_confirmation' => 'password',
+        'cnpj' => '11.111.111/1111-11',
+        'is_monthly_contract' => true,
+    ];
+
+    $response = $this->post('/clients', $clientData);
+
+    $response->assertStatus(403);
+    $this->assertDatabaseMissing('clients', ['cnpj' => '11.111.111/1111-11']);
+});
+
+test('non-admin/non-franchise users cannot update clients', function () {
+    $user = User::factory()->create(['role' => UserRole::COLLABORATOR]); // Or CLIENT
+    $this->actingAs($user);
+
+    $client = Client::factory()->create();
+    $updatedData = [
+        'name' => 'Attempted Update',
+        'email' => $client->user->email,
+        'cnpj' => $client->cnpj,
+        'is_monthly_contract' => $client->is_monthly_contract,
+    ];
+
+    $response = $this->put("/clients/{$client->id}", $updatedData);
+
+    $response->assertStatus(403);
+    $this->assertDatabaseHas('users', ['id' => $client->user_id, 'name' => $client->user->name]); // Ensure not updated
+});
+
+test('non-admin/non-franchise users cannot delete clients', function () {
+    $user = User::factory()->create(['role' => UserRole::COLLABORATOR]); // Or CLIENT
+    $this->actingAs($user);
+
+    $client = Client::factory()->create();
+
+    $response = $this->delete("/clients/{$client->id}");
+
+    $response->assertStatus(403);
+    $this->assertDatabaseHas('clients', ['id' => $client->id]); // Ensure not deleted
+});
+
 test('admin can create a new client', function () {
     $user = User::factory()->create(['role' => UserRole::ADMIN]);
     $clientData = [

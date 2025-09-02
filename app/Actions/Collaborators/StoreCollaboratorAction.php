@@ -14,7 +14,7 @@ class StoreCollaboratorAction
     /**
      * @throws Throwable
      */
-    public function execute(Request $request): User
+    public function execute(Request $request): \App\Models\Collaborator
     {
         $validated = $request->validated();
         $loggedInUser = $request->user();
@@ -45,13 +45,13 @@ class StoreCollaboratorAction
                 'email_verified_at' => now(),
             ]);
 
-            $user->collaborator()->create($collaboratorData);
+            $collaborator = $user->collaborator()->create($collaboratorData);
 
             if ($addressData && !empty(array_filter($addressData))) {
                 $user->address()->create($addressData);
             }
 
-            return $user;
+            return $collaborator;
         });
     }
 }

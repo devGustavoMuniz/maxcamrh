@@ -7,10 +7,10 @@ import { useCommand, useCommandGroup } from ".";
 
 const props = defineProps({
   value: { type: null, required: true },
-  disabled: { type: Boolean, required: false },
-  asChild: { type: Boolean, required: false },
-  as: { type: [String, Object, Function], required: false },
-  class: { type: null, required: false },
+  disabled: { type: Boolean, required: false, default: false },
+  asChild: { type: Boolean, required: false, default: false },
+  as: { type: [String, Object, Function], required: false, default: undefined },
+  class: { type: null, required: false, default: "" },
 });
 const emits = defineEmits(["select"]);
 

@@ -4,9 +4,9 @@ import { cn } from "@/lib/utils";
 import { buttonVariants } from ".";
 
 const props = defineProps({
-  variant: { type: null, required: false },
-  size: { type: null, required: false },
-  class: { type: null, required: false },
+  variant: { type: null, required: false, default: "default" },
+  size: { type: null, required: false, default: "default" },
+  class: { type: null, required: false, default: "" },
   asChild: { type: Boolean, required: false },
   as: { type: [String, Object, Function], required: false, default: "button" },
 });

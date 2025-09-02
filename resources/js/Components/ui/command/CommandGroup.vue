@@ -6,10 +6,10 @@ import { cn } from "@/lib/utils";
 import { provideCommandGroupContext, useCommand } from ".";
 
 const props = defineProps({
-  asChild: { type: Boolean, required: false },
-  as: { type: [String, Object, Function], required: false },
-  class: { type: null, required: false },
-  heading: { type: String, required: false },
+  asChild: { type: Boolean, required: false, default: false },
+  as: { type: [String, Object, Function], required: false, default: undefined },
+  class: { type: null, required: false, default: "" },
+  heading: { type: String, required: false, default: undefined },
 });
 
 const delegatedProps = reactiveOmit(props, "class");

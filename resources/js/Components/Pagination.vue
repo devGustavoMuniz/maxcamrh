@@ -2,7 +2,10 @@
 import { Link } from '@inertiajs/vue3';
 
 defineProps({
-  links: Array,
+  links: {
+    type: Array,
+    default: () => [],
+  },
 });
 </script>
 

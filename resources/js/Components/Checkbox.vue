@@ -9,6 +9,7 @@ const props = defineProps({
         required: true,
     },
     value: {
+        type: [String, Number, Boolean, Object, Array],
         default: null,
     },
 });

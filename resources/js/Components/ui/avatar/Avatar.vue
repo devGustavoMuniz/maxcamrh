@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { avatarVariant } from ".";
 
 const props = defineProps({
-  class: { type: null, required: false },
+  class: { type: null, required: false, default: "" },
   size: { type: null, required: false, default: "sm" },
   shape: { type: null, required: false, default: "circle" },
 });

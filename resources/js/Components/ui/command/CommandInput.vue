@@ -10,12 +10,12 @@ defineOptions({
 });
 
 const props = defineProps({
-  modelValue: { type: String, required: false },
-  autoFocus: { type: Boolean, required: false },
-  disabled: { type: Boolean, required: false },
-  asChild: { type: Boolean, required: false },
-  as: { type: [String, Object, Function], required: false },
-  class: { type: null, required: false },
+  modelValue: { type: String, required: false, default: undefined },
+  autoFocus: { type: Boolean, required: false, default: false },
+  disabled: { type: Boolean, required: false, default: false },
+  asChild: { type: Boolean, required: false, default: false },
+  as: { type: [String, Object, Function], required: false, default: undefined },
+  class: { type: null, required: false, default: "" },
 });
 
 const delegatedProps = reactiveOmit(props, "class");

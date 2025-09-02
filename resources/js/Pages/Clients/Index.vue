@@ -1,53 +1,35 @@
 <script setup>
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import { Head, Link, usePage, router } from "@inertiajs/vue3";
+import { Head, usePage, router } from "@inertiajs/vue3";
 import { computed, ref, watch } from "vue";
 import debounce from "lodash/debounce";
 
 import {
-    Table,
     TableBody,
     TableCell,
     TableHead,
     TableHeader,
     TableRow,
 } from "@/Components/ui/table";
-import { Button } from "@/Components/ui/button";
-import { Input } from "@/Components/ui/input";
-import {
-    Card,
-    CardContent,
-    CardHeader,
-    CardTitle,
-    CardDescription,
-    CardFooter,
-} from "@/Components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/Components/ui/avatar";
-
-import { Check, ChevronsUpDown } from "lucide-vue-next";
-import { cn } from "@/lib/utils";
-import {
-    Command,
-    CommandEmpty,
-    CommandGroup,
-    CommandInput,
-    CommandItem,
-    CommandList,
-} from "@/Components/ui/command";
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from "@/Components/ui/popover";
-
-import { Plus, FileEdit, Trash2, Search } from "lucide-vue-next";
 
 import Pagination from "@/Components/Pagination.vue";
+import ClientFilter from "@/Components/Client/ClientFilter.vue";
+import ClientTableRow from "@/Components/Client/ClientTableRow.vue";
+import ClientCard from "@/Components/Client/ClientCard.vue";
 
 const props = defineProps({
-    clients: Object,
-    filters: Object,
-    franchises: Array,
+    clients: {
+        type: Object,
+        default: () => ({}),
+    },
+    filters: {
+        type: Object,
+        default: () => ({}),
+    },
+    franchises: {
+        type: Array,
+        default: () => [],
+    },
 });
 
 const flash = computed(() => usePage().props.flash);
@@ -55,14 +37,6 @@ const user = computed(() => usePage().props.auth.user);
 
 const search = ref(props.filters?.search || "");
 const selectedFranchise = ref(props.filters.franchise_id || "");
-
-const openFranchiseCombobox = ref(false);
-const currentFranchiseLabel = computed(() => {
-    const franchise = props.franchises.find(
-        (f) => String(f.id) === selectedFranchise.value,
-    );
-    return franchise ? franchise.name : "Filtrar por franqueado...";
-});
 
 watch(
     [search, selectedFranchise],
@@ -80,6 +54,12 @@ watch(
         );
     }, 300),
 );
+
+const emptyStateMessage = computed(() => {
+    return search.value
+        ? `Nenhum cliente encontrado para "${search.value}".`
+        : 'Nenhum cliente cadastrado.';
+});
 
 const deleteClient = (clientId) => {
     if (
@@ -119,111 +99,14 @@ const deleteClient = (clientId) => {
                 {{ flash.error }}
             </div>
 
-            <div
-                class="flex flex-col md:flex-row justify-between items-center gap-4 mb-4"
-            >
-                <div class="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
-                    <div class="relative w-full sm:max-w-xs">
-                        <Input
-                            v-model="search"
-                            type="text"
-                            placeholder="Buscar por nome ou email"
-                            class="pl-10 w-full bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-600"
-                        />
-                        <div
-                            class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
-                        >
-                            <Search class="h-5 w-5 text-gray-400" />
-                        </div>
-                    </div>
-
-                    <div v-if="user.role === 'admin'" class="w-full sm:w-auto">
-                        <Popover v-model:open="openFranchiseCombobox">
-                            <PopoverTrigger as-child>
-                                <Button
-                                    variant="outline"
-                                    role="combobox"
-                                    :aria-expanded="openFranchiseCombobox"
-                                    class="w-full sm:w-[280px] justify-between bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-600"
-                                >
-                                    {{
-                                        selectedFranchise
-                                            ? currentFranchiseLabel
-                                            : "Filtrar por franqueado..."
-                                    }}
-                                    <ChevronsUpDown class="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                </Button>
-                            </PopoverTrigger>
-                            <PopoverContent class="w-full sm:w-[280px] p-0">
-                                <Command>
-                                    <CommandInput
-                                        class="h-4 my-2"
-                                        placeholder="Buscar franqueado..."
-                                    />
-                                    <CommandList>
-                                        <CommandEmpty>Nenhum franqueado encontrado.</CommandEmpty>
-                                        <CommandGroup>
-                                            <CommandItem
-                                                :value="null"
-                                                @select="
-                          () => {
-                            selectedFranchise = null;
-                            openFranchiseCombobox = false;
-                          }
-                        "
-                                            >
-                                                <Check
-                                                    :class="
-                            cn(
-                              'mr-2 h-4 w-4',
-                              selectedFranchise === null
-                                ? 'opacity-100'
-                                : 'opacity-0',
-                            )
-                          "
-                                                />
-                                                Todos os Franqueados
-                                            </CommandItem>
-                                            <CommandItem
-                                                v-for="franchise in props.franchises"
-                                                :key="franchise.id"
-                                                :value="franchise.name"
-                                                @select="
-                          () => {
-                            selectedFranchise = String(franchise.id);
-                            openFranchiseCombobox = false;
-                          }
-                        "
-                                            >
-                                                <Check
-                                                    :class="
-                            cn(
-                              'mr-2 h-4 w-4',
-                              selectedFranchise === String(franchise.id)
-                                ? 'opacity-100'
-                                : 'opacity-0',
-                            )
-                          "
-                                                />
-                                                {{ franchise.name }}
-                                            </CommandItem>
-                                        </CommandGroup>
-                                    </CommandList>
-                                </Command>
-                            </PopoverContent>
-                        </Popover>
-                    </div>
-                </div>
-                <Link :href="route('clients.create')" class="w-full md:w-auto">
-                    <Button
-                        variant="black"
-                        class="w-full bg-gray-800 text-white hover:bg-gray-700 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600"
-                    >
-                        <Plus class="h-4 w-4 mr-2" />
-                        Adicionar Cliente
-                    </Button>
-                </Link>
-            </div>
+            <ClientFilter
+                :search="search"
+                :selected-franchise="selectedFranchise"
+                :franchises="franchises"
+                :user-role="user.role"
+                @update:search="search = $event"
+                @update:selected-franchise="selectedFranchise = $event"
+            />
 
             <div
                 class="hidden md:block bg-gray-100 dark:bg-gray-800 overflow-x-auto shadow-sm sm:rounded-lg"
@@ -258,69 +141,18 @@ const deleteClient = (clientId) => {
                     </TableHeader>
                     <TableBody>
                         <template v-if="clients.data.length > 0">
-                            <TableRow
+                            <ClientTableRow
                                 v-for="client in clients.data"
                                 :key="client.id"
-                                class="[&>td]:py-2 border-b dark:border-gray-700"
-                            >
-                                <TableCell class="px-4">
-                                    <Avatar class="h-10 w-10">
-                                        <AvatarImage
-                                            :src="client.logo_full_url"
-                                            :alt="client.user.name"
-                                        />
-                                        <AvatarFallback>{{
-                                                client.user.name?.substring(0, 2).toUpperCase() || "C"
-                                            }}</AvatarFallback>
-                                    </Avatar>
-                                </TableCell>
-                                <TableCell
-                                    class="font-medium px-4 text-gray-800 dark:text-gray-200"
-                                >{{ client.user.name }}</TableCell
-                                >
-                                <TableCell class="px-4 text-gray-600 dark:text-gray-400">{{
-                                        client.user.email
-                                    }}</TableCell>
-                                <TableCell class="px-4 text-gray-600 dark:text-gray-400">{{
-                                        client.cnpj
-                                    }}</TableCell>
-                                <TableCell class="px-4 text-gray-600 dark:text-gray-400">{{
-                                        client.phone || "N/A"
-                                    }}</TableCell>
-                                <TableCell class="px-4 text-gray-600 dark:text-gray-400">{{
-                                        client.franchise_name || "N/A"
-                                    }}</TableCell>
-                                <TableCell class="text-right px-4">
-                                    <div class="flex items-center justify-end gap-2">
-                                        <Link :href="route('clients.edit', client.id)">
-                                            <Button variant="outline" size="icon" class="h-8 w-8">
-                                                <FileEdit class="h-4 w-4" />
-                                                <span class="sr-only">Editar</span>
-                                            </Button>
-                                        </Link>
-                                        <Button
-                                            variant="outline"
-                                            size="icon"
-                                            class="h-8 w-8 text-red-600 hover:text-red-700 hover:border-red-400 dark:hover:border-red-600"
-                                            @click="deleteClient(client.id)"
-                                        >
-                                            <Trash2 class="h-4 w-4" />
-                                            <span class="sr-only">Excluir</span>
-                                        </Button>
-                                    </div>
-                                </TableCell>
-                            </TableRow>
+                                :client="client"
+                                @delete="deleteClient"
+                            />
                         </template>
                         <TableRow v-else>
-                            <TableCell
-                                colspan="7"
-                                class="text-center py-8 text-gray-500 dark:text-gray-400 px-4"
-                            >
-                                {{
-                                    search
-                                        ? `Nenhum cliente encontrado para "${search}".`
-                                        : "Nenhum cliente cadastrado."
-                                }}
+                            <TableCell colspan="7">
+                                <EmptyStateMessage
+                                    :message="emptyStateMessage"
+                                />
                             </TableCell>
                         </TableRow>
                     </TableBody>
@@ -329,79 +161,17 @@ const deleteClient = (clientId) => {
 
             <div class="md:hidden space-y-4">
                 <template v-if="clients.data.length > 0">
-                    <Card
+                    <ClientCard
                         v-for="client in clients.data"
                         :key="`mobile-${client.id}`"
-                        class="bg-gray-100 dark:bg-gray-800 shadow-sm"
-                    >
-                        <CardHeader class="flex flex-row items-center gap-4 space-y-0 pb-2">
-                            <Avatar class="h-12 w-12">
-                                <AvatarImage
-                                    :src="client.logo_full_url"
-                                    :alt="client.user.name"
-                                />
-                                <AvatarFallback>{{
-                                        client.user.name?.substring(0, 2).toUpperCase() || "C"
-                                    }}</AvatarFallback>
-                            </Avatar>
-                            <div class="flex-1">
-                                <CardTitle class="text-lg text-gray-800 dark:text-gray-200">{{
-                                        client.user.name
-                                    }}</CardTitle>
-                                <CardDescription class="text-gray-600 dark:text-gray-400">{{
-                                        client.user.email
-                                    }}</CardDescription>
-                            </div>
-                        </CardHeader>
-                        <CardContent
-                            class="text-sm text-gray-700 dark:text-gray-300 space-y-1 pt-2 pb-4 px-6"
-                        >
-                            <p>
-                                <strong class="font-medium text-gray-800 dark:text-gray-200"
-                                >CNPJ:</strong
-                                >
-                                {{ client.cnpj }}
-                            </p>
-                            <p>
-                                <strong class="font-medium text-gray-800 dark:text-gray-200"
-                                >Telefone:</strong
-                                >
-                                {{ client.phone || "N/A" }}
-                            </p>
-                            <p v-if="client.franchise_name">
-                                <strong class="font-medium text-gray-800 dark:text-gray-200"
-                                >Franqueado:</strong
-                                >
-                                {{ client.franchise_name }}
-                            </p>
-                        </CardContent>
-                        <CardFooter
-                            class="flex justify-end gap-2 bg-gray-200/50 dark:bg-gray-900/50 py-3 px-6"
-                        >
-                            <Link :href="route('clients.edit', client.id)">
-                                <Button variant="outline" size="sm">
-                                    <FileEdit class="h-4 w-4 mr-2" />
-                                    Editar
-                                </Button>
-                            </Link>
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                class="text-red-600 hover:text-red-700 hover:border-red-400 dark:hover:border-red-600"
-                                @click="deleteClient(client.id)"
-                            >
-                                <Trash2 class="h-4 w-4 mr-2" />
-                                Excluir
-                            </Button>
-                        </CardFooter>
-                    </Card>
+                        :client="client"
+                        @delete="deleteClient"
+                    />
                 </template>
-                <div v-else class="text-center py-8 text-gray-500 dark:text-gray-400">
-                    {{
-                        search
-                            ? `Nenhum cliente encontrado para "${search}".`
-                            : "Nenhum cliente cadastrado."
-                    }}
+                <div v-else>
+                    <EmptyStateMessage
+                        :message="emptyStateMessage"
+                    />
                 </div>
             </div>
 

@@ -17,7 +17,6 @@ class CollaboratorPolicy
         return in_array($user->role, [
             UserRole::ADMIN,
             UserRole::FRANCHISE,
-            UserRole::CLIENT,
         ]);
     }
 

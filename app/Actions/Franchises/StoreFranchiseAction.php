@@ -14,7 +14,7 @@ class StoreFranchiseAction
     /**
      * @throws Throwable
      */
-    public function execute(array $data, ?UploadedFile $documentFile): User
+    public function execute(array $data, ?UploadedFile $documentFile): \App\Models\Franchise
     {
         $documentPath = $documentFile?->store('franchise_documents', 'public');
 
@@ -27,7 +27,7 @@ class StoreFranchiseAction
                 'email_verified_at' => now(),
             ]);
 
-            $user->franchise()->create([
+            $franchise = $user->franchise()->create([
                 'maxcam_email' => $data['maxcam_email'],
                 'cnpj' => $data['cnpj'],
                 'max_client' => $data['max_client'],
@@ -37,7 +37,7 @@ class StoreFranchiseAction
                 'observations' => $data['observations'],
             ]);
 
-            return $user;
+            return $franchise;
         });
     }
 }

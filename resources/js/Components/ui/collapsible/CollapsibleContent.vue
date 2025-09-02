@@ -2,9 +2,9 @@
 import { CollapsibleContent } from "reka-ui";
 
 const props = defineProps({
-  forceMount: { type: Boolean, required: false },
-  asChild: { type: Boolean, required: false },
-  as: { type: [String, Object, Function], required: false },
+  forceMount: { type: Boolean, required: false, default: false },
+  asChild: { type: Boolean, required: false, default: false },
+  as: { type: [String, Object, Function], required: false, default: undefined },
 });
 </script>
 

@@ -10,11 +10,11 @@ import { cn } from "@/lib/utils";
 
 const props = defineProps({
   value: { type: String, required: true },
-  disabled: { type: Boolean, required: false },
-  textValue: { type: String, required: false },
-  asChild: { type: Boolean, required: false },
-  as: { type: [String, Object, Function], required: false },
-  class: { type: null, required: false },
+  disabled: { type: Boolean, required: false, default: false },
+  textValue: { type: String, required: false, default: undefined },
+  asChild: { type: Boolean, required: false, default: false },
+  as: { type: [String, Object, Function], required: false, default: undefined },
+  class: { type: null, required: false, default: "" },
 });
 
 const emits = defineEmits(["select"]);
