@@ -249,22 +249,22 @@ isAdmPessoasOpen.value = isAdmPessoasGroupActive.value;
           </nav>
         </div>
         <div :class="[uiStore.isSidebarCollapsed ? 'p-2' : 'p-4', 'mt-auto border-t border-gray-200 dark:border-gray-700 space-y-2']">
-          <!-- Botão para colapsar sidebar quando expandida -->
+          <!-- Botão para colapsar sidebar quando expandida (apenas desktop) -->
           <button
             v-if="!uiStore.isSidebarCollapsed"
             @click="uiStore.collapseSidebar"
-            class="flex w-full items-center justify-between px-3 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-200 rounded-md"
+            class="hidden md:flex w-full items-center justify-between px-3 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-200 rounded-md"
             title="Recolher menu"
           >
             <span class="whitespace-nowrap">Recolher menu</span>
             <ChevronLeft class="h-4 w-4" />
           </button>
 
-          <!-- Botão para expandir sidebar quando recolhida -->
+          <!-- Botão para expandir sidebar quando recolhida (apenas desktop) -->
           <button
             v-if="uiStore.isSidebarCollapsed"
             @click="uiStore.expandSidebar"
-            class="flex w-full justify-center px-2 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-200 rounded-md"
+            class="hidden md:flex w-full justify-center px-2 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-200 rounded-md"
             title="Expandir menu"
           >
             <ChevronRight class="h-5 w-5" />
