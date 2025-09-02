@@ -88,14 +88,9 @@ class Franchise extends Model
     public function scopeWithFilters(Builder $query, array $filters): void
     {
         $query->when($filters['search'] ?? null, function (Builder $q, $search) {
-            $q->where(function (Builder $innerQuery) use ($search) {
-                $innerQuery->where('cnpj', 'like', "%$search%")
-                    ->orWhere('maxcam_email', 'like', "%$search%")
-                    ->orWhere('actuation_region', 'like', "%$search%")
-                    ->orWhereHas('user', function (Builder $userQuery) use ($search) {
-                        $userQuery->where('name', 'like', "%$search%")
-                            ->orWhere('email', 'like', "%$search%");
-                    });
+            $q->whereHas('user', function (Builder $userQuery) use ($search) {
+                $userQuery->where('name', 'like', "%$search%")
+                    ->orWhere('email', 'like', "%$search%");
             });
         });
     }
