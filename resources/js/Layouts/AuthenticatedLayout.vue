@@ -286,13 +286,13 @@ const handleLinkClick = () => {
         class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-200 dark:bg-gray-900 p-6"
       >
         <div
-          v-if="$page.props.flash.success"
+          v-if="$page.props.flash?.success"
           class="mb-4 p-4 rounded-md bg-green-100 dark:bg-green-800 text-sm font-medium text-green-700 dark:text-green-200"
         >
           {{ $page.props.flash.success }}
         </div>
         <div
-          v-if="$page.props.flash.error"
+          v-if="$page.props.flash?.error"
           class="mb-4 p-4 rounded-md bg-red-100 dark:bg-red-800 text-sm font-medium text-red-700 dark:text-red-200"
         >
           {{ $page.props.flash.error }}

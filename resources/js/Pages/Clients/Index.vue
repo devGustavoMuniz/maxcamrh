@@ -4,18 +4,12 @@ import { Head, usePage, router } from "@inertiajs/vue3";
 import { computed, ref, watch } from "vue";
 import debounce from "lodash/debounce";
 
-import {
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "@/Components/ui/table";
-
 import Pagination from "@/Components/Pagination.vue";
 import ClientFilter from "@/Components/Client/ClientFilter.vue";
-import ClientTableRow from "@/Components/Client/ClientTableRow.vue";
+import ClientTable from "@/Components/Client/ClientTable.vue";
 import ClientCard from "@/Components/Client/ClientCard.vue";
+import FlashMessages from "@/Components/FlashMessages.vue";
+import EmptyStateMessage from "@/Components/EmptyStateMessage.vue";
 
 const props = defineProps({
     clients: {
@@ -55,11 +49,6 @@ watch(
     }, 300),
 );
 
-const emptyStateMessage = computed(() => {
-    return search.value
-        ? `Nenhum cliente encontrado para "${search.value}".`
-        : 'Nenhum cliente cadastrado.';
-});
 
 const deleteClient = (clientId) => {
     if (
@@ -86,18 +75,7 @@ const deleteClient = (clientId) => {
         </template>
 
         <div class="mx-auto w-full">
-            <div
-                v-if="flash && flash.success"
-                class="mb-4 p-4 rounded-md bg-green-100 dark:bg-green-800 text-sm font-medium text-green-700 dark:text-green-200"
-            >
-                {{ flash.success }}
-            </div>
-            <div
-                v-if="flash && flash.error"
-                class="mb-4 p-4 rounded-md bg-red-100 dark:bg-red-800 text-sm font-medium text-red-700 dark:text-red-200"
-            >
-                {{ flash.error }}
-            </div>
+            <FlashMessages />
 
             <ClientFilter
                 :search="search"
@@ -108,56 +86,7 @@ const deleteClient = (clientId) => {
                 @update:selected-franchise="selectedFranchise = $event"
             />
 
-            <div
-                class="hidden md:block bg-gray-100 dark:bg-gray-800 overflow-x-auto shadow-sm sm:rounded-lg"
-            >
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead
-                                class="px-4 py-3 w-[60px] text-gray-800 dark:text-gray-200"
-                            >Logo</TableHead
-                            >
-                            <TableHead class="px-4 py-3 text-gray-800 dark:text-gray-200"
-                            >Nome</TableHead
-                            >
-                            <TableHead class="px-4 py-3 text-gray-800 dark:text-gray-200"
-                            >Email</TableHead
-                            >
-                            <TableHead class="px-4 py-3 text-gray-800 dark:text-gray-200"
-                            >CNPJ</TableHead
-                            >
-                            <TableHead class="px-4 py-3 text-gray-800 dark:text-gray-200"
-                            >Telefone</TableHead
-                            >
-                            <TableHead class="px-4 py-3 text-gray-800 dark:text-gray-200"
-                            >Franqueado Associado</TableHead
-                            >
-                            <TableHead
-                                class="text-right px-4 py-3 text-gray-800 dark:text-gray-200"
-                            >Ações</TableHead
-                            >
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        <template v-if="clients.data.length > 0">
-                            <ClientTableRow
-                                v-for="client in clients.data"
-                                :key="client.id"
-                                :client="client"
-                                @delete="deleteClient"
-                            />
-                        </template>
-                        <TableRow v-else>
-                            <TableCell colspan="7">
-                                <EmptyStateMessage
-                                    :message="emptyStateMessage"
-                                />
-                            </TableCell>
-                        </TableRow>
-                    </TableBody>
-                </Table>
-            </div>
+            <ClientTable :clients="clients" :search="search" @delete="deleteClient" />
 
             <div class="md:hidden space-y-4">
                 <template v-if="clients.data.length > 0">
@@ -170,7 +99,7 @@ const deleteClient = (clientId) => {
                 </template>
                 <div v-else>
                     <EmptyStateMessage
-                        :message="emptyStateMessage"
+                        :message="search ? `Nenhum cliente encontrado para &quot;${search}&quot;.` : 'Nenhum cliente cadastrado.'"
                     />
                 </div>
             </div>
