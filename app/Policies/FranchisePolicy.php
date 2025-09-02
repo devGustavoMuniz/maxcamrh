@@ -10,7 +10,6 @@ class FranchisePolicy
 {
     /**
      * Determine whether the user can view any models.
-     * Apenas Admins podem listar todos os franqueados.
      */
     public function viewAny(User $user): bool
     {
@@ -19,7 +18,6 @@ class FranchisePolicy
 
     /**
      * Determine whether the user can view the model.
-     * Um Admin pode ver qualquer franqueado. Um Franqueado só pode ver a si mesmo.
      */
     public function view(User $user, Franchise $franchise): bool
     {
@@ -28,7 +26,6 @@ class FranchisePolicy
         }
 
         if ($user->role === UserRole::FRANCHISE) {
-            // Garante que o usuário tem um franqueado associado e que é o mesmo sendo visualizado.
             return $user->franchise?->id === $franchise->id;
         }
 
@@ -37,7 +34,6 @@ class FranchisePolicy
 
     /**
      * Determine whether the user can create models.
-     * Apenas Admins podem criar novos franqueados.
      */
     public function create(User $user): bool
     {
@@ -46,7 +42,6 @@ class FranchisePolicy
 
     /**
      * Determine whether the user can update the model.
-     * Um Admin pode editar qualquer franqueado. Um Franqueado só pode editar a si mesmo.
      */
     public function update(User $user, Franchise $franchise): bool
     {
@@ -63,7 +58,6 @@ class FranchisePolicy
 
     /**
      * Determine whether the user can delete the model.
-     * Apenas Admins podem deletar franqueados.
      */
     public function delete(User $user, Franchise $franchise): bool
     {

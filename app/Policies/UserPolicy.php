@@ -9,7 +9,6 @@ class UserPolicy
 {
     /**
      * Determine whether the user can view any models.
-     * Usado na listagem de Admins. Apenas Admins podem listar outros Admins.
      */
     public function viewAny(User $user): bool
     {
@@ -18,7 +17,6 @@ class UserPolicy
 
     /**
      * Determine whether the user can view the model.
-     * Um admin pode ver qualquer usuário. Um usuário pode ver a si mesmo.
      */
     public function view(User $user, User $model): bool
     {
@@ -27,7 +25,6 @@ class UserPolicy
 
     /**
      * Determine whether the user can create models.
-     * Apenas Admins podem criar outros Admins.
      */
     public function create(User $user): bool
     {
@@ -36,7 +33,6 @@ class UserPolicy
 
     /**
      * Determine whether the user can update the model.
-     * Um admin pode editar qualquer usuário. Um usuário pode editar a si mesmo.
      */
     public function update(User $user, User $model): bool
     {
@@ -45,7 +41,6 @@ class UserPolicy
 
     /**
      * Determine whether the user can delete the model.
-     * Apenas Admins podem deletar outros usuários, mas nunca a si mesmos.
      */
     public function delete(User $user, User $model): bool
     {

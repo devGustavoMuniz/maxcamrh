@@ -17,8 +17,6 @@ class AdminTest extends TestCase
         $this->seed();
     }
 
-    // Authentication and Authorization Tests
-
     #[test]
     public function unauthenticated_users_cannot_view_admins_list(): void
     {
@@ -29,11 +27,11 @@ class AdminTest extends TestCase
     #[test]
     public function non_admin_users_cannot_view_admins_list(): void
     {
-        $user = User::factory()->create(['role' => UserRole::CLIENT->value]); // Create a client user directly
+        $user = User::factory()->create(['role' => UserRole::CLIENT->value]);
         $this->actingAs($user);
 
         $response = $this->get(route('admins.index'));
-        $response->assertStatus(403); // Forbidden
+        $response->assertStatus(403);
     }
 
     #[test]
@@ -46,8 +44,6 @@ class AdminTest extends TestCase
         $response->assertOk();
         $response->assertInertia(fn ($page) => $page->component('Admins/Index'));
     }
-
-    // Admin Creation Tests
 
     #[test]
     public function admin_can_create_a_new_admin(): void
@@ -87,8 +83,6 @@ class AdminTest extends TestCase
         $this->assertDatabaseMissing('users', ['email' => 'invalid-email']);
     }
 
-    // Admin Update Tests
-
     #[test]
     public function admin_can_update_an_admin(): void
     {
@@ -126,10 +120,8 @@ class AdminTest extends TestCase
         $response = $this->post(route('admins.update', $adminToUpdate->id), $invalidData);
 
         $response->assertSessionHasErrors(['name', 'email']);
-        $this->assertDatabaseHas('users', ['id' => $adminToUpdate->id, 'name' => $adminToUpdate->name]); // Ensure data is not updated
+        $this->assertDatabaseHas('users', ['id' => $adminToUpdate->id, 'name' => $adminToUpdate->name]);
     }
-
-    // Admin Deletion Tests
 
     #[test]
     public function admin_can_delete_an_admin(): void
@@ -152,8 +144,8 @@ class AdminTest extends TestCase
 
         $response = $this->delete(route('admins.destroy', $admin->id));
 
-        $response->assertRedirect(); // Expect a redirect
-        $response->assertSessionHasErrors(); // Expect session errors or a specific error message
-        $this->assertDatabaseHas('users', ['id' => $admin->id]); // Ensure admin is not deleted
+        $response->assertRedirect();
+        $response->assertSessionHasErrors();
+        $this->assertDatabaseHas('users', ['id' => $admin->id]);
     }
 }

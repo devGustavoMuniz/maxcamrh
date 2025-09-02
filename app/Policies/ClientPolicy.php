@@ -10,7 +10,6 @@ class ClientPolicy
 {
     /**
      * Determine whether the user can view any models.
-     * Admins e Franqueados podem listar clientes.
      */
     public function viewAny(User $user): bool
     {
@@ -19,9 +18,6 @@ class ClientPolicy
 
     /**
      * Determine whether the user can view the model.
-     * Admin: pode ver qualquer cliente.
-     * Franqueado: pode ver clientes da sua franquia.
-     * Cliente: pode ver a si mesmo.
      */
     public function view(User $user, Client $client): bool
     {
@@ -42,7 +38,6 @@ class ClientPolicy
 
     /**
      * Determine whether the user can create models.
-     * Admins e Franqueados podem criar novos clientes.
      */
     public function create(User $user): bool
     {
@@ -51,7 +46,6 @@ class ClientPolicy
 
     /**
      * Determine whether the user can update the model.
-     * Mesmas regras da visualização (view).
      */
     public function update(User $user, Client $client): bool
     {
@@ -60,7 +54,6 @@ class ClientPolicy
 
     /**
      * Determine whether the user can delete the model.
-     * Apenas Admins podem deletar clientes.
      */
     public function delete(User $user, Client $client): bool
     {
