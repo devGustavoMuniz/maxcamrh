@@ -59,7 +59,7 @@ watch(
 <template>
     <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
         <div class="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
-            <div class="relative w-full sm:max-w-xs">
+            <div class="relative w-full">
                 <Input
                     v-model="localSearch"
                     type="text"

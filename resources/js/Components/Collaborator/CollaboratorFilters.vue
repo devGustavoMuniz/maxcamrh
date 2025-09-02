@@ -66,11 +66,11 @@ watch(
 <template>
     <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
         <div class="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
-            <div class="relative w-full sm:max-w-xs">
+            <div class="relative w-full sm:w-80">
                 <Input
                     v-model="search"
                     type="text"
-                    placeholder="Buscar por nome ou email"
+                    placeholder="Buscar por nome ou email..."
                     class="pl-10 w-full bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-600"
                 />
                 <div
