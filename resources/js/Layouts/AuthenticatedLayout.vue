@@ -1,7 +1,8 @@
 <script setup>
-import { computed, ref } from "vue";
+import { computed, ref, onMounted } from "vue";
 import { Link, usePage } from "@inertiajs/vue3";
 import ApplicationLogo from "@/Components/ApplicationLogo.vue";
+import { useUIStore } from "@/stores/ui";
 
 import {
   LayoutDashboard,
@@ -13,6 +14,8 @@ import {
   ChevronDown,
   Menu,
   UsersRound,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-vue-next";
 
 import Dropdown from "@/Components/Dropdown.vue";
@@ -26,9 +29,16 @@ import {
 
 const page = usePage();
 
-// Controle da Sidebar e do menu Adm. Pessoas
+// Controle da Sidebar usando Pinia
+const uiStore = useUIStore();
+
+// Inicializar sidebar ao montar
+onMounted(() => {
+  uiStore.initializeSidebar();
+});
+
+// Controle do menu Adm. Pessoas
 const isAdmPessoasOpen = ref(false);
-const isSidebarOpen = ref(false);
 
 // Configurações dos links
 const mainLinksConfig = [
@@ -104,60 +114,86 @@ const isAdmPessoasGroupActive = computed(() => {
 
 // Abre o menu Adm. Pessoas se uma de suas rotas estiver ativa
 isAdmPessoasOpen.value = isAdmPessoasGroupActive.value;
-
-// Funções para fechar a sidebar ao clicar em um link em modo mobile
-const handleLinkClick = () => {
-  if (window.innerWidth < 768) {
-    // md breakpoint
-    isSidebarOpen.value = false;
-  }
-};
 </script>
 
 <template>
   <div class="min-h-screen bg-gray-100 dark:bg-gray-900 md:flex">
     <div
-      v-if="isSidebarOpen"
+      v-if="uiStore.isMobileSidebarOpen"
       class="fixed inset-0 z-20 bg-black/50 transition-opacity md:hidden"
-      @click="isSidebarOpen = false"
+      @click="uiStore.closeMobileSidebar"
     ></div>
 
     <aside
-      class="fixed inset-y-0 left-0 z-30 flex w-64 transform flex-col bg-gray-100 shadow-md transition-transform duration-300 ease-in-out dark:bg-gray-800 md:relative md:translate-x-0"
+      class="fixed inset-y-0 left-0 z-30 flex transform flex-col bg-gray-100 shadow-md transition-all duration-300 ease-in-out dark:bg-gray-800 md:relative md:translate-x-0"
       :class="{
-        'translate-x-0': isSidebarOpen,
-        '-translate-x-full': !isSidebarOpen,
+        'translate-x-0': uiStore.isMobileSidebarOpen,
+        '-translate-x-full': !uiStore.isMobileSidebarOpen,
+        'w-64': !uiStore.isSidebarCollapsed,
+        'md:w-16': uiStore.isSidebarCollapsed,
       }"
     >
       <div class="flex h-full flex-col">
-        <div class="p-4">
+        <div :class="uiStore.isSidebarCollapsed ? 'p-2' : 'p-4'">
           <Link
             :href="route('dashboard')"
             class="flex items-center justify-center mb-6"
-            @click="handleLinkClick"
+            @click="uiStore.handleMobileLinkClick"
           >
-            <ApplicationLogo class="h-9 w-auto" />
+            <ApplicationLogo v-if="!uiStore.isSidebarCollapsed" class="h-9 w-auto" />
+            <img 
+              v-if="uiStore.isSidebarCollapsed" 
+              src="/logo-mobile.png" 
+              alt="Logo"
+              class="h-8 w-8"
+            />
           </Link>
 
           <nav class="mt-5 flex-grow">
             <template v-for="item in processedMainLinks" :key="item.name">
               <Link
                 :href="item.href"
-                class="flex items-center px-3 py-2.5 mt-1 text-sm font-medium rounded-md transition-colors duration-150"
-                :class="
+                class="flex items-center mt-1 text-sm font-medium rounded-md transition-colors duration-150"
+                :class="[
                   item.current
                     ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100'
-                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100'
-                "
-                @click="handleLinkClick"
+                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100',
+                  uiStore.isSidebarCollapsed ? 'justify-center px-2 py-2' : 'px-3 py-2.5'
+                ]"
+                :title="uiStore.isSidebarCollapsed ? item.name : ''"
+                @click="uiStore.handleMobileLinkClick"
               >
-                <component :is="item.icon" class="h-5 w-5 mr-3 flex-shrink-0" />
-                <span>{{ item.name }}</span>
+                <component :is="item.icon" :class="uiStore.isSidebarCollapsed ? 'h-5 w-5' : 'h-5 w-5 mr-3 flex-shrink-0'" />
+                <span 
+                  v-if="!uiStore.isSidebarCollapsed && uiStore.isTextVisible" 
+                  class="whitespace-nowrap"
+                >{{ item.name }}</span>
               </Link>
             </template>
 
+            <div v-if="showAdmPessoasGroup && uiStore.isSidebarCollapsed" class="mt-1 space-y-1">
+              <template
+                v-for="item in processedAdmPessoasSubLinks"
+                :key="item.name"
+              >
+                <Link
+                  :href="item.href"
+                  class="flex items-center justify-center px-2 py-2 text-sm font-medium rounded-md transition-colors duration-150"
+                  :class="
+                    item.current
+                      ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100'
+                      : 'text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100'
+                  "
+                  :title="item.name"
+                  @click="uiStore.handleMobileLinkClick"
+                >
+                  <component :is="item.icon" class="h-5 w-5" />
+                </Link>
+              </template>
+            </div>
+
             <Collapsible
-              v-if="showAdmPessoasGroup"
+              v-if="showAdmPessoasGroup && !uiStore.isSidebarCollapsed"
               v-model:open="isAdmPessoasOpen"
               class="mt-1"
             >
@@ -171,7 +207,10 @@ const handleLinkClick = () => {
               >
                 <div class="flex items-center">
                   <UsersRound class="h-5 w-5 mr-3 flex-shrink-0" />
-                  <span>Adm. Pessoas</span>
+                  <span 
+                    v-if="uiStore.isTextVisible"
+                    class="whitespace-nowrap"
+                  >Adm. Pessoas</span>
                 </div>
                 <ChevronDown
                   class="h-4 w-4 transition-transform duration-200"
@@ -197,24 +236,53 @@ const handleLinkClick = () => {
                   >
                     <component
                       :is="item.icon"
-                      class="h-4 w-4 mr-2.5 flex-shrink-0"
+                      class="h-5 w-5 mr-2.5 flex-shrink-0"
                     />
-                    <span>{{ item.name }}</span>
+                    <span 
+                      v-if="uiStore.isTextVisible"
+                      class="whitespace-nowrap"
+                    >{{ item.name }}</span>
                   </Link>
                 </template>
               </CollapsibleContent>
             </Collapsible>
           </nav>
         </div>
-        <div class="p-4 mt-auto border-t border-gray-200 dark:border-gray-700">
+        <div :class="[uiStore.isSidebarCollapsed ? 'p-2' : 'p-4', 'mt-auto border-t border-gray-200 dark:border-gray-700 space-y-2']">
+          <!-- Botão para colapsar sidebar quando expandida -->
+          <button
+            v-if="!uiStore.isSidebarCollapsed"
+            @click="uiStore.collapseSidebar"
+            class="flex w-full items-center justify-between px-3 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-200 rounded-md"
+            title="Recolher menu"
+          >
+            <span class="whitespace-nowrap">Recolher menu</span>
+            <ChevronLeft class="h-4 w-4" />
+          </button>
+
+          <!-- Botão para expandir sidebar quando recolhida -->
+          <button
+            v-if="uiStore.isSidebarCollapsed"
+            @click="uiStore.expandSidebar"
+            class="flex w-full justify-center px-2 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-200 rounded-md"
+            title="Expandir menu"
+          >
+            <ChevronRight class="h-5 w-5" />
+          </button>
+          
           <Link
             :href="route('logout')"
             method="post"
             as="button"
-            class="w-full flex items-center px-3 py-2.5 text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100 rounded-md"
+            class="w-full flex items-center text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100 rounded-md"
+            :class="uiStore.isSidebarCollapsed ? 'justify-center px-2 py-2' : 'px-3 py-2.5'"
+            :title="uiStore.isSidebarCollapsed ? 'Logout' : ''"
           >
-            <LogOut class="h-5 w-5 mr-3 flex-shrink-0" />
-            <span>Logout</span>
+            <LogOut :class="uiStore.isSidebarCollapsed ? 'h-5 w-5' : 'h-5 w-5 mr-3 flex-shrink-0'" />
+            <span 
+              v-if="!uiStore.isSidebarCollapsed && uiStore.isTextVisible" 
+              class="whitespace-nowrap"
+            >Logout</span>
           </Link>
         </div>
       </div>
@@ -228,7 +296,7 @@ const handleLinkClick = () => {
         <div class="w-full px-6 mx-auto flex justify-between items-center h-16">
           <button
             class="md:hidden p-2 rounded-md text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700"
-            @click="isSidebarOpen = !isSidebarOpen"
+            @click="uiStore.toggleMobileSidebar"
           >
             <Menu class="h-6 w-6" />
           </button>
