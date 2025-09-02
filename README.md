@@ -76,6 +76,15 @@ Siga estas instruções na ordem exata. Todos os comandos devem ser executados n
     Abra seu navegador e acesse `http://localhost` (ou a porta configurada em `APP_PORT` no seu `.env`).
 
 
+## Testes
+
+Para executar os testes automatizados do projeto (Pest), utilize o seguinte comando:
+
+```bash
+sail pest
+```
+
+
 11. **Para Parar os Contêineres:**
     ```bash
     sail down
