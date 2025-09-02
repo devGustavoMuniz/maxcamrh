@@ -3,10 +3,10 @@
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AdminController;
-use App\Http\Controllers\ClientController;
-use App\Http\Controllers\FranchiseController;
-use App\Http\Controllers\CollaboratorController;
+use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\Client\ClientController;
+use App\Http\Controllers\Franchise\FranchiseController;
+use App\Http\Controllers\Collaborator\CollaboratorController;
 use Illuminate\Support\Facades\Redirect;
 
 Route::get('/', function () {

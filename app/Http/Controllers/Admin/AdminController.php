@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
 use App\Actions\Admins\StoreAdminAction;
 use App\Actions\Admins\UpdateAdminAction;

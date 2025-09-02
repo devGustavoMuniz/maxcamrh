@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Collaborator;
 
 use App\Actions\Collaborators\StoreCollaboratorAction;
 use App\Actions\Collaborators\UpdateCollaboratorAction;

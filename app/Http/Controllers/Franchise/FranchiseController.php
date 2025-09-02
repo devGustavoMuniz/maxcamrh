@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Franchise;
 
 use App\Actions\Franchises\StoreFranchiseAction;
 use App\Actions\Franchises\UpdateFranchiseAction;
