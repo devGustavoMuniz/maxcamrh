@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
 
 /**
- * 
+ *
  *
  * @property string $id
  * @property string $user_id
@@ -104,6 +104,9 @@ use Illuminate\Support\Carbon;
  * @method static Builder<static>|Collaborator whereUserId($value)
  * @method static Builder<static>|Collaborator whereZonaEleitoral($value)
  * @method static Builder<static>|Collaborator withFilters(array $filters)
+ * @property string|null $address_id
+ * @property-read Address|null $address
+ * @method static Builder<static>|Collaborator whereAddressId($value)
  * @mixin Eloquent
  */
 class Collaborator extends Model
