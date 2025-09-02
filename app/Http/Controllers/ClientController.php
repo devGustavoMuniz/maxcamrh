@@ -99,7 +99,7 @@ class ClientController extends Controller
         }
 
         return Inertia::render('Clients/Edit', [
-            'client_data' => new ClientResource($client->loadMissing(['user', 'franchise.user'])),
+            'client_data' => (new ClientResource($client->loadMissing(['user', 'franchise.user'])))->resolve(),
             'franchises' => $franchises,
         ]);
     }

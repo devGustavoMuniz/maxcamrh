@@ -1,7 +1,8 @@
 <script setup>
  
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import { Head, useForm } from "@inertiajs/vue3";
+import { Head, useForm, Link } from "@inertiajs/vue3";
+import { Button } from "@/Components/ui/button";
 import ClientForm from "@/Components/Client/ClientForm.vue";
 
 const props = defineProps({
@@ -55,7 +56,27 @@ const submit = () => {
             <div
                 class="bg-gray-100 dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-6 md:p-8"
             >
-                <ClientForm :client-form="form" :franchises="franchises" @submit="submit" />
+                <form class="space-y-6" @submit.prevent="submit">
+                    <ClientForm :client-form="form" :franchises="franchises" />
+
+                    <div
+                        class="flex items-center justify-end mt-6 pt-6 border-t dark:border-gray-700"
+                    >
+                        <Link :href="route('clients.index')" class="mr-4">
+                            <Button variant="outline" class="bg-white" type="button"
+                            >Cancelar</Button
+                            >
+                        </Link>
+                        <Button
+                            type="submit"
+                            variant="black"
+                            class="bg-gray-800 text-white hover:bg-gray-700 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600"
+                            :disabled="form.processing"
+                        >
+                            Criar Cliente
+                        </Button>
+                    </div>
+                </form>
             </div>
         </div>
     </AuthenticatedLayout>

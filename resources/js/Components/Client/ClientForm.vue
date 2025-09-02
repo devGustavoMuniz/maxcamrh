@@ -1,5 +1,5 @@
 <script setup>
-import { Link, usePage, useForm } from "@inertiajs/vue3";
+import { Link, usePage } from "@inertiajs/vue3";
 import { Button } from "@/Components/ui/button";
 import { Input } from "@/Components/ui/input";
 import { Label } from "@/Components/ui/label";
@@ -26,19 +26,7 @@ const props = defineProps({
     isEdit: { type: Boolean, default: false },
 });
 
-const form = useForm({
-    franchise_id: props.clientForm.franchise_id,
-    name: props.clientForm.name,
-    email: props.clientForm.email,
-    cnpj: props.clientForm.cnpj,
-    phone: props.clientForm.phone,
-    test_number: props.clientForm.test_number,
-    contract_end_date: props.clientForm.contract_end_date,
-    logo_file: null,
-    is_monthly_contract: props.clientForm.is_monthly_contract,
-    password: props.clientForm.password,
-    password_confirmation: props.clientForm.password_confirmation,
-});
+const form = props.clientForm;
 
 const emit = defineEmits(["submit"]);
 
@@ -46,7 +34,7 @@ const page = usePage();
 const userRole = computed(() => page.props.auth.user?.role);
 
 const logoFileInput = ref(null);
-const logoPreview = ref(props.clientForm.logo_full_url || null);
+const logoPreview = ref(form.logo_full_url || null);
 
 function handleLogoUpload(event) {
     const file = event.target.files[0];
@@ -57,12 +45,12 @@ function handleLogoUpload(event) {
 }
 
 const handleSubmit = () => {
-    emit("submit", form);
+    emit("submit");
 };
 </script>
 
 <template>
-    <form class="space-y-6" @submit.prevent="handleSubmit">
+    <div class="space-y-6">
         <div class="space-y-4">
             <h3
                 class="text-lg font-medium text-gray-900 dark:text-gray-100 border-b dark:border-gray-700 pb-2"
@@ -246,23 +234,5 @@ const handleSubmit = () => {
                 </div>
             </div>
         </div>
-
-        <div
-            class="flex items-center justify-end mt-6 pt-6 border-t dark:border-gray-700"
-        >
-            <Link :href="route('clients.index')" class="mr-4">
-                <Button variant="outline" class="bg-white" type="button"
-                    >Cancelar</Button
-                >
-            </Link>
-            <Button
-                type="submit"
-                variant="black"
-                class="bg-gray-800 text-white hover:bg-gray-700 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600"
-                :disabled="form.processing"
-            >
-                {{ isEdit ? 'Atualizar Cliente' : 'Criar Cliente' }}
-            </Button>
-        </div>
-    </form>
+    </div>
 </template>
