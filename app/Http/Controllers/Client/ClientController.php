@@ -31,6 +31,7 @@ class ClientController extends Controller
 
         $clients = Client::with(['user', 'franchise.user'])
             ->withFilters($request->only(['search', 'franchise_id']))
+            ->withUserFilters($user)
             ->orderByDesc('clients.created_at')
             ->paginate(10)
             ->withQueryString();

@@ -6,6 +6,7 @@ use App\Enums\UserRole;
 use App\Http\Requests\StoreAdminRequest;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Carbon\Carbon;
 
 class StoreAdminAction
 {
@@ -18,7 +19,7 @@ class StoreAdminAction
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
             'role' => UserRole::ADMIN,
-            'email_verified_at' => now(),
+            'email_verified_at' => Carbon::now(config('app.timezone')),
         ]);
     }
 }

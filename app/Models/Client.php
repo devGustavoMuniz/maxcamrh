@@ -95,23 +95,21 @@ class Client extends Model
     public function scopeWithFilters(Builder $query, array $filters): void
     {
         $query->when($filters['search'] ?? null, function (Builder $q, $search) {
-            $q->whereHas('user', function (Builder $userQuery) use ($search) {
-                $lowerSearchTerm = strtolower($search);
-                $userQuery->whereRaw('LOWER(name) LIKE ?', ["%$lowerSearchTerm%"])
-                    ->orWhereRaw('LOWER(email) LIKE ?', ["%$lowerSearchTerm%"]);
-            });
+            $lowerSearchTerm = strtolower($search);
+            $q->join('users', 'clients.user_id', '=', 'users.id')
+                ->where(function (Builder $innerQuery) use ($lowerSearchTerm) {
+                    $innerQuery->whereRaw('LOWER(users.name) LIKE ?', ["%$lowerSearchTerm%"])
+                        ->orWhereRaw('LOWER(users.email) LIKE ?', ["%$lowerSearchTerm%"]);
+                });
         });
 
         $query->when($filters['franchise_id'] ?? null, function (Builder $q, $franchiseId) {
             $q->where('franchise_id', $franchiseId);
         });
+    }
 
-        /** @var User|null $user */
-        $user = auth()->user();
-        if (!$user) {
-            return;
-        }
-
+    public function scopeWithUserFilters(Builder $query, User $user): void
+    {
         if ($user->role === UserRole::FRANCHISE) {
             $query->where('franchise_id', $user->franchise?->id);
         }
