@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Client\ClientController;
 use App\Http\Controllers\Franchise\FranchiseController;
 use App\Http\Controllers\Collaborator\CollaboratorController;
+use App\Http\Controllers\Report\ReportController;
 use Illuminate\Support\Facades\Redirect;
 
 Route::get('/', function () {
@@ -35,6 +36,18 @@ Route::middleware('auth')->group(function () {
     Route::resource('collaborators', CollaboratorController::class)->except([
         'show'
     ]);
+
+    Route::prefix('reports')->name('reports.')->group(function () {
+        Route::get('/clients-by-franchise', [ReportController::class, 'clientsByFranchiseIndex'])
+            ->name('clients-by-franchise.index');
+        Route::post('/clients-by-franchise/generate', [ReportController::class, 'clientsByFranchiseGenerate'])
+            ->name('clients-by-franchise.generate');
+
+        Route::get('/collaborators-by-client', [ReportController::class, 'collaboratorsByClientIndex'])
+            ->name('collaborators-by-client.index');
+        Route::post('/collaborators-by-client/generate', [ReportController::class, 'collaboratorsByClientGenerate'])
+            ->name('collaborators-by-client.generate');
+    });
 });
 
 require __DIR__.'/auth.php';

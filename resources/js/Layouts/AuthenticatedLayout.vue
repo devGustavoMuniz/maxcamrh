@@ -16,6 +16,8 @@ import {
   UsersRound,
   ChevronLeft,
   ChevronRight,
+  FileText,
+  BarChart3,
 } from "lucide-vue-next";
 
 import Dropdown from "@/Components/Dropdown.vue";
@@ -39,6 +41,9 @@ onMounted(() => {
 
 // Controle do menu Adm. Pessoas
 const isAdmPessoasOpen = ref(false);
+
+// Controle do menu Relatórios
+const isRelatoriosOpen = ref(false);
 
 // Configurações dos links
 const mainLinksConfig = [
@@ -87,6 +92,23 @@ const admPessoasSubLinksConfig = [
   },
 ];
 
+const relatoriosSubLinksConfig = [
+  {
+    name: "Clientes por Franqueado",
+    href: route("reports.clients-by-franchise.index"),
+    current: () => route().current("reports.clients-by-franchise.*"),
+    canAccess: (user) => user?.role === "admin",
+    icon: BarChart3,
+  },
+  {
+    name: "Colaboradores por Cliente",
+    href: route("reports.collaborators-by-client.index"),
+    current: () => route().current("reports.collaborators-by-client.*"),
+    canAccess: (user) => user && (user.role === "admin" || user.role === "franchise"),
+    icon: FileText,
+  },
+];
+
 // Computeds para processar os links baseados nas permissões do usuário
 const currentUser = computed(() => page.props.auth.user);
 
@@ -104,16 +126,34 @@ const processedAdmPessoasSubLinks = computed(() => {
     .map((link) => ({ ...link, current: link.current() }));
 });
 
+const processedRelatoriosSubLinks = computed(() => {
+  if (!currentUser.value) return [];
+  return relatoriosSubLinksConfig
+    .filter((link) => link.canAccess(currentUser.value))
+    .map((link) => ({ ...link, current: link.current() }));
+});
+
 const showAdmPessoasGroup = computed(
   () => processedAdmPessoasSubLinks.value.length > 0,
+);
+
+const showRelatoriosGroup = computed(
+  () => processedRelatoriosSubLinks.value.length > 0,
 );
 
 const isAdmPessoasGroupActive = computed(() => {
   return processedAdmPessoasSubLinks.value.some((link) => link.current);
 });
 
+const isRelatoriosGroupActive = computed(() => {
+  return processedRelatoriosSubLinks.value.some((link) => link.current);
+});
+
 // Abre o menu Adm. Pessoas se uma de suas rotas estiver ativa
 isAdmPessoasOpen.value = isAdmPessoasGroupActive.value;
+
+// Abre o menu Relatórios se uma de suas rotas estiver ativa
+isRelatoriosOpen.value = isRelatoriosGroupActive.value;
 </script>
 
 <template>
@@ -239,6 +279,84 @@ isAdmPessoasOpen.value = isAdmPessoasGroupActive.value;
                       class="h-5 w-5 mr-2.5 flex-shrink-0"
                     />
                     <span 
+                      v-if="uiStore.isTextVisible"
+                      class="whitespace-nowrap"
+                    >{{ item.name }}</span>
+                  </Link>
+                </template>
+              </CollapsibleContent>
+            </Collapsible>
+
+            <!-- Menu Relatórios (modo collapsed) -->
+            <div v-if="showRelatoriosGroup && uiStore.isSidebarCollapsed" class="mt-1 space-y-1">
+              <template
+                v-for="item in processedRelatoriosSubLinks"
+                :key="item.name"
+              >
+                <Link
+                  :href="item.href"
+                  class="flex items-center justify-center px-2 py-2 text-sm font-medium rounded-md transition-colors duration-150"
+                  :class="
+                    item.current
+                      ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100'
+                      : 'text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100'
+                  "
+                  :title="item.name"
+                  @click="uiStore.handleMobileLinkClick"
+                >
+                  <component :is="item.icon" class="h-5 w-5" />
+                </Link>
+              </template>
+            </div>
+
+            <!-- Menu Relatórios (modo expandido) -->
+            <Collapsible
+              v-if="showRelatoriosGroup && !uiStore.isSidebarCollapsed"
+              v-model:open="isRelatoriosOpen"
+              class="mt-1"
+            >
+              <CollapsibleTrigger
+                class="flex items-center justify-between w-full px-3 py-2.5 text-sm font-medium rounded-md transition-colors duration-150"
+                :class="
+                  isRelatoriosGroupActive && !isRelatoriosOpen
+                    ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100'
+                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100'
+                "
+              >
+                <div class="flex items-center">
+                  <BarChart3 class="h-5 w-5 mr-3 flex-shrink-0" />
+                  <span
+                    v-if="uiStore.isTextVisible"
+                    class="whitespace-nowrap"
+                  >Relatórios</span>
+                </div>
+                <ChevronDown
+                  class="h-4 w-4 transition-transform duration-200"
+                  :class="[isRelatoriosOpen && 'rotate-180']"
+                />
+              </CollapsibleTrigger>
+              <CollapsibleContent
+                class="pt-1 pl-4 border-l-2 border-gray-200 dark:border-gray-700 ml-[10px] mr-[-10px] space-y-px"
+              >
+                <template
+                  v-for="item in processedRelatoriosSubLinks"
+                  :key="item.name"
+                >
+                  <Link
+                    :href="item.href"
+                    class="flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors duration-150"
+                    :class="
+                      item.current
+                        ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100'
+                        : 'text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-800 dark:hover:text-gray-200'
+                    "
+                    @click="uiStore.handleMobileLinkClick"
+                  >
+                    <component
+                      :is="item.icon"
+                      class="h-5 w-5 mr-2.5 flex-shrink-0"
+                    />
+                    <span
                       v-if="uiStore.isTextVisible"
                       class="whitespace-nowrap"
                     >{{ item.name }}</span>
