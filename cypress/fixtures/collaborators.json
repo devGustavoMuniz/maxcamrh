@@ -1,0 +1,62 @@
+{
+  "collaborator_1": {
+    "name": "João Silva",
+    "email": "joao.silva@collaborator.com",
+    "cpf": "111.222.333-44",
+    "phone": "(11) 91111-2222",
+    "position": "Desenvolvedor Full Stack",
+    "salary": "8000.00",
+    "employment_type": "CLT",
+    "start_date": "2024-01-15",
+    "password": "password",
+    "address": {
+      "street": "Rua das Flores",
+      "number": "789",
+      "complement": "Casa",
+      "neighborhood": "Jardins",
+      "city": "São Paulo",
+      "state": "SP",
+      "zip_code": "01234-567"
+    }
+  },
+  "collaborator_2": {
+    "name": "Maria Santos",
+    "email": "maria.santos@collaborator.com",
+    "cpf": "222.333.444-55",
+    "phone": "(21) 92222-3333",
+    "position": "Gerente de Projetos",
+    "salary": "12000.00",
+    "employment_type": "CLT",
+    "start_date": "2024-02-01",
+    "password": "password",
+    "address": {
+      "street": "Avenida Brasil",
+      "number": "321",
+      "complement": "Apto 45",
+      "neighborhood": "Centro",
+      "city": "Rio de Janeiro",
+      "state": "RJ",
+      "zip_code": "20000-000"
+    }
+  },
+  "collaborator_3": {
+    "name": "Pedro Oliveira",
+    "email": "pedro.oliveira@collaborator.com",
+    "cpf": "333.444.555-66",
+    "phone": "(31) 93333-4444",
+    "position": "Designer UX/UI",
+    "salary": "6500.00",
+    "employment_type": "PJ",
+    "start_date": "2024-03-10",
+    "password": "password",
+    "address": {
+      "street": "Rua das Artes",
+      "number": "654",
+      "complement": "Sala 3",
+      "neighborhood": "Savassi",
+      "city": "Belo Horizonte",
+      "state": "MG",
+      "zip_code": "30130-000"
+    }
+  }
+}

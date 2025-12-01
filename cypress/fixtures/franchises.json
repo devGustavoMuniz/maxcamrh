@@ -1,0 +1,36 @@
+{
+  "franchise_1": {
+    "name": "Franchise SP",
+    "email": "franchise.sp@maxcamrh.com",
+    "company_name": "MaxCam SP LTDA",
+    "cnpj": "11.222.333/0001-44",
+    "phone": "(11) 3333-4444",
+    "password": "password",
+    "address": {
+      "street": "Avenida Paulista",
+      "number": "1000",
+      "complement": "Sala 101",
+      "neighborhood": "Bela Vista",
+      "city": "São Paulo",
+      "state": "SP",
+      "zip_code": "01310-100"
+    }
+  },
+  "franchise_2": {
+    "name": "Franchise RJ",
+    "email": "franchise.rj@maxcamrh.com",
+    "company_name": "MaxCam RJ LTDA",
+    "cnpj": "22.333.444/0001-55",
+    "phone": "(21) 3333-5555",
+    "password": "password",
+    "address": {
+      "street": "Avenida Atlântica",
+      "number": "2000",
+      "complement": "Cobertura",
+      "neighborhood": "Copacabana",
+      "city": "Rio de Janeiro",
+      "state": "RJ",
+      "zip_code": "22021-001"
+    }
+  }
+}
